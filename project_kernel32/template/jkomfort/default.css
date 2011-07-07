@@ -1,0 +1,489 @@
+/*
+Design by NodeThirtyThree <http://www.nodethirtythree.com>
+Published by Free CSS Templates <http://www.freecsstemplates.org/>
+Released for free under a Creative Commons Attribution 2.5 License
+*/
+
+body {
+	margin: 0;
+	padding: 0;
+	background: #F4FBFF url(images/img01.png) top repeat-x;
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	color: #405A67;
+}
+
+h1, h2, h3 {
+	margin: 0;
+	font-weight: normal;
+	color: #4F6977;
+}
+
+h2, h1 {
+	font-size: 28px;
+}
+
+h3 {
+	font-size: 16px;
+}
+
+p, ul, ol {
+	margin: 0 0 1.5em 0;
+	line-height: 1.5em;
+	text-align: justify;
+}
+
+p {
+}
+
+blockquote {
+	font-style: italic;
+}
+
+ul {
+}
+
+ol {
+}
+
+a {
+	color: #38B5F1;
+}
+
+a:hover {
+	text-decoration: none;
+}
+
+small {
+}
+
+hr {
+	display: none;
+}
+
+img {
+	border: none;
+}
+
+img.left {
+	float: left;
+	margin: 0 15px 0 0;
+}
+
+img.right {
+	float: left;
+	margin: 0 0 0 15px;
+}
+
+/* Header */
+
+#header {
+	width: 954px;
+	margin: 0 auto;
+	/*background: url(images/apatit.png);*/
+}
+#logo1{
+	background: url(images/apatit.png) no-repeat top left;
+	margin: 10px 15px 10px 10px;
+}
+#logo2{
+	background: url(images/apatit-arms.png) no-repeat right;
+	height: 115px;
+	width: 100%;
+}
+#logo2 img{
+	padding: 20px 0 0 260px;
+}
+#header h1, #header h2{
+	color: white;
+	font-size: 2.5em;
+	padding-left: 195px;
+	font-family: Verdana;
+	font-weight: bold;
+	font-style: italic;
+}
+#header h1{
+	text-transform: uppercase;
+	padding-bottom: 25px;
+}
+#header h2{
+	padding-top: 23px;
+	font-size: 1em;
+}
+
+/* Logo */
+
+#logo {
+	float: left;
+}
+
+#logo h1, #logo h2 {
+	float: left;
+	text-transform: lowercase;
+	color: #FFFFFF;
+}
+
+#logo h1 {
+	padding: 115px 0 0 50px;
+	font-weight: bold;
+}
+
+#logo h2 {
+	padding: 143px 0 0 8px;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+#logo a {
+	text-decoration: none;
+	color: #FFFFFF;
+}
+
+/* Menu */
+
+#menu {
+	/*float: left;*/
+	padding: 0 0 10px 3px;
+	clear: both;
+	min-height: 2em;
+}
+
+#menu ul {
+	margin: 0;
+	padding: 0 20px 0 0;
+	list-style: none;
+	line-height: normal;
+}
+
+#menu ul ul{
+	padding: 6px;
+} 
+
+#menu li {
+	display: block;
+	min-width: 110px;
+	float: left;
+	padding: 3px;
+}
+
+#menu a {
+	padding: 0 18px 0 0;
+	text-decoration: underline;
+	font-size: 16px;
+	color: #405A67;
+}
+#menu li:hover a{
+	padding-right: 10px;
+	font-weight: bold;
+	text-decoration: none;
+}
+#menu li:hover ul a{
+	font-weight: normal;
+	text-decoration: none;
+}
+#menu li:hover ul{
+	display: block;
+	position: absolute;
+	border: 1px solid #405A67;
+	border-radius: 10px;
+	-moz-border-radius: 10px;
+	background-color: white;
+}
+#menu li ul a{
+	font-weight: normal;
+}
+
+.post.post1{
+	padding-top: 17px;
+	min-height: 400px;
+}
+
+#menu ul ul{
+	display: none;
+}
+#menu ul ul li{
+	border: 0px;
+	float: none;
+}
+#menu ul ul li:hover{
+	border: 0px!important;
+	margin: 0px!important;
+}
+#menu li:hover ul li:hover a:hover{
+	font-weight: normal!important;
+	text-decoration: underline;
+}
+
+/* Page */
+
+#page {
+	width: 954px;
+	margin: 0 auto;
+	background: #FFFFFF url(images/img03.jpg) repeat-y;
+}
+
+#bg {
+	background: url(images/img06.jpg) no-repeat left bottom;
+	min-height: 550px;
+}
+
+/* Content */
+
+#content {
+	float: left;
+	width: 680px;
+	background: url(images/img04.png) no-repeat;
+}
+
+/* Posts */
+
+.post {
+	width: 606px;
+	padding: 30px 0 0 48px;
+}
+
+.post p{
+	text-indent: 2em;
+}
+
+.post .title {
+	padding: 0 0 0 12px;
+}
+
+.post .title a {
+	color: #4F6977;
+}
+
+.post .date {
+	margin: -26px 25px 15px 0;
+	text-align: right;
+	color: #79AFCD;
+}
+
+.post .article {
+	padding: 12px 20px 0 12px;
+	background: url(images/img07.jpg) no-repeat;
+}
+
+.post .meta {
+	padding: 5px 12px 15px;
+	background: url(images/img08.jpg) no-repeat left bottom;
+}
+
+.post .meta b {
+	display: none;
+}
+
+.post .more, .post .comments {
+	padding: 0 30px 0 20px;
+}
+
+.post .more {
+	background: url(images/img09.gif) no-repeat left center;
+}
+
+.post .comments {
+	background: url(images/img10.gif) no-repeat left center;
+}
+
+.post p.no-indent{
+	text-indent: 0;
+}
+.no-margin{
+	margin: 0;
+	padding: 0;
+}
+.no-margin-bottom{
+	margin-bottom: 0;
+	padding-bottom: 0;
+}
+
+/* About Box */
+
+#about-box {
+	width: 215px;
+	height: 232px;
+	padding: 0px 37px 0 20px;
+	background: url(images/img11.jpg) no-repeat left bottom;
+}
+
+#about-box h3{
+	padding: 35px 0 0 0;
+}
+#about-box div{
+	padding: 35px 0 25px 0;
+	text-align: justify;
+	line-height: 150%;
+}
+
+#sidebar h3{
+	font-size: 1.5em;
+    text-align: center;
+}
+#sidebar h4{
+	font-size: 1.2em;
+	text-align: center;
+	padding: 15px 0 0 10px;
+}
+
+.timetable h3{
+	background: url("images/img12.jpg") no-repeat scroll left bottom transparent;
+    padding: 30px 0 30px 10px;
+}
+.timetable h3{
+	padding-top: 10px;	
+}
+
+.timetable table tr td:FIRST-CHILD{
+	min-width: 107px;
+}
+
+div.timetable{
+	padding: 10px 20px 10px 10px;
+} 
+.timetable table{
+	/*background: url("images/img12.jpg") no-repeat scroll left top transparent;*/
+	border-collapse: collapse;
+}
+.timetable tr:FIRST-CHILD{
+	background: none;
+}
+.timetable tr{
+	background: url("images/img13.gif") repeat-x scroll 0 0 transparent;
+}
+.timetable td{
+	padding: 3px;
+}
+.timetable tr td:first-child{
+	font-style: italic;
+}
+.timetable h4{
+	margin: 0;
+	font-weight: normal;
+}
+.timetable span{
+	color: #38B5F1;
+	font-size: 1.1em;
+}
+
+#sidebar span{
+	font-weight: bold;
+	padding: 0 3px;
+}
+
+#about-box h2 {
+	margin-bottom: 5px;
+}
+
+/* Sidebar */
+
+#sidebar {
+	float: right;
+	width: 274px;
+	background: url(images/img05.png) no-repeat;
+	min-height: 500px;
+}
+
+#sidebar ul {
+	width: 206px;
+	margin: 0;
+	padding: 0 0 0 30px;
+	list-style: none;
+}
+
+#sidebar li {
+}
+
+#sidebar li ul {
+	width: auto;
+	padding: 0 15px 0 10px;
+}
+
+#sidebar li li {
+	padding: 5px 0 5px 0;
+	background: url(images/img13.gif) repeat-x;
+}
+
+#sidebar li li.first {
+	padding-top: 0;
+	background: none;
+}	
+
+#sidebar li h2 {
+	font-size: 18px;
+	padding: 30px 0 40px 10px;
+	background: url(images/img12.jpg) no-repeat left bottom;
+}
+
+/* Footer */
+
+#footer {
+	padding: 10px 0;
+}
+
+#footer p {
+	text-align: center;
+	font-size: 12px;
+	color: #83B3CE;
+}
+
+#footer a {
+	color: #83B3CE;
+}
+
+/*more*/
+
+#logo{
+	padding-top: 13px;
+}
+#logo h1{
+	display: none;
+}
+#logo h2{
+	padding-left: 213px;
+}
+
+.fin-hoz{
+	list-style-image: url('images/img09.gif');
+}
+.content .article table{
+	border-collapse: collapse;
+}
+.content .article table td{
+	padding: 5px;
+	vertical-align: top;
+	border: 1px solid #405A67;
+	margin: 0;
+}
+.content .article table tr:FIRST-CHILD td{
+	font-weight: bold;
+}
+.content .article table thead td{
+	font-weight: bold;
+}
+.post .article{
+	min-height: 60px;
+}
+
+.article .house_list td{
+	vertical-align: top;
+	border: none!important;
+	font-weight: normal!important;
+}
+.article .house_list li{
+	font-weight: normal!important;
+}
+.article table.jkomfort_house{
+	vertical-align: top;
+	text-align: left;
+	border: 1px solid #405A67;
+	border-width: 0 1px 1px 0;
+	border-collapse: collapse;
+	margin-bottom: 20px;
+	max-width: 600px;
+}
+.article .jkomfort_house td, .article .jkomfort_house th{
+	border: 1px solid #405A67;
+	border-width: 1px 0 0 1px;
+	padding: 3px;
+}

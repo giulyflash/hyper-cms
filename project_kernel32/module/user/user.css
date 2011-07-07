@@ -1,0 +1,39 @@
+.user_container{
+	margin: 20px auto;
+}
+
+.user_container p{
+	margin: 0px;
+	padding: 1px 0px;
+}
+
+.user_container .reset_password{
+	margin-right: 5px;
+}
+
+.user_container label,
+.user_container .reset_password,
+.user_container a.logout{
+	color: #666666;
+}
+
+.user_container .input_container input{
+	border-radius: 6px;
+	padding: 1px 5px;
+}
+
+.user_container label{
+	display: block;
+	position: absolute;
+	padding: 4px 0 0 8px;
+}
+
+.user_container input.button{
+	float: right;
+	color: black;
+}
+
+.user_container span{
+	font-weight: bold;
+	text-decoration: underline;
+}

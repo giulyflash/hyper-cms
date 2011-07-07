@@ -1,0 +1,32 @@
+div.fieldset {
+	border:  1px solid #afe14c;
+	padding: 20px 0px;
+}
+div.fieldset span.legend {
+	position: relative;
+	background-color: #FFF;
+	padding: 3px;
+	top: -30px;
+	font: 700 14px Arial, Helvetica, sans-serif;
+	color: #73b304;
+}
+
+div.flash {
+	width: 240px;
+	border-color: #D9E4FF;
+
+	-moz-border-radius-topleft : 5px;
+	-webkit-border-top-left-radius : 5px;
+    -moz-border-radius-topright : 5px;
+    -webkit-border-top-right-radius : 5px;
+    -moz-border-radius-bottomleft : 5px;
+    -webkit-border-bottom-left-radius : 5px;
+    -moz-border-radius-bottomright : 5px;
+    -webkit-border-bottom-right-radius : 5px;
+
+}
+
+input[disabled]{ border: 1px solid #ccc } /* FF 2 Fix */
+
+.progressWrapper, .progressContainer{overflow: auto}
+.swfupload {vertical-align: top;}

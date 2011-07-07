@@ -1,0 +1,8 @@
+
+RewriteEngine On
+
+ErrorDocument 404 /404
+
+RewriteRule ^([^/\.]+)/$ $1
+RewriteRule ^admin$ /admin.php [R]
+RewriteRule ^([^/\.]+)$ /?call=article.get&field=translit_title&value=$1 [L]

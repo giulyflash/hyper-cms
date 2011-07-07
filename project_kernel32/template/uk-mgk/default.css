@@ -1,0 +1,153 @@
+body{
+	padding: 0;
+	margin: 0;
+	color: #333333;
+}
+
+/*header*/
+
+.header{
+	background: #006699 url("images/header.png") no-repeat -30px 0;
+	height: 45px;
+	padding: 20px 15px 15px 250px;
+	color: white;
+}
+.header h1{
+	padding: 0;
+	margin: 0;
+	color: #C3DFED;
+}
+
+/*left*/
+
+.left{
+	float: left;
+	width: 170px;
+	background: #F1F1F1 url("images/side-bg.png") repeat-x top;
+	min-height: 20px;
+	padding: 15px;
+}
+
+/*right*/
+
+.right{
+	background: url("images/center-bg.png") repeat-x top;
+	float: right;
+	width: 230px;
+	min-height: 20px;
+	padding: 15px 15px 15px 0;
+}
+
+/*menu*/
+
+.menu li{
+	background: url("images/hdot2.gif") bottom repeat-x;
+}
+.menu ul{
+	margin: 0;
+	padding: 0 0 0 15px;
+	list-style-type: disc;
+	color: #666666;
+	background: url("images/hdot2.gif") top repeat-x;
+}
+.menu ul.lvl1, .menu ul.lvl1 li:last-child{
+	background: none;
+}
+.menu a{
+	padding: 5px 0;
+	display: block;
+	color: #333333;
+	text-decoration: none;
+}
+.menu a:hover{
+	text-decoration: underline;	
+}
+.menu a.active{
+	color: #006699;
+	font-weight: bold;
+}
+
+/*right*/
+
+.window{
+	background: url("images/b-br.gif") no-repeat bottom right;
+	margin-top: 15px;
+}
+.window:FIRST-CHILD{
+	margin-top: 0;
+}
+.window div{
+	background: url("images/b-bl.gif") no-repeat bottom left;
+}
+.window div div{
+	background: url("images/b-tr.gif") no-repeat top right;
+}
+.window div div div{
+	background: url("images/b-tl.gif") no-repeat top left;
+	padding: 10px;
+}
+.window div div div div{
+	background: none;
+	padding: 0;
+	margin: 0;
+}
+.window h3{
+	color: #006699;
+	padding: 3px 0;
+	margin: 0;
+	text-align: center;
+}
+.window span{
+	font-weight: bold;
+	padding: 0 3px;
+}
+
+/*center*/
+
+.center a, .right a{
+	color: #006699;
+}
+.center a:hover, .right a:hover{
+	color: #333333;
+}
+.center_wrap{
+	background: #FDFDFD url("images/center_bg.png") repeat-y -300px 0;
+}
+.center{
+	margin: 0 245px 0 200px;
+	padding: 15px;
+	background: url("images/center-bg.png") repeat-x top;
+}
+
+/*footer*/
+
+.footer{
+	border: 5px solid #CCCCCC;
+	border-width: 5px 0 5px 0;
+	background: #006699;
+	min-height: 1.7em;
+	color: #999999;
+	padding: 20px 10px;
+}
+.footer a{
+	color: #f1f1f1;
+}
+.entry p{
+	text-indent: 2em;
+}
+.center .title{
+	margin-top: 0;
+	text-align: center;
+}
+
+.timetable table tr td:FIRST-CHILD{
+	font-style: italic;
+}
+.timetable table span{
+	color: #006699
+}
+.timetable table td{
+}
+ul.doc{
+	list-style-image: url("images/img09.gif");
+}
