@@ -1,0 +1,62 @@
+.article.admin input.title{
+	padding: 4px;
+	font-size: 1.7em;
+	width: 100%;
+	border-radius: 6px 6px 6px 6px;
+}
+.article.admin span.more_input{
+	color: blue;
+	cursor: pointer;
+}
+.article.admin table.more_input{
+	width: 100%;
+	display: none;
+}
+.article.admin .submit{
+	padding: 10px;
+	float: right;
+}
+.article.admin p.delimiter{
+	padding: 0px;
+	margin: 8px;
+}
+.article.admin table.more_input input{
+	width: 100%;
+}
+.article.admin table.more_input .table_title{
+	width: 160px;
+}
+
+.article.admin table.more_input input.translit_title{
+	width: 270px;
+	margin-right: 10px;
+}
+
+.article.admin #generate_translit{
+	width: auto;
+}
+
+.article.admin table.more_input input.language{
+	width: auto;
+}
+
+#sidebar #article_file_list{
+	overflow:auto;
+	max-height: 650px;
+	max-width: 257px;
+}
+
+#sidebar #article_file_list h3{
+    font-size:1.1em;
+    text-align:justify;
+}
+
+#sidebar .article_file_2_wysiwyg select{
+	width: 85px;
+	margin: 0 5px;
+}
+
+#sidebar p.delimiter{
+	border-top:1px solid;
+	margin:15px 25px 0 0;
+}

@@ -1,0 +1,50 @@
+.content h1{
+	display: none;
+}
+.left_container{
+	display: none;
+}
+.content .container{
+	margin-left: 0px;
+}
+.article p{
+	text-indent: 20px
+}
+.article ul{
+	list-style-type: none;
+	padding: 0;
+	margin-top: 0px;
+}
+.article li{
+	min-height: 44px;
+	background-repeat: no-repeat;
+	background-position: top left;
+	padding: 20px 0 0 64px;
+}
+li.main_service{
+	background-image: url("/template/grosstech/images/icon/service.png");
+}
+li.main_repair{
+	background-image: url("/template/grosstech/images/icon/repair.png");
+}
+li.main_fill{
+	background-image: url("/template/grosstech/images/icon/fill.png");
+}
+li.main_lan{
+	background-image: url("/template/grosstech/images/icon/lan.png");
+}
+li.main_camera{
+	background-image: url("/template/grosstech/images/icon/camera.png");
+}
+li.main_setup{
+	background-image: url("/template/grosstech/images/icon/setup.png");
+}
+li.main_recover{
+	background-image: url("/template/grosstech/images/icon/recover.png");
+}
+li.main_server{
+	background-image: url("/template/grosstech/images/icon/server.png");
+}
+li.main_site{
+	background-image: url("/template/grosstech/images/icon/site.png");
+}

@@ -1,0 +1,43 @@
+#_background{
+    background-color:white;
+    height:100%;
+    left:0;
+    opacity:0.6;
+    position:fixed;
+    top:0;
+    width:100%;
+    z-index:99;
+   	display: none;
+}
+
+#_wysiwyg_form{
+	z-index:100;
+	display: none;
+	position:relative;
+	background: #DFDFDF;
+	border-radius: 20px;
+	padding: 20px;
+	border: 1px solid #999999;
+	min-width: 250px;
+	left: -400px;
+	top: 150px;
+}
+
+#_wysiwyg_form div{
+	min-height: 150px;
+}
+
+#_wysiwyg_form button{
+	min-width: 240px;
+}
+
+#_wysiwyg_form #_href2wisiwig button, #_wysiwyg_form #_pdf2wisiwig button{
+	min-width: 92px;
+}
+
+#_wysiwyg_form button.cancel{
+	margin-left: 90px;
+	min-width: 70px;
+	width: 70px;
+	
+}

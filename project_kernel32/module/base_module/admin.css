@@ -1,0 +1,69 @@
+.nested_tree .item_cont{
+	min-height: 3.3em;
+}
+
+.nested_tree .controls{
+	display: none;
+	position: absolute;
+}
+
+.nested_tree .item_cont:hover .controls{
+	display: block;
+}
+
+.nested_tree .controls select.insert_place{
+	width: 100px;
+}
+
+.nested_tree .controls a{
+	margin-right: 10px;
+}
+
+.nested_tree .subitem{
+	margin-left: 10px;
+}
+
+.nested_tree .remove_menu{
+	margin-left: 20px;
+}
+
+.nested_tree .controls .remove, .nested_tree .remove_menu{
+	color: #993333;
+}
+
+.nested_tree .controls .remove:hover, .nested_tree .remove_menu:hover{
+	color: red;
+}
+
+.nested_tree ul{
+	margin: 0px;
+}
+
+.nested_tree .input_article{
+	display: none;
+}
+.nested_tree .edit_item td{
+	vertical-align: top;
+}
+.nested_tree .edit_item .first{
+	width: 60px;
+}
+.nested_tree .input_text, .nested_tree .input_article{
+	padding: 10px 0 10px 68px;
+}
+.nested_tree ul{
+	list-style-type: none;
+}
+
+.nested_tree .item_cont img, .nested_items_list img, .nested_items_uncategorized img{
+	float: left;
+	margin-right: 5px;
+	cursor: pointer;
+}
+.nested_items_list li, .nested_items_uncategorized li{
+	min-height: 24px;
+	padding: 2px;
+}
+.nested_tree .controls{
+	padding-left: 30px;
+}

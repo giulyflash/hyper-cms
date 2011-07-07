@@ -1,0 +1,157 @@
+body, html {
+	height:100%;
+	padding: 0;
+	margin: 0;
+	font-family: Verdana;
+	background: url("/template/grosstech/images/bg.png");
+}
+
+.wrap{
+	width: 1000px;
+	height: 100%;
+	margin: 0 auto;
+	border-collapse: collapse;
+}
+.wrap td{
+	vertical-align: top;
+	padding: 0px;
+}
+
+/*header*/
+.head td{
+	background: url("/template/grosstech/images/head_gradient.jpg") no-repeat top left;
+}
+.head img{
+	border: none;
+}
+.head .main_href{
+	display: block;
+	height: 257px;
+}
+.head_text{
+	position: absolute;
+	width: 340px;
+	text-align: center;
+	font-family: Arial;
+}
+.head_text p{
+	font-style: italic;
+	color: black;
+}
+.head_text img{
+	margin: 30px 0 0 20px;
+}
+/*menu*/
+.menu, .menu ul, .top{
+	height: 29px;
+}
+.menu{
+	background: url("/template/grosstech/images/menu.jpg");
+	border-top: 4px solid white;
+	border-bottom: 4px solid #10498A;
+	font-size: 0.9em;
+}
+div.menu{
+	border-radius: 25px 25px 0 0;
+	height:27px;
+	padding-top:2px;
+}
+.menu a{
+	color: white;
+	text-decoration: none;
+	font-weight: bold;
+	text-transform: uppercase;
+	padding: 0 20px;
+}
+.menu li {
+    display:block;
+    float:left;
+    min-width:110px;
+    padding:5px 4px 4px 4px;
+}
+.menu ul{
+	margin-top: 0px;
+	padding-top: 0px;
+}
+.menu ul ul{
+	height: auto;
+	position: absolute;
+	padding: 0;
+	display: none;
+}
+div.menu ul ul li{
+	background: url("/template/grosstech/images/menu_line.png");
+	border-width: 0px 1px 1px 1px;
+	border: 1px solid #10498A;
+	border-width: 0px 2px;
+	float: none;
+	min-width: 120px;
+}
+div.menu ul ul li a{
+	text-transform: none;
+	padding: 0 15px;
+}
+.menu ul ul li:FIRST-CHILD{
+	background: url("/template/grosstech/images/menu_first.png") 0px -1px;
+}
+.menu ul ul li:LAST-CHILD{
+	border-radius: 0px 0px 15px 15px;
+	border-width: 0px 2px 2px 2px;
+	padding-bottom: 7px;
+}
+.menu a:hover{
+	text-decoration: underline;
+}
+
+.menu li:hover ul{
+	display: block;
+}
+
+/*footer*/
+.footer{
+	background: url("/template/grosstech/images/footer.jpg");
+	height: 72px;
+	border: 2px solid #00A0E3;
+	border-width: 3px 0px;
+}
+
+/*content*/
+.content div.container{
+	border: 1px solid #999999;
+	border-width: 0 1px;
+	background-color: white;
+}
+.content td, .content div.container{
+	height: 100%;
+}
+.content div.article, .content div.message_box{
+	padding: 15px;
+}
+.content div div{
+	border: none;
+}
+.grosstech_business{
+	border-collapse: collapse;
+	width: 100%;
+}
+.content div.article{
+	padding: 15px;
+}
+.grosstech_business td{
+	border-right: 1px solid #999999;
+}
+.grosstech_business td:last-child{
+	border: none;
+}
+.content div.article *:FIRST-CHILD{
+	margin-top: 0px;
+}
+.content a, .content a:visited{
+	color: #00A0E3;
+}
+.content a:hover{
+	color: #10498A;
+}
+.content{
+	color: #444;
+}
