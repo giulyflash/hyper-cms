@@ -49,52 +49,67 @@
 	</xsl:if>
 	<from class="link_form">
 		<div>
-			<table>
-				<tr class="module">
-					<td>
-						Модуль:
-					</td>
-					<td>
-						<select id="module_select" autocomplete = "off">
-							<option value=""></option>
-							<xsl:for-each select="module_list/*">
-								<option value="{name()}" >
-									<xsl:value-of select="."/>
-								</option>
-							</xsl:for-each>
-						</select>
-					</td>
-				</tr>
-				<tr class="method">
-					<td>
-						Метод:
-					</td>
-					<td>
-						<select id="method_select" autocomplete = "off">
-							<option value=""></option>
-						</select>
-					</td>
-				</tr>
-				<tr class="params">
-					<td>
-						Параментры:
-					</td>
-					<td>
-						<table class="param_box">
-							<tr>
-								<td>
-									<select class="param_select" autocomplete = "off"><option value=""></option></select>
-								</td>
-								<td>
-								</td>
-							</tr>
-						</table>
-					</td>
-				</tr>
-			</table>
+			<xsl:call-template name="module_link_wisard">
+				<xsl:with-param name="name">Что связываем:</xsl:with-param>
+			</xsl:call-template>
+			<xsl:call-template name="module_link_wisard">
+				<xsl:with-param name="name">С чем связываем:</xsl:with-param>
+				<xsl:with-param name="num">1</xsl:with-param>
+			</xsl:call-template>
 		</div>
 		<input type="submit" value="сохранить"/>
 	</from>
+</xsl:template>
+
+<xsl:template name="module_link_wisard">
+	<xsl:param name="name"/>
+	<xsl:param name="num">0</xsl:param>
+	<table>
+		<xsl:if test="$name">
+			<tr class="thead"><th colspan="2"><xsl:value-of select="$name"/></th><th></th></tr>
+		</xsl:if>
+		<tr class="module">
+			<td>
+				Модуль:
+			</td>
+			<td>
+				<select class="module_select" autocomplete = "off" name="module[{$num}]">
+					<option value=""></option>
+					<xsl:for-each select="module_list/*">
+						<option value="{name()}" >
+							<xsl:value-of select="."/>
+						</option>
+					</xsl:for-each>
+				</select>
+			</td>
+		</tr>
+		<tr class="method">
+			<td>
+				Метод:
+			</td>
+			<td>
+				<select class="method_select" autocomplete = "off" name="method[{$num}]">
+					<option value=""></option>
+				</select>
+			</td>
+		</tr>
+		<tr class="params">
+			<td>
+				Параментры:
+			</td>
+			<td>
+				<table class="param_box">
+					<tr>
+						<td>
+							<select class="param_select" autocomplete = "off"><option value=""></option></select>
+						</td>
+						<td>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
 </xsl:template>
 
 </xsl:stylesheet>

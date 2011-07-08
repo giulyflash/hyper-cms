@@ -29,8 +29,12 @@
 .link_form div >table >tbody >tr >td{
 	padding: 3px;
 }
-.link_form tr.module{
+.link_form tr.module, .link_form tr.thead{
 	display: table-row;
+}
+.link_form tr.thead th{
+	text-align: left;
+	padding-top: 20px;
 }
 .link_form>div{
 	min-height: 500px;

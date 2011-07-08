@@ -1,54 +1,62 @@
 $(function(){
 	admin_method_name = '_admin';
+	//sorting elements
 	sort_data();
-	$('#module_select').html('');
-	module_list_obj = $('#module_select');
-	for(var i in document.module_data)
-		module_list_obj.append('<option value="'+i+'">'+document.module_data[i]['title']+'<optin/>');
+	module_list_obj = $('.module_select');
+	module_list_obj.each(function(num,module_list){
+		module_list = $(module_list);
+		module_list.html('<option></option>');
+		for(var i in document.module_data)
+			module_list.append('<option value="'+i+'">'+document.module_data[i]['title']+'<optin/>');
+	});
+	//event for module select
 	module_list_obj.change(function(){
+		parent = $(this).parent().parent().parent().parent();
 		if(!document.module_data){
 			alert('fatal error: data array not found!');
 			return;
 		}
 		value = $(this).val();
 		if(!value){
-			$('.method, .params').css('display','none');
+			parent.find('.method, .params').css('display','none');
 			return;
 		}
 		if(!document.module_data[value]){
 			alert('fatal error: module "'+value+'" not found!');
 			return;
 		}
-		method_select = $('#method_select');
+		method_select = parent.find('.method_select');
 		method_select.html('<option></option>');
 		for(var method_name in document.module_data[value]['method']){
 			method_select.append('<option value="'+method_name+'">'+document.module_data[value]['method'][method_name]['title']
 			+(method_name==admin_method_name?' (admin)':'')+'</option>');
 		}
-		$('.method').css('display','table-row');
-		$('.params').css('display','none');
+		parent.find('.method').css('display','table-row');
+		parent.find('.params').css('display','none');
 	});
 	
-	$('#method_select').change(function(){
+	//event for method select
+	$('.method_select').change(function(){
+		parent = $(this).parent().parent().parent().parent();
 		if(!document.module_data){
 			alert('fatal error: data array not found!');
 			return;
 		}
 		method = $(this).val();
-		module = $('#module_select').val();
+		module = parent.find('.module_select').val();
 		//console.log(document.module_data[module]);return;
-		$('.params').css('display','none');
+		parent.find('.params').css('display','none');
 		if(!method || !document.module_data[module]['method'][method]['params'])
 			return;
-		$('.params .param_box').html('');
-		param_change();
-		$('.params').css('display','table-row');
+		parent.find('.params .param_box').html('');
+		param_change(parent);
+		parent.find('.params').css('display','table-row');
 	});
 });
 
-function param_change(param_select){
-	module = $('#module_select').val();
-	method = $('#method_select').val();
+function param_change(parent,param_select){
+	module = parent.find('.module_select').val();
+	method = parent.find('.method_select').val();
 	param = param_select?($(param_select).val()):null;
 	if(param_select){
 		if(param)
@@ -56,24 +64,24 @@ function param_change(param_select){
 		else
 			param_select.parent().parent().remove();
 	}
-	select_list = $('.params .param_box td:first-child .param_select');
+	select_list = parent.find('.params .param_box td:first-child .param_select');
 	param_count = 0;
 	for(param_name in document.module_data[module]['method'][method]['params'])
 		param_count++;
 	if(!param_select || !select_list.last().val()  || select_list.size()<param_count){
-		$('.params .param_box').append(get_param_html());
-		$('.params .param_box:last .param_select').change(function(){
-			param_change($(this));
+		parent.find('.params .param_box').append(get_param_html());
+		parent.find('.params .param_box:last .param_select').change(function(){
+			param_change(parent,$(this));
 		});
 	}
-	param_all = $('.params .param_box tr');
+	param_all = parent.find('.params .param_box tr');
 	current_param_list = [];
 	if(param_select){
 		$.each(param_all, function(key,param_tr){
 			param_tr = $(param_tr);
 			select_each = param_tr.find('td:first-child select');
 			param_name = select_each.val();
-			select_each.attr('name',param_name?('param['+param_tr.index()+']'):'');
+			select_each.attr('name',param_name?('param['+parent.index()+']['+param_tr.index()+']'):'');
 			if(param_name)
 				current_param_list[param_name] = 1;
 		});
@@ -137,7 +145,8 @@ function get_param_value(module,method,param,obj){
 
 function set_param_value(obj, value){
 	obj.parent().next().html(null);
-	name_str = ' name="param_value['+obj.parent().parent().index()+']"';
+	parent = obj.parent().parent().parent().parent().parent().parent().parent().parent();
+	name_str = ' name="param_value['+parent.index()+']['+obj.parent().parent().index()+']"';
 	new_input = null;
 	for(param_dinamic in value){
 		if(!new_input)
