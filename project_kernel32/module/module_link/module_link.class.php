@@ -70,14 +70,11 @@ class module_link extends module{
 				$this->_query->join('module_link_param mlp','left','inner')->_on('ml.link_id','ml.link_id')->where();
 			}*/
 		}
-		//var_dump($this->_config('exclude_from_admin_list'));
 		$module_list = $this->get_module($this->_config('exclude_from_admin_list'));
 		foreach($module_list as $module_name=>&$module)
 			$this->_result['module_list'][$module_name] = $module['title'];
 		$this->_result['data'] = json_encode($module_list);
-		$this->_result['test'] = $module_list; 
-		//header('Content-Type: text/plain; charset=utf-8');
-		//var_dump($module_list);die;
+		$this->_result['test'] = $module_list;
 	}
 	
 	public function _admin(){

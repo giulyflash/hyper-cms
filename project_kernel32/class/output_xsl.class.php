@@ -19,7 +19,6 @@ class output_xsl extends output implements output_interface{
 			}
 			$this->xsl_include($xsl, $stylesheetNode, $module['_module_name'], isset($module['_template'])?$module['_template']:NULL);
 		}
-		//var_dump($this->loaded_templates);
 		$proc = new XSLTProcessor();
 		try{
 			$proc->importStyleSheet($xsl);
