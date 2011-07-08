@@ -171,7 +171,7 @@ abstract class module{
 		}
 		if(class_exists($config_class_name)){
 			$parent_config = new $config_class_name($this->parent->get_module_config($module));
-			//$this->_merge_config_array('include', $parent_config);
+			$this->_merge_config_array('include', $parent_config);
 			$this->_merge_config_array('link', $parent_config);
 			$this->_merge_config_array('tempalte_include', $parent_config, 'merge');
 			$this->_merge_config_array('callable_method', $parent_config, 'inherit');
@@ -183,7 +183,7 @@ abstract class module{
 			if($src_include = $this->config->get_ref($param_name)){
 				if($mode=='add')
 					foreach($parent_value as $name=>$value)
-						$src_include[$name] = (isset($src_include[$name])?$src_include[$name]:'').$value;
+						$src_include[$name] = ((isset($src_include[$name]) && $src_include[$name]!=$value)?$src_include[$name]:'').$value;
 				elseif($mode=='inherit'){
 					foreach($parent_value as $name=>$value)
 						if(isset($src_include[$name]))
