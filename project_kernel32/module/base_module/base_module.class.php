@@ -36,6 +36,9 @@ class base_module_config extends module_config{
 		'save'=>array(
 			'text'=>FILTER_UNSAFE_RAW,
 		),
+		'edit_category'=>array(
+			'insert_place'=>'_exclude',
+		)
 	);
 	
 	protected $template_include = array(

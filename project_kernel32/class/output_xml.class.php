@@ -13,6 +13,27 @@ class output_xml extends output implements output_interface{
 		}
 		return $xml->saveXML();
 	}
+
+	/* TODO test this:
+function assocArrayToXML($root_element_name,$ar)
+{
+//if (is_numeric($key)) $key = "unknownNode_".(string) $key;
+//$key = preg_replace('/[^a-z]/i', '', $key);
+    $xml = new SimpleXMLElement("<?xml version=\"1.0\"?><{$root_element_name}></{$root_element_name}>");
+    $f = create_function('$f,$c,$a','
+            foreach($a as $k=>$v) {
+                if(is_array($v)) {
+                    $ch=$c->addChild($k);
+                    $f($f,$ch,$v);
+                } else {
+                    $c->addChild($k,$v);
+                }
+            }');
+    $f($f,$xml,$ar);
+    return $xml->asXML();
+} 
+*/
+	//TODO create text from array and parse it without DomDocument class
 	
 	public function transform_array2DOM($array, DOMElement &$container=NULL, $nodeName=NULL, $useNodeNameForChildren = TRUE) {
 		if (!is_array($array) && (!is_object($array))) $array=array($array);
