@@ -1,8 +1,11 @@
 $(function(){
 	admin_method_name = '_admin';
 	sort_data();
-	//FIXME срабатывание select на параметры
-	$('#module_select').change(function(){
+	$('#module_select').html('');
+	module_list_obj = $('#module_select');
+	for(var i in document.module_data)
+		module_list_obj.append('<option value="'+i+'">'+document.module_data[i]['title']+'<optin/>');
+	module_list_obj.change(function(){
 		if(!document.module_data){
 			alert('fatal error: data array not found!');
 			return;
@@ -54,10 +57,10 @@ function param_change(param_select){
 			param_select.parent().parent().remove();
 	}
 	select_list = $('.params .param_box td:first-child .param_select');
-	param_count = 0
+	param_count = 0;
 	for(param_name in document.module_data[module]['method'][method]['params'])
 		param_count++;
-	if(!param_select || select_list.last().val() && select_list.size()<param_count){
+	if(!param_select || !select_list.last().val()  || select_list.size()<param_count){
 		$('.params .param_box').append(get_param_html());
 		$('.params .param_box:last .param_select').change(function(){
 			param_change($(this));
@@ -128,7 +131,7 @@ function get_param_value(module,method,param,obj){
 				alert('can not evaluete server data!');
 			}
 		},
-		error: function(html){alert('can not recieve data from server!')}
+		error: function(html){alert('can not recieve data from server!');}
 	});
 }
 
@@ -138,7 +141,7 @@ function set_param_value(obj, value){
 	new_input = null;
 	for(param_dinamic in value){
 		if(!new_input)
-			new_input = $('<select class="param_select"'+name_str+'/>');
+			new_input = $('<select'+name_str+'/>');
 		new_input.append('<option value="'+param_dinamic+'">'+value[param_dinamic]+'<optin/>');
 	}
 	if(!new_input)
@@ -150,7 +153,6 @@ function set_param_value(obj, value){
 function sort_data(){
 	for(var module_name in document.module_data)
 		document.module_data[module_name]['method'] = sort_by_title(document.module_data[module_name]['method']);
-	//FIXME не работает сортировка модулей
 	document.module_data = sort_by_title(document.module_data);
 }
 
