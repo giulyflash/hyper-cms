@@ -21,7 +21,7 @@ $(function(){
 
 function change_nested_folder_img($obj,$hide){
 	if($hide)
-		$obj.parent().parent().find('ul').hide();
+		$obj.parent().parent().find('>ul').hide();
 	var src  = $obj.attr('src')=='template/admin/images/folder_opened.png'?'template/admin/images/folder_closed.png':'template/admin/images/folder_opened.png';
 	$obj.attr('src',src);
 }

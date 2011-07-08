@@ -139,20 +139,6 @@ abstract class module{
 		return $this->config->get($name);
 	}
 	
-	public function _add_include($module_include){
-		if(!$module_include)
-			return;
-		if(!is_array($module_include))
-			throw new my_exception('include is not array', $module_include);
-		if($src_include = $this->_config('include')){
-			foreach($module_include as $name=>$value)
-				$src_include[$name] = (isset($src_include[$name])?$src_include[$name]:'').$value;
-			$this->config->set('include',$src_include);
-		}
-		else
-			$this->config->set('include',$module_include);
-	}
-	
 	public function _params($method){
 		$params = array();
 		$method_reflection = new ReflectionMethod($this,$method);
@@ -185,7 +171,7 @@ abstract class module{
 		}
 		if(class_exists($config_class_name)){
 			$parent_config = new $config_class_name($this->parent->get_module_config($module));
-			$this->_merge_config_array('include', $parent_config);
+			//$this->_merge_config_array('include', $parent_config);
 			$this->_merge_config_array('link', $parent_config);
 			$this->_merge_config_array('tempalte_include', $parent_config, 'merge');
 			$this->_merge_config_array('callable_method', $parent_config, 'inherit');

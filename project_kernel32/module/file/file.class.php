@@ -77,7 +77,6 @@ class file extends module{
 	public function upload($data=NULL, $module='file'){
 		$this->parent->config->set('template','module/file/file.xhtml.xsl');
 		$this->_result = $this->get_files($module);
-		//var_dump($this->result);
 	}
 	
 	public function get_files($module='file'){

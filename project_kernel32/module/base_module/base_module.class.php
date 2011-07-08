@@ -252,7 +252,6 @@ abstract class base_module extends module{
 				$value['left'] = $this->_query->query1('right')+1;
 			}
 			$value['right'] = $value['left'] + 1;
-			//var_dump($insert_place,$value);die;
 			$this->_query->insert($table_name)->values($value)->execute();
 			$id = $this->parent->db->insert_id();
 			$this->_message('new category add',array('title'=>$value['title']));
@@ -262,7 +261,6 @@ abstract class base_module extends module{
 	}
 
 	public function move_category($id=NULL, $insert_type=NULL, $insert_place=NULL, $condition = array(),$redirect = 'admin'){
-		//var_dump($id, $insert_type, $insert_place, $condition, $redirect);die();
 		$table_name = $this->module_name.$this->_config('category_posfix');
 		if(!$id)
 			throw new my_exception('id is empty');

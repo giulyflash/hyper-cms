@@ -148,7 +148,6 @@ class site_jkomfort extends module{
 	}
 	
 	private function save_article($article_title,$article_text, $replace=NULL, $do_not_create_new = false){
-		//var_dump($replace);
 		$article_name = translit::transliterate($article_title);
 		$date = new DateTime();
 		$date = $date->format('Y-m-d H:i:s');

@@ -253,7 +253,6 @@ class app extends module{
 		if(!$module)
 			$module = $this->module_name;
 		if(isset($this->config_cache[$module])){
-			//var_dump($module, is_array($this->config_cache[$module]), $this->config_cache[$module]); echo '!!!<br/>';
 			return $this->config_cache[$module];
 		}
 		else
@@ -360,7 +359,6 @@ class app extends module{
 				}
 			}
 		}
-		//var_dump($this->call_list);
 	}
 	
 	private function get_module_link_list(&$link_cache, $module=NULL, $method=NULL){
@@ -442,12 +440,10 @@ class app extends module{
 			order('order')->query();
 		//create array of link_id for query
 		$link_list = array();
-		//var_dump($this->admin_mode, $call_db_list);
 		if($call_db_list){
 			foreach($call_db_list as $call)
 				if(!isset($link_list[$call['link_id']]))
 					$link_list[$call['link_id']] = true;
-			//var_dump($link_list);
 			$link_param = $this->_query->select()->from('module_link_param')->where('link_id',array_keys($link_list),'in')->query();
 			//grouping params by link_id
 			$param_group = array();
@@ -460,7 +456,6 @@ class app extends module{
 					$param_group[$param['link_id']]['condition'][$param['param_name']] = $param['value'];
 			}
 			//applying params
-			//var_dump($param_group, $this->_call_list);
 			foreach($call_db_list as $call){
 				if(!empty($param_group[$call['link_id']])){
 					$call['params'] = $param_group[$call['link_id']]['param'];
@@ -475,7 +470,6 @@ class app extends module{
 		//get config for modules from db and put them to cache
 		$this->get_module_list();
 		if($this->_config('config_from_db')){
-			//var_dump($this->_query);
 			$db_params = $this->_query->select('module_name,param_name,value')->from('module_param')->where('module_name',$this->module_list,'in')->query();
 			foreach($db_params as $param)
 				$this->config_cache[$param['module_name']][$param['param_name']] = $param['value'];
@@ -518,7 +512,6 @@ class app extends module{
 	private function get_module_config_include(&$module){
 		if($this->_config('include_from_module_config') && $include_cache = $module->_config('include')){
 			$this->check_array_comma($include_cache);
-			//var_dump($include_cache);echo "<br/>\n<br/>\n";
 			if(!isset($this->loaded_module_include))
 				$this->loaded_module_include = array();
 			$admin_mode = $this->admin_mode?'admin_mode.':'';
@@ -690,7 +683,6 @@ class app extends module{
 		$module_name = $module->module_name;
 		$this->prepare_callable_method($module);
 		$callable_method = $module->_config('callable_method',true);
-		//var_dump($module_name, $callable_method);
 		if(!isset($callable_method[$method_name]))
 			throw new my_exception('access rule not found',$module_name.'.'.$method_name,0);
 		//TODO access rules for users and groups
