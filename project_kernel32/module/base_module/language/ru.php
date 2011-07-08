@@ -16,7 +16,7 @@ $language = array(
 		),
 	),
 	'get_category_by_title' => array(
-		'__title' => 'выбрать список категорий по имени',
+		'__title' => 'выбрать категорю по имени',
 		'__param' => array(
 			'title' => 'заголовок',
 		),
