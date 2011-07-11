@@ -45,6 +45,7 @@ class app_config extends config{
 	public $language_data_for_all_methods = '_for_all';
 	protected $language_title_name = '__title';
 	protected $language_param_name = '__param';
+	protected $disable_php_filter = '_disable_filter';//disable filter for method parameter 
 
 	protected $link = array(
 		'admin_mode.*'=>array('head'=>'user',),
@@ -435,15 +436,15 @@ class app extends module{
 			$center_method[] = $this->center_method;//TODO nedd to get center method from call
 		//TODO not only central link
 		//$this->_query->echo_sql = true;
-		$call_db_list = $this->_query->select('module_name, method_name, position, link_id')->from('module_link')->
+		$call_db_list = $this->_query->select('module_name, method_name, position, id')->from('module_link')->
 			where('exclude',1,'!=')->_and('center_module',$center_module,'in')->_and('center_method',$center_method,'in')->_and('admin_mode',$this->admin_mode)->
 			order('order')->query();
 		//create array of link_id for query
 		$link_list = array();
 		if($call_db_list){
 			foreach($call_db_list as $call)
-				if(!isset($link_list[$call['link_id']]))
-					$link_list[$call['link_id']] = true;
+				if(!isset($link_list[$call['id']]))
+					$link_list[$call['id']] = true;
 			$link_param = $this->_query->select()->from('module_link_param')->where('link_id',array_keys($link_list),'in')->query();
 			//grouping params by link_id
 			$param_group = array();
@@ -457,9 +458,9 @@ class app extends module{
 			}
 			//applying params
 			foreach($call_db_list as $call){
-				if(!empty($param_group[$call['link_id']])){
-					$call['params'] = $param_group[$call['link_id']]['param'];
-					$call['condition'] = $param_group[$call['link_id']]['condition'];
+				if(!empty($param_group[$call['id']])){
+					$call['params'] = $param_group[$call['id']]['param'];
+					$call['condition'] = $param_group[$call['id']]['condition'];
 				}
 				$this->call_list[] = $call;
 			}
@@ -802,7 +803,7 @@ class app extends module{
 						$filter = $default_argument_filter;
 					if(!$filter)
 						$value = false;
-					else 
+					elseif(!$filter==$this->_config('disable_php_filter'))
 						$value = filter_var($value, $filter);
 				}
 			}

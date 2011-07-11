@@ -381,9 +381,13 @@ class object_sql_query{
 		return $this->parent->query_result;
 	}
 	
+	public function insert_id(){
+		return $this->sql_query_class->insert_id();
+	}
+	
 	public function query1($field=NULL){
 		$sql = $this->parent->get_sql1();
-		$sql = preg_replace('%^(.+) LIMIT[0-9 ]+,[0-9 ]*$%', '\1',$sql);
+		$sql = preg_replace('%^(.+) LIMIT[0-9 ]+,?[0-9 ]*$%', '\1',$sql);
 		$this->parent->set_sql($sql.' LIMIT 1');
 		$this->parent->execute();
 		if(isset($this->parent->query_result[0])){
@@ -400,6 +404,8 @@ class object_sql_query{
 	
 	public function query2assoc_array($name_column, $value_column=NULL, $unset=true){
 		$this->parent->execute();
+		if(!$this->parent->query_result)
+			return;
 		if(isset($this->parent->query_result[0][$name_column])){
 			$new_result = array();
 			foreach($this->parent->query_result as &$result){

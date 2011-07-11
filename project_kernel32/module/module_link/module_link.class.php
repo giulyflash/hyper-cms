@@ -65,38 +65,82 @@ class module_link extends module{
 	public function edit($id=NULL, $module=NULL, $method=NULL, $params=array()){
 		//module, method, params - to made link from
 		if($id){
-			$link = $this->_query->select()->from('module_link ml')->where('id',$id)->query1();
-			/*foreach($params as $name=>$value){
-				$this->_query->join('module_link_param mlp','left','inner')->_on('ml.link_id','ml.link_id')->where();
-			}*/
+			$this->_result['link'] = $this->_query->select()->from('module_link')->where('id',$id)->query1();
+			$this->_result['link']['param'] = $this->_query->select()->from('module_link_param')->where('link_id',$id)->query2assoc_array('link_id');
+			$this->_result['link'] = json_encode($this->_result['link']);
 		}
 		$module_list = $this->get_module($this->_config('exclude_from_admin_list'));
 		foreach($module_list as $module_name=>&$module)
 			$this->_result['module_list'][$module_name] = $module['title'];
 		$this->_result['data'] = json_encode($module_list);
-		$this->_result['test'] = $module_list;
+		$this->_result['position'] = $this->_query->select('translit_title,title')->from('position')->query2assoc_array('translit_title','title');
+	}
+	
+	public function save($id=NULL,$link=NULL,$position=NULL,$order=NULL){
+		var_dump($link);
+		if(empty($link[0]['module']))
+			throw new my_exception('module name not found');
+		$link_value = array('module_name'=>$link[0]['module']);
+		if(!empty($link[0]['method']))
+			$link_value['method_name'] = $link[0]['method'];
+		if(!empty($link[1]['module']))
+			$link_value['center_module'] = $link[1]['module'];
+		if(!empty($link[1]['module']))
+			$link_value['center_method'] = $link[1]['method'];
+		$link_value['position'] = $position?$position:$this->parent->_config('main_position_name');
+		$link_value['order'] = $order?$order:1;
+		if($id){
+			$this->_query->update($this->module_name)->set($link_value)->where('id',$id)->limit(1)->execute();
+			$message = 'edit successfool';
+		}
+		else{
+			$this->_query->insert($this->module_name)->values($link_value)->execute();
+			if(!$id = $this->_query->insert_id())
+				throw new my_exception('id not found');
+			$message = 'add successfool';
+		}
+		foreach($link as $link_id=>&$link_item){
+			foreach($link_item['param'] as &$param){
+				$type = $link_id?'condition':'param';
+				$param_value = array('param_name'=>$param['name'], 'type'=>$type, 'link_id'=>$id);
+				if(isset($param['value']))
+					$param_value['value'] = $param['value'];
+				if($this->_query->select('link_id')->from($this->module_name.'_param')->where('link_id',$id)->_and('param_name',$param['name'])->_and('type',$type)->query1())
+					$this->_query->update($this->module_name)->set($param_value)->where('link_id',$id)->limit(1)->execute();
+				else
+					$this->_query->insert($this->module_name.'_param')->values($param_value)->execute();
+			}
+		}
+		$this->_message($message);
+		$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
 	}
 	
 	public function _admin(){
-		$result = $this->_query->select()->from('module_link')->order('order')->query2assoc_array('link_id',NULL,false);
+		$result = $this->_query->select()->from('module_link')->order('order')->query2assoc_array('id',NULL,false);
 		$params = $this->_query->select()->from('module_link_param')->where('link_id',array_keys($result),'in')->_and('type','condition')->query();
 		foreach($params as $param)
 			$result[$param['link_id']]['params'][] = $param;
 		$this->_result = &$result;
 	}
+	
+	public function remove($id=NULL){
+		if(!$id)
+			throw new my_exception('id not found');
+		$this->_query->delete()->from($this->module_name)->where('id',$id)->limit(1)->execute();
+		$this->_query->delete()->from($this->module_name.'_param')->where('link_id',$id)->limit(1)->execute();
+		$this->_message('delete successfool');
+		$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
+	}
 }
 
 class module_link_config extends module_config{
 	public $callable_method=array(
-		'_admin,edit,remove'=>array(
+		'_admin,edit,remove,save'=>array(
 			self::object_name=>__CLASS__,
 			self::role_name=>self::role_write,
 		),
 		'save'=>array(
-			self::object_name=>__CLASS__,
-			self::role_name=>self::role_write,
-			//TODO check overwrite callable_method params
-			'params'=>FILTER_UNSAFE_RAW,
+			'link'=>'_disable_filter',
 			'_exclude'=>true
 		),
 	);
