@@ -11,7 +11,7 @@
 			<th>Удалить</th>
 		</thead>
 		<xsl:for-each select="item">
-			<xsl:variable name="href" select="concat('admin.php?call=module_link.edit&amp;id=',link_id)"/>
+			<xsl:variable name="href" select="concat('admin.php?call=module_link.edit&amp;id=',id)"/>
 			<tr>
 				<td>
 					<a href="{$href}">
@@ -31,7 +31,7 @@
 					</a>
 				</td>
 				<td class="remove">
-					<a href="admin.php?call=module_link.remove&amp;id={link_id}">X</a>
+					<a href="admin.php?call=module_link.remove&amp;id={id}">X</a>
 				</td>
 			</tr>
 		</xsl:for-each>
@@ -45,20 +45,34 @@
 	<xsl:if test ="data"> 
 		<script type="text/javascript">
 			document.module_data=<xsl:value-of select="data"/>
+			document.link_data=<xsl:value-of select="link"/>
 		</script>
 	</xsl:if>
-	<from class="link_form">
+	<form class="link_form" action="/admin.php?call=module_link.save" method="post">
+		<input type="hidden" value="{link/id}"/>
 		<div>
 			<xsl:call-template name="module_link_wisard">
 				<xsl:with-param name="name">Что связываем:</xsl:with-param>
 			</xsl:call-template>
+			<p>
+				<b>Позиция:</b>&#160;&#160;<select name="position">
+				<xsl:for-each select="position/*">
+					<option value="{name()}">
+						<xsl:if test="name()=position">
+							<xsl:attribute name="selected">1</xsl:attribute>
+						</xsl:if>
+						<xsl:value-of select = "."/>
+					</option>
+				</xsl:for-each>
+				</select>
+			</p>
 			<xsl:call-template name="module_link_wisard">
 				<xsl:with-param name="name">С чем связываем:</xsl:with-param>
 				<xsl:with-param name="num">1</xsl:with-param>
 			</xsl:call-template>
 		</div>
 		<input type="submit" value="сохранить"/>
-	</from>
+	</form>
 </xsl:template>
 
 <xsl:template name="module_link_wisard">
@@ -73,7 +87,7 @@
 				Модуль:
 			</td>
 			<td>
-				<select class="module_select" autocomplete = "off" name="module[{$num}]">
+				<select class="module_select" autocomplete = "off" name="link[{$num}][module]">
 					<option value=""></option>
 					<xsl:for-each select="module_list/*">
 						<option value="{name()}" >
@@ -88,7 +102,7 @@
 				Метод:
 			</td>
 			<td>
-				<select class="method_select" autocomplete = "off" name="method[{$num}]">
+				<select class="method_select" autocomplete = "off" name="link[{$num}][method]">
 					<option value=""></option>
 				</select>
 			</td>

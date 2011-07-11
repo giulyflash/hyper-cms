@@ -60,3 +60,6 @@
 .link_form .params >td{
 	padding-top: 15px;
 }
+.link_form div p{
+	text-indent: 0px!important;
+}

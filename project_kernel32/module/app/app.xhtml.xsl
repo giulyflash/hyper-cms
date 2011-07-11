@@ -16,6 +16,7 @@
 </xsl:template>
 
 <xsl:template name="_word">
+	<!--TODO test this -->
 	<xsl:param name="module"/>
 	<xsl:param name="method"/>
 	<xsl:param name="word"/>

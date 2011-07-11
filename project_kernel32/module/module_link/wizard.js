@@ -81,7 +81,7 @@ function param_change(parent,param_select){
 			param_tr = $(param_tr);
 			select_each = param_tr.find('td:first-child select');
 			param_name = select_each.val();
-			select_each.attr('name',param_name?('param['+parent.index()+']['+param_tr.index()+']'):'');
+			select_each.attr('name',param_name?('link['+parent.index()+'][param]['+param_tr.index()+'][name]'):'');
 			if(param_name)
 				current_param_list[param_name] = 1;
 		});
@@ -146,7 +146,7 @@ function get_param_value(module,method,param,obj){
 function set_param_value(obj, value){
 	obj.parent().next().html(null);
 	parent = obj.parent().parent().parent().parent().parent().parent().parent().parent();
-	name_str = ' name="param_value['+parent.index()+']['+obj.parent().parent().index()+']"';
+	name_str = ' name="link['+parent.index()+'][param]['+obj.parent().parent().index()+'][value]"';
 	new_input = null;
 	for(param_dinamic in value){
 		if(!new_input)
