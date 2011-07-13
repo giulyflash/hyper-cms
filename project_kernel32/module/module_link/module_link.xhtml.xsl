@@ -45,7 +45,9 @@
 	<xsl:if test ="data"> 
 		<script type="text/javascript">
 			document.module_data=<xsl:value-of select="data"/>
-			document.link_data=<xsl:value-of select="link"/>
+			<xsl:if test="link">
+				document.link_data=<xsl:value-of select="link"/>
+			</xsl:if>
 		</script>
 	</xsl:if>
 	<form class="link_form" action="/admin.php?call=module_link.save" method="post">
@@ -99,7 +101,7 @@
 		</tr>
 		<tr class="method">
 			<td>
-				Метод:
+				Действие:
 			</td>
 			<td>
 				<select class="method_select" autocomplete = "off" name="link[{$num}][method]">

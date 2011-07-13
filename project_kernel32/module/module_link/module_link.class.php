@@ -66,7 +66,7 @@ class module_link extends module{
 		//module, method, params - to made link from
 		if($id){
 			$this->_result['link'] = $this->_query->select()->from('module_link')->where('id',$id)->query1();
-			$this->_result['link']['param'] = $this->_query->select()->from('module_link_param')->where('link_id',$id)->query2assoc_array('link_id');
+			$this->_result['link']['param'] = $this->_query->select()->from('module_link_param')->where('link_id',$id)->query();
 			$this->_result['link'] = json_encode($this->_result['link']);
 		}
 		$module_list = $this->get_module($this->_config('exclude_from_admin_list'));
