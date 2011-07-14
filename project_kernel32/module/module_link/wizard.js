@@ -187,6 +187,7 @@ function set_param_value(obj, value, param_value){
 	parent = obj.parent().parent().parent().parent().parent().parent().parent().parent();
 	name_str = ' name="link['+parent.index()+'][param]['+obj.parent().parent().index()+'][value]"';
 	new_input = null;
+	//TODO sort values
 	for(param_dinamic in value){
 		if(!new_input)
 			new_input = $('<select'+name_str+'/>');
