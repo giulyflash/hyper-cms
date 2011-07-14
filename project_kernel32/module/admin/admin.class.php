@@ -24,37 +24,6 @@ class admin extends module{
 		$this->_result = $link->get_module($exclude, true);
 	}
 	
-	public function get_module($exclude = array(), $adnin_method_only=false){
-		//TODO check access for $module->admin_method
-		$exclude = array_merge($exclude, array('admin','app'));
-		$class_list = array();
-		$dir = _module_path;
-		if ($handle = opendir($dir)){
-			$module_root=scandir($dir);
-			foreach($module_root as $class_dir)
-				if(preg_match("%^([a-zA-Z\-_]+)$%",$class_dir,$re) && !in_array($re[1],$exclude)){
-					$module_name = $re[1];
-					$module = new $module_name($this->parent);
-					$callable_method = $module->_config('callable_method',true);
-					if($adnin_method_only){
-						if(isset($callable_method[$callable_name=$module->_config('admin_method')]))
-							$this->add_method($module, $callable_name, $class_list, false);
-					}
-					else{
-						$class_list[$module_name]['title'] = 
-							(!empty($this->parent->language_cache[$module_name][$title_str = $this->parent->_config('language_title_name')]))?
-								$this->parent->language_cache[$module->module_name][$title_str]:$module_name;
-						foreach($callable_method as $callable_name=>$callable_value)
-							$this->add_method($module, $callable_name, $class_list);
-						
-					}
-				}
-		}
-		else
-			throw new exception('module directory not found',_module_path);
-		return $class_list;
-	}
-	
 	public function add_method(&$module, &$method_name, &$class_list, $need_params = true){
 		if($method_name && method_exists($module, $method_name)){
 			$class_list[$module->module_name]['method'][$method_name]['title'] =

@@ -83,7 +83,7 @@ abstract class module{
 		}
 	}
 	
-	private function _get_module_language_data($module_name){
+	public function _get_module_language_data($module_name){
 		if(!isset($this->parent->language_cache[$module_name])){
 			$file_name = _module_path.($module_name).'/'._language_path.$this->_config('language')._language_ext;
 			@include $file_name;
@@ -209,7 +209,7 @@ abstract class module{
 	}
 	
 	public function _get_param_value($method_name,$param_name){
-		throw new my_exception('under construction');
+		//throw new my_exception('under construction');
 	}
 }
 ?>

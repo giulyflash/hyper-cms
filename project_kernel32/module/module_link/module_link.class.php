@@ -77,16 +77,16 @@ class module_link extends module{
 	}
 	
 	public function save($id=NULL,$link=NULL,$position=NULL,$order=NULL){
-		var_dump($link);
-		if(empty($link[0]['module']))
+		//var_dump($link);
+		if(empty($link[1]['module']))
 			throw new my_exception('module name not found');
-		$link_value = array('module_name'=>$link[0]['module']);
-		if(!empty($link[0]['method']))
-			$link_value['method_name'] = $link[0]['method'];
-		if(!empty($link[1]['module']))
-			$link_value['center_module'] = $link[1]['module'];
-		if(!empty($link[1]['module']))
-			$link_value['center_method'] = $link[1]['method'];
+		$link_value = array('module_name'=>$link[1]['module']);
+		if(!empty($link[1]['method']))
+			$link_value['method_name'] = $link[1]['method'];
+		if(!empty($link[2]['module']))
+			$link_value['center_module'] = $link[2]['module'];
+		if(!empty($link[2]['module']))
+			$link_value['center_method'] = $link[2]['method'];
 		$link_value['position'] = $position?$position:$this->parent->_config('main_position_name');
 		$link_value['order'] = $order?$order:1;
 		if($id){
@@ -100,34 +100,75 @@ class module_link extends module{
 			$message = 'add successfool';
 		}
 		foreach($link as $link_id=>&$link_item){
-			foreach($link_item['param'] as &$param){
-				$type = $link_id?'condition':'param';
-				$param_value = array('param_name'=>$param['name'], 'type'=>$type, 'link_id'=>$id);
-				if(isset($param['value']))
-					$param_value['value'] = $param['value'];
-				if($this->_query->select('link_id')->from($this->module_name.'_param')->where('link_id',$id)->_and('param_name',$param['name'])->_and('type',$type)->query1())
-					$this->_query->update($this->module_name)->set($param_value)->where('link_id',$id)->limit(1)->execute();
-				else
+			if(isset($link_item['param']))
+				foreach($link_item['param'] as &$param){
+					$type = ($link_id-1)?'condition':'param';
+					//var_dump($link,$link_id,$type);
+					$param_value = array('param_name'=>$param['name'], 'type'=>$type, 'link_id'=>$id);
+					if(isset($param['value']))
+						$param_value['value'] = $param['value'];
+					$this->_query->delete()->from($this->module_name.'_param')->where('link_id',$id)->_and('param_name',$param['name'])->_and('type',$type)->query1();
 					$this->_query->insert($this->module_name.'_param')->values($param_value)->execute();
-			}
+					//TODO unset lost params
+				}
 		}
 		$this->_message($message);
 		$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
 	}
 	
 	public function _admin(){
-		$result = $this->_query->select()->from('module_link')->order('order')->query2assoc_array('id',NULL,false);
-		$params = $this->_query->select()->from('module_link_param')->where('link_id',array_keys($result),'in')->_and('type','condition')->query();
-		foreach($params as $param)
-			$result[$param['link_id']]['params'][] = $param;
-		$this->_result = &$result;
+		$this->_result = $this->_query->select()->from('module_link')->order('order')->query2assoc_array('id',NULL,false);
+		$params = $this->_query->select()->from('module_link_param')->where('link_id',array_keys($this->_result),'in')->query();
+		foreach($params as &$param)
+			$this->_result[$param['link_id']]['params'][] = $param;
+		$title_field = $this->parent->_config('language_title_name');
+		$param_field =  $this->parent->_config('language_param_name');
+		$position = $this->_query->select('translit_title,title')->from('position')->query2assoc_array('translit_title','title');
+		foreach($this->_result as &$link){
+			$link['position_title'] = (!empty($position[$link['position']]))?$position[$link['position']]:$link['position'];
+			$this->get_link_translation($link,$title_field,$param_field);
+			$this->get_link_translation($link,$title_field,$param_field,1);
+		}
+	}
+	
+	private function get_link_translation(&$link,$title_field,$param_field,$canter_module = NULL){
+		if($canter_module){
+			$module_param = 'center_module';
+			$method_param = 'center_method';
+			$type_param = 'condition';
+			$module_trans_title = 'center_module_title';
+			$method_trans_title = 'center_method_title';
+		}
+		else{
+			$module_param = 'module_name';
+			$method_param = 'method_name';
+			$type_param = 'param';
+			$module_trans_title = 'module_title';
+			$method_trans_title = 'method_title';
+		}
+		$module_name = $link[$module_param];
+		$module = new $module_name($this->parent);
+		$link[$module_trans_title] = (!empty($this->parent->language_cache[$link[$module_param]][$title_field]))?
+		$this->parent->language_cache[$link[$module_param]][$title_field]:$link[$module_param];
+		$link[$method_trans_title] = (!empty($this->parent->language_cache[$link[$module_param]][$link[$method_param]][$title_field]))?
+		$this->parent->language_cache[$link[$module_param]][$link[$method_param]][$title_field]:$link[$method_param];
+		if(isset($link['params']))
+		foreach($link['params'] as &$param)
+			if($param['type']==$type_param){
+				$param['title'] = (!empty($this->parent->language_cache[$link[$module_param]][$link[$method_param]][$param_field][$param['param_name']]))?
+				$this->parent->language_cache[$link[$module_param]][$link[$method_param]][$param_field][$param['param_name']]:$param['param_name'];
+				$module->_get_param_value($link[$method_param],$param['param_name']);
+				if($module->_result)
+				if(!empty($module->_result[$param['value']]))
+				$param['value'] = $module->_result[$param['value']];
+			}
 	}
 	
 	public function remove($id=NULL){
 		if(!$id)
 			throw new my_exception('id not found');
 		$this->_query->delete()->from($this->module_name)->where('id',$id)->limit(1)->execute();
-		$this->_query->delete()->from($this->module_name.'_param')->where('link_id',$id)->limit(1)->execute();
+		$this->_query->delete()->from($this->module_name.'_param')->where('link_id',$id)->execute();
 		$this->_message('delete successfool');
 		$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
 	}

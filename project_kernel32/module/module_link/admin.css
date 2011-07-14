@@ -63,3 +63,7 @@
 .link_form div p{
 	text-indent: 0px!important;
 }
+.module_link_list span{
+	font-style: italic;
+	font-weight: bold;
+}
