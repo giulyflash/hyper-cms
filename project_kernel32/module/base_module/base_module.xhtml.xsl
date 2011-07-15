@@ -121,12 +121,12 @@
 			<xsl:apply-templates match="items"/>
 		</xsl:if>
 	</div>
-	<xsl:if test="_config/has_category">
+	<xsl:if test="_config/has_category='1'">
 		<p>
 			<a href="admin.php?call={_module_name}.edit_category">Новая категория</a>
 		</p>
 	</xsl:if>
-	<xsl:if test="_config/has_item">
+	<xsl:if test="_config/has_item='1'">
 		<p>
 			<a href="admin.php?call={_module_name}.edit">Новая статья</a>
 		</p>

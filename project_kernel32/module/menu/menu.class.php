@@ -2,7 +2,7 @@
 class menu extends base_module{
 	protected $config_class_name = 'menu_config';
 	
-	public function _admin(){
+	public function _admin($page=null, $count=null, $show='all'){
 		$this->_result = $this->_query->select()->from('menu')->query();
 		$this->_result['lt'] = '<';
 		$this->_result['gt'] = '>';
@@ -11,7 +11,6 @@ class menu extends base_module{
 	}
 	
 	public function get($id = 1, $show_title=NULL){
-		//TODO common nested items: http://dev.mysql.com/tech-resources/articles/hierarchical-data.html
 		parent::get_category(NULL,NULL,NULL,NULL,'id,title,depth,link',array('menu_id',$id));
 		if($show_title)
 			$this->_result['title'] = $this->_query->select('title')->from('menu')->where('id',$id)->query1('title');
@@ -45,7 +44,13 @@ class menu extends base_module{
 		if(!$menu_id = $this->_query->select('menu_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
 		parent::edit_category($id);
-		$this->_result['article'] = $this->_query->select('title,translit_title')->from('article')->order('create_date')->query();
+		//$this->_result['article'] = $this->_query->select('title,translit_title')->from('article')->order('create_date')->query();
+		$module = new module_link($this->parent);
+		$module_list = $module->get_module($module->_config('exclude_from_admin_list'));
+		foreach($module_list as $module_name=>&$module)
+			$this->_result['module_list'][$module_name] = $module['title'];
+		$this->_result['data'] = json_encode($module_list);
+		//TODO edit
 	}
 
 	public function save_item($id=NULL,$title=NULL,$link=NULL,$insert_place=NULL,$input_type=NULL,$link_article=NULL){
@@ -142,6 +147,18 @@ class menu_config extends base_module_config{
 		'edit_item'=>array(
 			'insert_place'=>'_exclude',
 		)
+	);
+	
+	protected $include = array(
+		'edit_item'=>
+			'<link href="module/module_link/wizard.css" rel="stylesheet" type="text/css"/>
+			<script type="text/javascript" src="module/module_link/wizard.js"></script>
+			<script type="text/javascript" src="module/menu/admin.js"></script>',
+	);
+	
+	protected $template_include = array(
+		'module/module_link/link_wizard.xhtml.xsl',
+		'module/base_module/base_module.xhtml.xsl',
 	);
 	
 	protected $output_new_argument = true;

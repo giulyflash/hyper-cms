@@ -9,7 +9,8 @@ $(function(){
 		module_name_str = '';
 		method_name_str = '';
 		if(document.link_data && document.link_data['module_name']){
-			is_condition = module_list.parent().parent().parent().parent().index();
+			is_condition = module_list.parent().parent().parent().parent().index()-1;
+			//alert(is_condition);
 			if(!is_condition){
 				module_name_str = document.link_data['module_name'];
 				method_name_str = document.link_data['method_name'];
@@ -72,16 +73,16 @@ function module_change(parent,module_name_str,is_condition){
 		+document.module_data[module_name_str]['method'][method_name]['title']
 		+(method_name==admin_method_name?' (admin)':'')+'</option>');
 	}
-	parent.find('.method').css('display','table-row');
 	parent.find('.params').css('display','none');
 	if(typeof is_condition!='undefined'){
-		parent.find('.param_box td:first-child').html('');
+		parameter_box = parent.find('.param_box');
+		parameter_box.html('');
 		for(var i in document.link_data['param']){
 			if(is_condition && document.link_data['param'][i]['type']=='condition' || !is_condition && document.link_data['param'][i]['type']!='condition'){
-				var select_temp = $('<select class="param_select"><option></option><option selected="1" value="'+document.link_data['param'][i]['param_name'] 
-				+'">'+document.link_data['param'][i]['param_name']+'</option></select>');
-				parent.find('.param_box td:first-child').append(select_temp);
-				param_change(parent.parent(),select_temp,document.link_data['param'][i]['value']);
+				var select_temp = $('<tr><td><select class="param_select"><option></option><option selected="1" value="'+document.link_data['param'][i]['param_name'] 
+				+'">'+document.link_data['param'][i]['param_name']+'</option></select></td><td></td></tr>');
+				parameter_box.append(select_temp);
+				param_change(parent.parent(),select_temp.find('select'),document.link_data['param'][i]['value']);
 			}
 		}
 		parent.find('.params').css('display','table-row');
@@ -145,6 +146,8 @@ function param_change(parent,param_select,param_value){
 			new_option.append(option_html[param_name]);
 			p_select.append(new_option);
 		}
+		if(p_select.find('option').size()==1 && !p_select.find('option').html())
+			tr_obj.remove();
 	});
 	parent.find('.param_box').css('display','block');
 }
