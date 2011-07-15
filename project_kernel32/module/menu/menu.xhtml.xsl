@@ -95,8 +95,17 @@
 	</xsl:if>
 </xsl:template>
 
-<xsl:template match="root/module/item[_module_name='menu' and (_method_name='edit_item' or _method_name='save_item')]">
-	<form class="menu nested_tree" method="post" action="admin.php?call=menu.save_item&amp;menu_id={argument/menu_id}">
+<xsl:template match="root/module/item[_module_name='menu' and _method_name='edit_item']">
+	<xsl:if test ="data"> 
+		<script type="text/javascript">
+			document.module_data=<xsl:value-of select="data"/>
+			<xsl:if test="link_data">
+				document.link_data=<xsl:value-of select="link_data"/>
+			</xsl:if>
+		</script>
+	</xsl:if>
+	<xsl:value-of select="module_list"/>
+	<form class="menu nested_tree link_form" method="post" action="admin.php?call=menu.save_item&amp;menu_id={argument/menu_id}">
 		<xsl:if test="id">
 			<input type="hidden" value="{id}" name="id"/>
 		</xsl:if>
@@ -121,7 +130,7 @@
 					<label for="radio_href_input">Ввести ссылку</label>
 					<br/>
 					<input id="radio_href_article" type="radio" value="article" name="input_type"/>
-					<label for="radio_href_article">Ссылка на статью</label>
+					<label for="radio_href_article">Редактор ссылок</label>
 					<br/>
 				</td>
 			</tr>
@@ -130,16 +139,7 @@
 			<input id="href_input" type="text" value="{link}" name="link"/>
 		</div>
 		<div class="input_article">
-			<select name="link_article" autocomplete="off">
-				<xsl:for-each select="article/item">
-					<option value="{translit_title}">
-						<xsl:if test="translit_title=../../link">
-							<xsl:attribute name="selected">1</xsl:attribute>
-						</xsl:if>
-						<xsl:value-of select="title"/>
-					</option>
-				</xsl:for-each>
-			</select>
+			<xsl:call-template name="module_link_wisard"/>
 		</div>
 		<input type="submit" value="Сохранить"/>
 	</form>

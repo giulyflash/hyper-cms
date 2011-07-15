@@ -100,6 +100,7 @@ class module_link extends module{
 			$message = 'add successfool';
 		}
 		foreach($link as $link_id=>&$link_item){
+			$this->_query->delete()->from($this->module_name.'_param')->where('link_id',$id)->query();
 			if(isset($link_item['param']))
 				foreach($link_item['param'] as &$param){
 					$type = ($link_id-1)?'condition':'param';
@@ -107,9 +108,7 @@ class module_link extends module{
 					$param_value = array('param_name'=>$param['name'], 'type'=>$type, 'link_id'=>$id);
 					if(isset($param['value']))
 						$param_value['value'] = $param['value'];
-					$this->_query->delete()->from($this->module_name.'_param')->where('link_id',$id)->_and('param_name',$param['name'])->_and('type',$type)->query1();
 					$this->_query->insert($this->module_name.'_param')->values($param_value)->execute();
-					//TODO unset lost params
 				}
 		}
 		$this->_message($message);
@@ -186,12 +185,18 @@ class module_link_config extends module_config{
 		),
 	);
 	
+	protected $template_include = array(
+		'module/module_link/link_wizard.xhtml.xsl',
+	);
+	
 	protected $exclude_from_admin_list = array();
 	
 	protected $include = array(
 		'_admin,edit'=>
 			'<link href="module/module_link/admin.css" rel="stylesheet" type="text/css"/>
-			<script type="text/javascript" src="module/module_link/admin.js"></script>
+			<script type="text/javascript" src="module/module_link/admin.js"></script>',
+		'edit'=>
+			'<link href="module/module_link/wizard.css" rel="stylesheet" type="text/css"/>
 			<script type="text/javascript" src="module/module_link/wizard.js"></script>',
 	);
 }
