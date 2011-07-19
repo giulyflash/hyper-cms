@@ -35,17 +35,7 @@
 					Параментры:
 				</td>
 				<td>
-					<table class="param_box" style="display:block">
-						<tbody>
-							<tr>
-								<td>
-									<select class="param_select" autocomplete = "off">
-										<option></option>
-									</select>
-								</td>
-								<td></td>
-							</tr>
-						</tbody>
+					<table class="param_box">
 					</table>
 				</td>
 			</tr>
