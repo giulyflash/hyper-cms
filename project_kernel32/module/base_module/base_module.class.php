@@ -192,6 +192,7 @@ abstract class base_module extends module{
 	}
 	
 	public function save($id=NULL, $value = array(), $redirect = 'edit', $output_message = true, $params=array()){
+		//TODO unique translit_title
 		if($id){
 			$this->_query->update($this->module_name)->set($value)->where('id',$id)->limit(1)->execute();
 			if($output_message)

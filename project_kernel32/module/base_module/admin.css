@@ -39,16 +39,16 @@
 	margin: 0px;
 }
 
-.nested_tree .input_article{
+.menu_editor .input_text{
 	display: none;
 }
-.nested_tree .edit_item td{
+.menu_editor .edit_item td{
 	vertical-align: top;
 }
-.nested_tree .edit_item .first{
+.menu_editor .edit_item .first{
 	width: 60px;
 }
-.nested_tree .input_text, .nested_tree .input_article{
+.menu_editor .input_text, .menu_editor .input_article{
 	padding: 10px 0 10px 68px;
 }
 .nested_tree ul{
