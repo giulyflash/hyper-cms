@@ -104,7 +104,6 @@
 			</xsl:if>
 		</script>
 	</xsl:if>
-	<xsl:value-of select="module_list"/>
 	<form class="menu menu_editor link_form" method="post" action="admin.php?call=menu.save_item&amp;menu_id={argument/menu_id}">
 		<xsl:if test="id">
 			<input type="hidden" value="{id}" name="id"/>
@@ -136,7 +135,7 @@
 			</tr>
 		</table>
 		<div class="input_article">
-			<xsl:call-template name="module_link_wisard"/>
+			<xsl:call-template name="module_link_wizard"/>
 		</div>
 		<div class="input_text">
 			<input id="href_input" type="text" value="{link}" name="link_text"/>

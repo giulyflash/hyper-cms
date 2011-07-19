@@ -64,17 +64,15 @@ class module_link extends module{
 
 	public function edit($id=NULL, $module=NULL, $method=NULL, $params=array()){
 		//module, method, params - to made link from
+		//TODO switch show/hide private methods in the list 
 		if($id){
 			$this->_result['link'] = $this->_query->select()->from('module_link')->where('id',$id)->query1();
 			if(!$this->_result['link']){
 				$this->_message('link not found');
 				$this->parent->redirect('/admin.php?call=module_link._admin');
 			}
+			$this->_result['link_data'] = $this->_result['link'];
 			$this->_result['link']['param'] = $this->_query->select()->from('module_link_param')->where('link_id',$id)->order('order')->query();
-			$this->_result['link_position'] = $this->_result['link']['position'];
-			$this->_result['link_order'] = $this->_result['link']['order'];
-			$this->_result['link_draft'] = $this->_result['link']['exclude'];
-			$this->_result['link_id'] = $this->_result['link']['id'];
 			$this->_result['link'] = json_encode($this->_result['link']);
 		}
 		$module_list = $this->get_module($this->_config('exclude_from_admin_list'));
@@ -82,7 +80,8 @@ class module_link extends module{
 		$this->_result['position'] = $this->_query->select('translit_title,title')->from('position')->query2assoc_array('translit_title','title');
 	}
 	
-	public function save($id=NULL,$link=NULL,$position=NULL,$order=NULL,$draft=NULL){
+	public function save($id=NULL,$link=NULL,$redirect=true,$menu=NULL,$position=NULL,$order=NULL,$draft=NULL){
+		var_dump($link);
 		if(empty($link[1]['module']))
 			throw new my_exception('module name not found');
 		$link_value = array('module_name'=>$link[1]['module']);
@@ -95,6 +94,7 @@ class module_link extends module{
 		$link_value['position'] = $position?$position:$this->parent->_config('main_position_name');
 		$link_value['order'] = $order?$order:1;
 		$link_value['exclude'] = $draft?1:0;
+		$link_value['menu'] = $menu?1:0;
 		if($id){
 			$this->_query->update($this->module_name)->set($link_value)->where('id',$id)->limit(1)->execute();
 			$message = 'edit successfool';
@@ -116,8 +116,11 @@ class module_link extends module{
 					$this->_query->insert($this->module_name.'_param')->values($param_value)->execute();
 				}
 		}
-		$this->_message($message);
-		$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
+		if($redirect){
+			$this->_message($message);
+			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
+		}
+		return $id;
 	}
 	
 	public function _admin(){
@@ -135,8 +138,8 @@ class module_link extends module{
 		}
 	}
 	
-	private function get_link_translation(&$link,$title_field,$param_field,$canter_module = NULL){
-		if($canter_module){
+	private function get_link_translation(&$link,$title_field,$param_field,$center_module = NULL){
+		if($center_module){
 			$module_param = 'center_module';
 			$method_param = 'center_method';
 			$type_param = 'condition';
@@ -151,6 +154,8 @@ class module_link extends module{
 			$method_trans_title = 'method_title';
 		}
 		$module_name = $link[$module_param];
+		if(!$module_name || $module_name=='*')
+			return;
 		$module = new $module_name($this->parent);
 		$link[$module_trans_title] = (!empty($this->parent->language_cache[$link[$module_param]][$title_field]))?
 		$this->parent->language_cache[$link[$module_param]][$title_field]:$link[$module_param];

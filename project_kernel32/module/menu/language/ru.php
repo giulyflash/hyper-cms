@@ -60,7 +60,7 @@ $error = array(
 	'add successfool' => 'Меню "$name" успешно добавлено',
 	'delete successfooly' => 'Меню "$name" успешно удалено',
 	'id is empty' => 'Идентивикатор объекта пуст',
-	'category edited successfooly' => 'Пункт меню "$title" успешно отредактирована',
+	'category edited successfooly' => 'Пункт меню "$title" успешно отредактирован',
 	'parent not found' => 'Родитель id="$id" не найден',
 	'new category add' => 'Новый пункт меню "$title" добавлен',
 	'insert_type not found' => 'Тип вставки пункта меню не найден',

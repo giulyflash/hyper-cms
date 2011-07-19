@@ -69,7 +69,8 @@
 		</script>
 	</xsl:if>
 	<form class="link_form" action="/admin.php?call=module_link.save" method="post">
-		<input type="hidden" name="id" value="{link_id}"/>
+		<input type="hidden" name="id" value="{link_data/id}"/>
+		<input type="hidden" name="menu" value="{link_data/menu}"/>
 		<div>
 			<table class="link_controls">
 				<tr>
@@ -78,7 +79,7 @@
 						<select name="position" autocomplete="off">
 							<xsl:for-each select="position/*">
 								<option value="{name()}">
-									<xsl:if test="name()=../../link_position">
+									<xsl:if test="name()=../../link_data/position">
 										<xsl:attribute name="selected">1</xsl:attribute>
 									</xsl:if>
 									<xsl:value-of select = "."/>
@@ -91,25 +92,25 @@
 						<select name="order" autocompleate="off">
 							<xsl:call-template name="order_loop">
 								<xsl:with-param name="max">10</xsl:with-param>
-								<xsl:with-param name="selected" select="link_order"/>
+								<xsl:with-param name="selected" select="link_data/order"/>
 							</xsl:call-template>
 						</select>
 					</td>
 					<td><b>Черновик:</b></td>
 					<td>
 						<input type="checkbox" name="draft">
-							<xsl:if test="link_draft!='0'">
+							<xsl:if test="link_data/exclude!='0'">
 								<xsl:attribute name="checked">1</xsl:attribute>
 							</xsl:if>
 						</input>
 					</td>
 				</tr>
 			</table>
-			<xsl:call-template name="module_link_wisard">
+			<xsl:call-template name="module_link_wizard">
 				<xsl:with-param name="name">Что связываем:</xsl:with-param>
 				<xsl:with-param name="num">1</xsl:with-param>
 			</xsl:call-template>
-			<xsl:call-template name="module_link_wisard">
+			<xsl:call-template name="module_link_wizard">
 				<xsl:with-param name="name">С чем связываем:</xsl:with-param>
 				<xsl:with-param name="num">2</xsl:with-param>
 			</xsl:call-template>
