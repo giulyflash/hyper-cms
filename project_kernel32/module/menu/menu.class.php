@@ -53,7 +53,7 @@ class menu extends base_module{
 		//TODO edit
 	}
 
-	public function save_item($id=NULL,$title=NULL,$insert_place=NULL,$input_type=NULL,$link_text=NULL,$link=NULL){
+	public function save_item($id=NULL,$title=NULL,$insert_place=NULL,$input_type=NULL,$link_text=NULL,$link=array()){
 		if(!$menu_id = $this->_query->select('menu_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
 		if(!$title){
@@ -61,10 +61,16 @@ class menu extends base_module{
 			return;
 		}
 		$link_id = NULL;
+		//TODO get module_link id
 		if($link){
-			var_dump($link);die;
-			$link_id = 0;
-			$link_text = '#';
+			$link = $link[0];
+			$module_link = new module_link($this->parent);
+			$link_id = $module_link->save($link_id,array(1=>$link),false,1);
+			$link_text = '/?call='.$link['module'].'.'.$link['method'];
+			if(isset($link['param']))
+				foreach($link['param'] as &$param)
+					$link_text.= '&'.$param['name'].'='.$param['value'];
+			//TODO load module and get link_alias
 		}
 		$value = array(
 			'title'=>$title,
