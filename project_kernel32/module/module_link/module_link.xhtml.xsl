@@ -72,15 +72,16 @@
 		<input type="hidden" value="{link/id}"/>
 		<div>
 			<p>
-				<b>Позиция:</b>&#160;&#160;<select name="position">
-				<xsl:for-each select="position/*">
-					<option value="{name()}">
-						<xsl:if test="name()=position">
-							<xsl:attribute name="selected">1</xsl:attribute>
-						</xsl:if>
-						<xsl:value-of select = "."/>
-					</option>
-				</xsl:for-each>
+				<b>Позиция:</b>&#160;&#160;
+				<select name="position" autocomplete="off">
+					<xsl:for-each select="position/*">
+						<option value="{name()}">
+							<xsl:if test="name()=../../link_position">
+								<xsl:attribute name="selected">1</xsl:attribute>
+							</xsl:if>
+							<xsl:value-of select = "."/>
+						</option>
+					</xsl:for-each>
 				</select>
 			</p>
 			<xsl:call-template name="module_link_wisard">

@@ -95,11 +95,11 @@ class menu extends base_module{
 			case 'get':{
 				switch($param_name){
 					case 'id':{
-						$this->_result = $this->_query->select('id,title')->from($this->module_name)->query2assoc_array('id','title');
+						return $this->_query->select('id,title')->from($this->module_name)->query2assoc_array('id','title');
 						break;
 					}
 					case 'show_title':{
-						$this->_result = array(1=>'+',''=>'-');
+						return array('true'=>'+','false'=>'-');
 						break;
 					}
 					default: parent::_get_param_value($method_name,$param_name);
@@ -109,19 +109,22 @@ class menu extends base_module{
 			case 'edit':{
 				switch($param_name){
 					case 'id':{
-						$this->_result = $this->_query->select('id,title')->from($this->module_name)->query2assoc_array('id','title');
+						return $this->_query->select('id,title')->from($this->module_name)->query2assoc_array('id','title');
 						break;
 					}
+					default: parent::_get_param_value($method_name,$param_name);
 				}
+				
 				break;
 			};
 			case 'remove_item':
 			case 'edit_item':{
 				switch($param_name){
 					case 'id':{
-						$this->_result = $this->_query->select('id,title')->from($this->module_name.$this->_config('category_posfix'))->query2assoc_array('id','title');
+						return $this->_query->select('id,title')->from($this->module_name.$this->_config('category_posfix'))->query2assoc_array('id','title');
 						break;
 					}
+					default: parent::_get_param_value($method_name,$param_name);
 				}
 				break;
 			};

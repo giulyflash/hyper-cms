@@ -2,31 +2,51 @@ $(function(){
 	admin_method_name = '_admin';
 	//sorting elements
 	sort_data();
-	module_list_obj = $('.module_select');
-	module_list_obj.each(function(num,module_list){
+	//init module
+	$('.module_select').each(function(num,module_list){
 		module_list = $(module_list);
-		module_list.html('<option></option>');
-		module_name_str = '';
-		method_name_str = '';
-		if(document.link_data && document.link_data['module_name']){
-			is_condition = module_list.parent().parent().parent().parent().index()-1;
-			//alert(is_condition);
-			if(!is_condition){
-				module_name_str = document.link_data['module_name'];
-				method_name_str = document.link_data['method_name'];
-			}
-			else{
-				module_name_str = document.link_data['center_module'];
-				method_name_str = document.link_data['center_method'];
-			}
+		if(document.link_data)
+			get_module_name(module_list);
+		else{
+			module_name = '';
+			method_name = '';
 		}
-		for(var i in document.module_data)
-			module_list.append('<option value="'+i+'" '+((module_name_str && module_name_str==i)?'selected=1':'')+'>'+document.module_data[i]['title']+'<optin/>');
-		if(module_name_str)
-			module_change(module_list.parent().parent().parent(),module_name_str,is_condition);
+		for(i in document.module_data)
+			module_list.append('<option value="'+i+'" '+(module_name==i?'selected="1"':'')+'>'+document.module_data[i]['title']+'<optin/>');
 	});
+	if(document.link_data){
+		//init method
+		$('.method_select').each(function(num,method_list){
+			method_list = $(method_list);
+			get_module_name(method_list);
+			for(i in document.module_data[module_name]['method']){
+				method_list.append('<option value="'+i+'" '+(method_name==i?'selected="1"':'')+'>'+document.module_data[module_name]['method'][i]['title']+'<optin/>');
+			}
+			method_list.parent().parent().css('display','table-row');
+		});
+		//init params
+		$('.param_box').each(function(num,param_box){
+			param_box = $(param_box);
+			get_module_name(param_box);
+			for(i in document.link_data['param']){
+				if(document.link_data['param'][i]['type']==(is_condition?'condition':'param')){
+					param_box.append(get_param_td_html());
+					param_list = param_box.find('.param_select').last();
+					var parent_internal = parent;
+					param_list.change(function(){
+						param_change(parent_internal,$(this));
+					});
+					parameter_name = document.link_data['param'][i]['param_name'];
+					param_list.append('<option value="'+parameter_name+'" selected=1>'+document.module_data[module_name]['method'][method_name]['params'][parameter_name]+'</option>');
+					get_param_value(module_name,method_name,parameter_name,param_list);
+				}
+			}
+			param_change(parent,param_list,true);
+			param_box.parent().parent().css('display','table-row');
+		});
+	}
 	//event for module select
-	module_list_obj.change(function(){
+	$('.module_select').change(function(){
 		parent = $(this).parent().parent().parent().parent();
 		if(!document.module_data){
 			alert('fatal error: data array not found!');
@@ -41,7 +61,14 @@ $(function(){
 			alert('fatal error: module "'+value+'" not found!');
 			return;
 		}
-		module_change(parent,value);
+		method_select = parent.find('.method_select');
+		method_select.html('<option></option>');
+		for(var method_name in document.module_data[value]['method']){
+			method_select.append('<option value="'+method_name+'">'+document.module_data[value]['method'][method_name]['title']
+			+(method_name==admin_method_name?' (admin)':'')+'</option>');
+		}
+		parent.find('.method').css('display','table-row');
+		parent.find('.params').css('display','none');
 	});
 	
 	//event for method select
@@ -63,39 +90,16 @@ $(function(){
 	});
 });
 
-function module_change(parent,module_name_str,is_condition){
-	method_select = parent.find('.method_select');
-	method_select.html('<option></option>');
-	if(!document.module_data[module_name_str])
-		return;
-	for(var method_name in document.module_data[module_name_str]['method']){
-		method_select.append('<option value="'+method_name+'"'+((method_name_str && method_name_str==method_name)?'selected=1':'')+'>'
-		+document.module_data[module_name_str]['method'][method_name]['title']
-		+(method_name==admin_method_name?' (admin)':'')+'</option>');
-	}
-	parent.find('.params').css('display','none');
-	if(typeof is_condition!='undefined'){
-		parameter_box = parent.find('.param_box');
-		parameter_box.html('');
-		for(var i in document.link_data['param']){
-			if(is_condition && document.link_data['param'][i]['type']=='condition' || !is_condition && document.link_data['param'][i]['type']!='condition'){
-				var select_temp = $('<tr><td><select class="param_select"><option></option><option selected="1" value="'+document.link_data['param'][i]['param_name'] 
-				+'">'+document.link_data['param'][i]['param_name']+'</option></select></td><td></td></tr>');
-				parameter_box.append(select_temp);
-				param_change(parent.parent(),select_temp.find('select'),document.link_data['param'][i]['value']);
-			}
-		}
-		parent.find('.params').css('display','table-row');
-	}
-}
-
-function param_change(parent,param_select,param_value){
+function param_change(parent,param_select,need_not_value){
 	module = parent.find('.module_select').val();
 	method = parent.find('.method_select').val();
 	param = param_select?($(param_select).val()):null;
+	//alert(module+'; '+method+'; '+param);
 	if(param_select){
-		if(param)
-			get_param_value(module,method,param,param_select,param_value);
+		if(param){
+			if(!need_not_value)
+				get_param_value(module,method,param,param_select);
+		}
 		else
 			param_select.parent().parent().remove();
 	}
@@ -103,8 +107,8 @@ function param_change(parent,param_select,param_value){
 	param_count = 0;
 	for(param_name in document.module_data[module]['method'][method]['params'])
 		param_count++;
-	if((!param_select || select_list.last().val() || !select_list.size())  && select_list.size()<param_count){
-		parent.find('.params .param_box').append(get_param_html());
+	if((!select_list.size() || select_list.last().val())  && select_list.size()<param_count){
+		parent.find('.params .param_box').append(get_param_td_html());
 		parent.find('.params .param_box:last .param_select').change(function(){
 			param_change(parent,$(this));
 		});
@@ -122,12 +126,9 @@ function param_change(parent,param_select,param_value){
 		});
 	}
 	option_html = [];
-	option_replace_name = [];
 	for(param_name in document.module_data[module]['method'][method]['params']){
 		if(!current_param_list[param_name])
 			option_html[param_name] = document.module_data[module]['method'][method]['params'][param_name];
-		else
-			option_replace_name[param_name] = document.module_data[module]['method'][method]['params'][param_name];
 	}
 	param_all.each(function(key,tr_obj){
 		tr_obj = $(tr_obj);
@@ -137,8 +138,6 @@ function param_change(parent,param_select,param_value){
 			option = $(option);
 			if(option.val() && p_select_value!=option.val())
 				option.remove();
-			else if(option_replace_name[option.val()])
-				option.html(option_replace_name[option.val()]);
 		});
 		for(param_name in option_html){
 			new_option = $("<option/>");
@@ -146,17 +145,19 @@ function param_change(parent,param_select,param_value){
 			new_option.append(option_html[param_name]);
 			p_select.append(new_option);
 		}
-		if(p_select.find('option').size()==1 && !p_select.find('option').html())
-			tr_obj.remove();
 	});
-	parent.find('.param_box').css('display','block');
+	$('.link_form .param_box').css('display','block');
 }
 
-function get_param_html(num){
+function get_param_td_html(){
 	return '<tr><td><select class="param_select" autocomplete = "off"><option value=""></option></select></td><td></td></tr>';
 }
 
-function get_param_value(module,method,param,obj,param_value){
+function get_select_html(class_name,value,title){
+	return '<tr><td><select class="'+class_name+'" autocomplete = "off"><option></option>'+(value&&title?('<option value="'+value+'">'+title+'</option>'):'')+'</select></td><td></td></tr>';
+}
+
+function get_param_value(module,method,param,obj){
 	url_str = 'http://'+(window.location+'/').split( '/' )[2]+'/'+window.location.pathname+'?call='+module+'._get_param_value&_content=json&PHPSESSID='+PHPSESSID+'&method_name='+method+'&param_name='+param;
 	$.ajax({
 		url: url_str,
@@ -170,11 +171,11 @@ function get_param_value(module,method,param,obj,param_value){
 						for(error_method in value_list['__error'][error_module])
 							for(error_i in value_list['__error'][error_module][error_method])
 								error_str += error_module+'.'+error_method+': '+value_list['__error'][error_module][error_method][error_i]['text']+"\n";
-					set_param_value(obj, null, param_value);
+					set_param_value(obj, null);
 					alert(error_str);
 				}
 				else
-					set_param_value(obj, value_list, param_value);
+					set_param_value(obj, value_list);
 			}
 			catch(e){
 				alert(e);
@@ -185,21 +186,18 @@ function get_param_value(module,method,param,obj,param_value){
 	});
 }
 
-function set_param_value(obj, value, param_value){
+function set_param_value(obj, value){
 	obj.parent().next().html(null);
 	parent = obj.parent().parent().parent().parent().parent().parent().parent().parent();
 	name_str = ' name="link['+parent.index()+'][param]['+obj.parent().parent().index()+'][value]"';
 	new_input = null;
-	//TODO sort values
 	for(param_dinamic in value){
 		if(!new_input)
 			new_input = $('<select'+name_str+'/>');
-		new_input.append('<option value="'+param_dinamic+'" '
-			+((typeof param_value!='undefined' && param_dinamic == param_value)?'selected=1':'')+'>'
-			+value[param_dinamic]+'<optin/>');
+		new_input.append('<option value="'+param_dinamic+'">'+value[param_dinamic]+'<optin/>');
 	}
 	if(!new_input)
-		new_input = $('<input type="text"'+name_str+(param_value?(' value="'+param_value+'"'):'')+'/>');
+		new_input = $('<input type="text"'+name_str+'/>');
 	obj.parent().next().append(new_input);
 	new_input.focus();
 }
@@ -235,4 +233,17 @@ function sort_obj(arr){
     for (var i in sortedKeys)
         sortedObj[sortedKeys[i]] = arr[sortedKeys[i]];
     return sortedObj;
+}
+
+function get_module_name($obj){
+	parent = $obj.parent().parent().parent().parent();
+	is_condition = parent.index()-1;
+	if(is_condition){
+		module_name = document.link_data['center_module'];
+		method_name = document.link_data['center_method'];
+	}
+	else{
+		module_name = document.link_data['module_name'];
+		method_name = document.link_data['method_name'];
+	}
 }

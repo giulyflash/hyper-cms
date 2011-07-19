@@ -385,7 +385,7 @@ abstract class base_module extends module{
 					}
 					case 'value':break;
 					case 'need_item':{
-						$this->_result = array(1=>'+',''=>'-');
+						return array('true'=>'+','false'=>'-');
 						break;
 					}
 					default: parent::_get_param_value($method_name,$param_name);

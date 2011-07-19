@@ -24,6 +24,8 @@ class article extends base_module{
 	}
 	
 	public function save($id=NULL, $title=NULL, $translit_title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL){
+		if(!$title)
+			throw new my_exception('title must not be empty');
 		$value = array(
 			'title'=>$title,
 			'translit_title'=>($translit_title?$translit_title:translit::transliterate($title)),
@@ -69,7 +71,7 @@ class article extends base_module{
 			case 'get':{
 				switch($param_name){
 					case 'show_title':{
-						$this->_result = array(''=>'-',1=>'+');
+						return array('true'=>'+','false'=>'-');
 						break;
 					}
 					default:
@@ -80,7 +82,7 @@ class article extends base_module{
 			case 'edit':{
 				switch($param_name){
 					case 'id':{
-						$this->_result = $this->_query->select('id,title')->from($this->module_name)->query2assoc_array('id','title');
+						return $this->_query->select('id,title')->from($this->module_name)->query2assoc_array('id','title');
 						break;
 					}
 					default:
@@ -91,11 +93,11 @@ class article extends base_module{
 			case 'get_by_title':{
 				switch($param_name){
 					case 'title':{
-						$this->_result = $this->_query->select('title,translit_title')->from($this->module_name)->where('draft',1,'!=')->query2assoc_array('translit_title','title');
+						return $this->_query->select('title,translit_title')->from($this->module_name)->where('draft',1,'!=')->query2assoc_array('translit_title','title');
 						break;
 					}
 					case 'show_title':{
-						$this->_result = array(1=>'+',''=>'-');
+						return array('true'=>'+','false'=>'-');
 						break;
 					}
 					default:

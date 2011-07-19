@@ -6,50 +6,50 @@
 	<xsl:param name="name"/>
 	<xsl:param name="num">1</xsl:param>
 	<table>
-		<xsl:if test="$name">
-			<tr class="thead"><th colspan="2"><xsl:value-of select="$name"/></th><th></th></tr>
-		</xsl:if>
-		<tr class="module">
-			<td>
-				Модуль:
-			</td>
-			<td>
-				<select class="module_select" autocomplete = "off" name="link[{$num}][module]">
-					<option value=""></option>
-					<xsl:for-each select="module_list/*">
-						<option value="{name()}" >
-							<xsl:value-of select="."/>
-						</option>
-					</xsl:for-each>
-				</select>
-			</td>
-		</tr>
-		<tr class="method">
-			<td>
-				Действие:
-			</td>
-			<td>
-				<select class="method_select" autocomplete = "off" name="link[{$num}][method]">
-					<option value=""></option>
-				</select>
-			</td>
-		</tr>
-		<tr class="params">
-			<td>
-				Параментры:
-			</td>
-			<td>
-				<table class="param_box">
-					<tr>
-						<td>
-							<select class="param_select" autocomplete = "off"><option value=""></option></select>
-						</td>
-						<td>
-						</td>
-					</tr>
-				</table>
-			</td>
-		</tr>
+		<tbody>
+			<xsl:if test="$name">
+				<tr class="thead"><th colspan="2"><xsl:value-of select="$name"/></th><th></th></tr>
+			</xsl:if>
+			<tr class="module">
+				<td>
+					Модуль:
+				</td>
+				<td>
+					<select class="module_select" autocomplete = "off" name="link[{$num}][module]">
+						<option value=""></option>
+					</select>
+				</td>
+			</tr>
+			<tr class="method">
+				<td>
+					Действие:
+				</td>
+				<td>
+					<select class="method_select" autocomplete = "off" name="link[{$num}][method]">
+						<option value=""></option>
+					</select>
+				</td>
+			</tr>
+			<tr class="params">
+				<td>
+					Параментры:
+				</td>
+				<td>
+					<table class="param_box" style="display:block">
+						<tbody>
+							<tr>
+								<td>
+									<select class="param_select" autocomplete = "off">
+										<option></option>
+									</select>
+								</td>
+								<td></td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</tbody>
 	</table>
 </xsl:template>
 
