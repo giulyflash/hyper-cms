@@ -69,23 +69,45 @@
 		</script>
 	</xsl:if>
 	<form class="link_form" action="/admin.php?call=module_link.save" method="post">
-		<input type="hidden" value="{link/id}"/>
+		<input type="hidden" name="id" value="{link_id}"/>
 		<div>
-			<p>
-				<b>Позиция:</b>&#160;&#160;
-				<select name="position" autocomplete="off">
-					<xsl:for-each select="position/*">
-						<option value="{name()}">
-							<xsl:if test="name()=../../link_position">
-								<xsl:attribute name="selected">1</xsl:attribute>
+			<table class="link_controls">
+				<tr>
+					<td><b>Позиция:</b></td>
+					<td>
+						<select name="position" autocomplete="off">
+							<xsl:for-each select="position/*">
+								<option value="{name()}">
+									<xsl:if test="name()=../../link_position">
+										<xsl:attribute name="selected">1</xsl:attribute>
+									</xsl:if>
+									<xsl:value-of select = "."/>
+								</option>
+							</xsl:for-each>
+						</select>
+					</td>
+					<td><b>Порядковый номер:</b></td>
+					<td>
+						<select name="order" autocompleate="off">
+							<xsl:call-template name="order_loop">
+								<xsl:with-param name="max">10</xsl:with-param>
+								<xsl:with-param name="selected" select="link_order"/>
+							</xsl:call-template>
+						</select>
+					</td>
+					<td><b>Черновик:</b></td>
+					<td>
+						<input type="checkbox" name="draft">
+							<xsl:if test="link_draft!='0'">
+								<xsl:attribute name="checked">1</xsl:attribute>
 							</xsl:if>
-							<xsl:value-of select = "."/>
-						</option>
-					</xsl:for-each>
-				</select>
-			</p>
+						</input>
+					</td>
+				</tr>
+			</table>
 			<xsl:call-template name="module_link_wisard">
 				<xsl:with-param name="name">Что связываем:</xsl:with-param>
+				<xsl:with-param name="num">1</xsl:with-param>
 			</xsl:call-template>
 			<xsl:call-template name="module_link_wisard">
 				<xsl:with-param name="name">С чем связываем:</xsl:with-param>
@@ -94,6 +116,25 @@
 		</div>
 		<input type="submit" value="сохранить"/>
 	</form>
+</xsl:template>
+
+<xsl:template name="order_loop">
+	<xsl:param name="var">1</xsl:param>
+	<xsl:param name="max"/>
+	<xsl:param name="selected"/>
+	<option value="{$var}">
+		<xsl:if test="$var = $selected">
+			<xsl:attribute name="selected">1</xsl:attribute>
+		</xsl:if>
+		<xsl:value-of select="$var"/>
+	</option>
+	<xsl:if test = "$var &lt; $max">
+		<xsl:call-template name="order_loop">
+			<xsl:with-param name="var" select="$var+1"/>
+			<xsl:with-param name="max" select="$max"/>
+			<xsl:with-param name="selected" select="$selected"/>
+		</xsl:call-template>
+	</xsl:if>
 </xsl:template>
 
 </xsl:stylesheet>

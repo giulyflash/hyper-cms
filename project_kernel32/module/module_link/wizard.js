@@ -38,7 +38,7 @@ $(function(){
 					});
 					parameter_name = document.link_data['param'][i]['param_name'];
 					param_list.append('<option value="'+parameter_name+'" selected=1>'+document.module_data[module_name]['method'][method_name]['params'][parameter_name]+'</option>');
-					get_param_value(module_name,method_name,parameter_name,param_list);
+					get_param_value(module_name,method_name,parameter_name,param_list,document.link_data['param'][i]['value']);
 				}
 			}
 			param_change(parent,param_list,true);
@@ -157,7 +157,7 @@ function get_select_html(class_name,value,title){
 	return '<tr><td><select class="'+class_name+'" autocomplete = "off"><option></option>'+(value&&title?('<option value="'+value+'">'+title+'</option>'):'')+'</select></td><td></td></tr>';
 }
 
-function get_param_value(module,method,param,obj){
+function get_param_value(module,method,param,obj,value){
 	url_str = 'http://'+(window.location+'/').split( '/' )[2]+'/'+window.location.pathname+'?call='+module+'._get_param_value&_content=json&PHPSESSID='+PHPSESSID+'&method_name='+method+'&param_name='+param;
 	$.ajax({
 		url: url_str,
@@ -171,11 +171,11 @@ function get_param_value(module,method,param,obj){
 						for(error_method in value_list['__error'][error_module])
 							for(error_i in value_list['__error'][error_module][error_method])
 								error_str += error_module+'.'+error_method+': '+value_list['__error'][error_module][error_method][error_i]['text']+"\n";
-					set_param_value(obj, null);
+					set_param_value(obj, null, value);
 					alert(error_str);
 				}
 				else
-					set_param_value(obj, value_list);
+					set_param_value(obj, value_list, value);
 			}
 			catch(e){
 				alert(e);
@@ -186,18 +186,18 @@ function get_param_value(module,method,param,obj){
 	});
 }
 
-function set_param_value(obj, value){
+function set_param_value(obj, value_list, value){
 	obj.parent().next().html(null);
 	parent = obj.parent().parent().parent().parent().parent().parent().parent().parent();
 	name_str = ' name="link['+parent.index()+'][param]['+obj.parent().parent().index()+'][value]"';
 	new_input = null;
-	for(param_dinamic in value){
+	for(param_dinamic in value_list){
 		if(!new_input)
 			new_input = $('<select'+name_str+'/>');
-		new_input.append('<option value="'+param_dinamic+'">'+value[param_dinamic]+'<optin/>');
+		new_input.append('<option value="'+param_dinamic+'"'+((typeof(value)!='undefined' && param_dinamic==value)?' selected="1"':'')+'>'+value_list[param_dinamic]+'<optin/>');
 	}
 	if(!new_input)
-		new_input = $('<input type="text"'+name_str+'/>');
+		new_input = $('<input type="text"'+name_str+' '+((typeof(value)!='undefined')?(' value="'+value+'"'):'')+'/>');
 	obj.parent().next().append(new_input);
 	new_input.focus();
 }

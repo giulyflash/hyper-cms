@@ -66,8 +66,15 @@ class module_link extends module{
 		//module, method, params - to made link from
 		if($id){
 			$this->_result['link'] = $this->_query->select()->from('module_link')->where('id',$id)->query1();
-			$this->_result['link']['param'] = $this->_query->select()->from('module_link_param')->where('link_id',$id)->query();
-			$this->_result['link_position'] = $this->_result['link']['position']; 
+			if(!$this->_result['link']){
+				$this->_message('link not found');
+				$this->parent->redirect('/admin.php?call=module_link._admin');
+			}
+			$this->_result['link']['param'] = $this->_query->select()->from('module_link_param')->where('link_id',$id)->order('order')->query();
+			$this->_result['link_position'] = $this->_result['link']['position'];
+			$this->_result['link_order'] = $this->_result['link']['order'];
+			$this->_result['link_draft'] = $this->_result['link']['exclude'];
+			$this->_result['link_id'] = $this->_result['link']['id'];
 			$this->_result['link'] = json_encode($this->_result['link']);
 		}
 		$module_list = $this->get_module($this->_config('exclude_from_admin_list'));
@@ -75,8 +82,7 @@ class module_link extends module{
 		$this->_result['position'] = $this->_query->select('translit_title,title')->from('position')->query2assoc_array('translit_title','title');
 	}
 	
-	public function save($id=NULL,$link=NULL,$position=NULL,$order=NULL){
-		//var_dump($link);
+	public function save($id=NULL,$link=NULL,$position=NULL,$order=NULL,$draft=NULL){
 		if(empty($link[1]['module']))
 			throw new my_exception('module name not found');
 		$link_value = array('module_name'=>$link[1]['module']);
@@ -88,9 +94,11 @@ class module_link extends module{
 			$link_value['center_method'] = $link[2]['method'];
 		$link_value['position'] = $position?$position:$this->parent->_config('main_position_name');
 		$link_value['order'] = $order?$order:1;
+		$link_value['exclude'] = $draft?1:0;
 		if($id){
 			$this->_query->update($this->module_name)->set($link_value)->where('id',$id)->limit(1)->execute();
 			$message = 'edit successfool';
+			$this->_query->delete()->from($this->module_name.'_param')->where('link_id',$id)->query();
 		}
 		else{
 			$this->_query->insert($this->module_name)->values($link_value)->execute();
@@ -98,13 +106,11 @@ class module_link extends module{
 				throw new my_exception('id not found');
 			$message = 'add successfool';
 		}
-		foreach($link as $link_id=>&$link_item){
-			$this->_query->delete()->from($this->module_name.'_param')->where('link_id',$id)->query();
+		foreach($link as $link_num=>&$link_item){
 			if(isset($link_item['param']))
-				foreach($link_item['param'] as &$param){
-					$type = ($link_id-1)?'condition':'param';
-					//var_dump($link,$link_id,$type);
-					$param_value = array('param_name'=>$param['name'], 'type'=>$type, 'link_id'=>$id);
+				foreach($link_item['param'] as $order=>&$param){
+					$type = ($link_num-1==1)?'condition':'param';
+					$param_value = array('param_name'=>$param['name'], 'type'=>$type, 'link_id'=>$id, 'order'=>$order);
 					if(isset($param['value']))
 						$param_value['value'] = $param['value'];
 					$this->_query->insert($this->module_name.'_param')->values($param_value)->execute();
@@ -115,7 +121,7 @@ class module_link extends module{
 	}
 	
 	public function _admin(){
-		$this->_result = $this->_query->select()->from('module_link')->where('menu',0)->order('order')->query2assoc_array('id',NULL,false);
+		$this->_result = $this->_query->select()->from('module_link')->where('menu',0)->order('position,order')->query2assoc_array('id',NULL,false);
 		$params = $this->_query->select()->from('module_link_param')->where('link_id',array_keys($this->_result),'in')->query();
 		foreach($params as &$param)
 			$this->_result[$param['link_id']]['params'][] = $param;
@@ -155,10 +161,9 @@ class module_link extends module{
 			if($param['type']==$type_param){
 				$param['title'] = (!empty($this->parent->language_cache[$link[$module_param]][$link[$method_param]][$param_field][$param['param_name']]))?
 				$this->parent->language_cache[$link[$module_param]][$link[$method_param]][$param_field][$param['param_name']]:$param['param_name'];
-				$module->_get_param_value($link[$method_param],$param['param_name']);
-				if($module->_result)
-				if(!empty($module->_result[$param['value']]))
-				$param['value'] = $module->_result[$param['value']];
+				if($param_values = $module->_get_param_value($link[$method_param],$param['param_name']))
+					if(!empty($param_values[$param['value']]))
+						$param['value'] = $param_values[$param['value']];
 			}
 	}
 	

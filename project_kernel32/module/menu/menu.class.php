@@ -53,17 +53,23 @@ class menu extends base_module{
 		//TODO edit
 	}
 
-	public function save_item($id=NULL,$title=NULL,$link=NULL,$insert_place=NULL,$input_type=NULL,$link_article=NULL){
+	public function save_item($id=NULL,$title=NULL,$insert_place=NULL,$input_type=NULL,$link_text=NULL,$link=NULL){
 		if(!$menu_id = $this->_query->select('menu_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
 		if(!$title){
-			$this->_message('menu name must not be empty');
+			$this->_message('menu item name must not be empty');
 			return;
 		}
-		$link = $input_type=='article'?$link_article:$link;
+		$link_id = NULL;
+		if($link){
+			var_dump($link);die;
+			$link_id = 0;
+			$link_text = '#';
+		}
 		$value = array(
 			'title'=>$title,
-			'link'=>($link?$link:$this->_config('default_link')),
+			'link'=>($link_text?$link_text:$this->_config('default_link')),
+			'link_id'=>$link_id,
 			'menu_id'=>$menu_id,
 		);
 		parent::save_category($id,$value,$insert_place,array('menu_id',$menu_id),NULL);
@@ -114,7 +120,6 @@ class menu extends base_module{
 					}
 					default: parent::_get_param_value($method_name,$param_name);
 				}
-				
 				break;
 			};
 			case 'remove_item':

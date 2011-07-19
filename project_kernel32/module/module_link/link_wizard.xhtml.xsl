@@ -4,7 +4,7 @@
 
 <xsl:template name="module_link_wisard">
 	<xsl:param name="name"/>
-	<xsl:param name="num">1</xsl:param>
+	<xsl:param name="num">0</xsl:param>
 	<table>
 		<tbody>
 			<xsl:if test="$name">

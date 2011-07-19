@@ -29,3 +29,17 @@
 #content .meta{
 	display: none;
 }
+
+.link_form div > table.link_controls > tbody > tr {
+    display: table-row;
+}
+
+.link_form .link_controls select{
+	min-width: 0px;
+}
+.link_form b{
+	padding-left: 25px;
+}
+.link_form td:FIRST-CHILD b{
+	padding-left: 0px;
+}
