@@ -97,10 +97,23 @@
 
 <xsl:template match="root/module/item[_module_name='menu' and _method_name='edit_item']">
 	<xsl:if test ="data"> 
+	<!--
+	$this->result['data'] = $module_link->_result['data'];
+		if(isseet($module_link->_result['link_data']))
+			$this->result['link_data'] = $module_link->_result['link_data'];
+		if(isseet($module_link->_result['link']))
+			$this->result['link0'] = $module_link->_result['link']; 
+	 -->
+	 	<script type="text/javascript">
+			document.module_data=<xsl:value-of select="data"/>
+			<xsl:if test="link">
+				document.link_data=<xsl:value-of select="link"/>
+			</xsl:if>
+		</script>
 		<script type="text/javascript">
 			document.module_data=<xsl:value-of select="data"/>
-			<xsl:if test="link_data">
-				document.link_data=<xsl:value-of select="link_data"/>
+			<xsl:if test="link0">
+				document.link_data=<xsl:value-of select="link0"/>
 			</xsl:if>
 		</script>
 	</xsl:if>
@@ -125,10 +138,10 @@
 					Ссылка:
 				</td>
 				<td>
-					<input id="radio_href_article" type="radio" value="article" name="input_type" checked="1"/>
+					<input id="radio_href_article" type="radio" value="wizard" name="input_type" checked="1"/>
 					<label for="radio_href_article">Редактор ссылок</label>
 					<br/>
-					<input id="radio_href_input" type="radio" value="input" name="input_type"/>
+					<input id="radio_href_input" type="radio" value="text" name="input_type"/>
 					<label for="radio_href_input">Ввести ссылку</label>
 					<br/>
 				</td>

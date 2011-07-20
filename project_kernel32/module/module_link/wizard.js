@@ -238,6 +238,8 @@ function sort_obj(arr){
 function get_module_name($obj){
 	parent = $obj.parent().parent().parent().parent();
 	is_condition = parent.index()-1;
+	if(is_condition<0)
+		is_condition = 0;
 	if(is_condition){
 		module_name = document.link_data['center_module'];
 		method_name = document.link_data['center_method'];

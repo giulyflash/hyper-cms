@@ -51,6 +51,9 @@
 .menu_editor .input_text, .menu_editor .input_article{
 	padding: 10px 0 10px 68px;
 }
+.menu_editor #href_input{
+	min-width: 450px;
+}
 .nested_tree ul{
 	list-style-type: none;
 }
