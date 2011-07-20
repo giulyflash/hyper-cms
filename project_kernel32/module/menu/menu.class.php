@@ -44,13 +44,14 @@ class menu extends base_module{
 		if(!$menu_id = $this->_query->select('menu_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
 		parent::edit_category($id);
-		//$this->_result['article'] = $this->_query->select('title,translit_title')->from('article')->order('create_date')->query();
-		$module = new module_link($this->parent);
-		$module_list = $module->get_module($module->_config('exclude_from_admin_list'));
-		foreach($module_list as $module_name=>&$module)
-			$this->_result['module_list'][$module_name] = $module['title'];
-		$this->_result['data'] = json_encode($module_list);
-		//TODO edit
+		$module_link = new module_link($this->parent);
+		$module_link->edit($this->_result['link_id']);
+		$this->_result['data'] = $module_link->_result['data'];
+		if(isset($module_link->_result['link']))
+			$this->_result['link0'] = $module_link->_result['link'];
+		//TODO draft
+		//TODO alias editor
+		//TODO drag-n-drop edit alias order
 	}
 
 	public function save_item($id=NULL,$title=NULL,$insert_place=NULL,$input_type=NULL,$link_text=NULL,$link=array()){
@@ -60,17 +61,21 @@ class menu extends base_module{
 			$this->_message('menu item name must not be empty');
 			return;
 		}
-		$link_id = NULL;
-		//TODO get module_link id
-		if($link){
-			$link = $link[0];
+		$link_id = $id?($this->_query->select('link_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('link_id')):NULL;
+		if($input_type=='wizard'){
+			if($link){
+				$link = $link[0];
+				$module_link = new module_link($this->parent);
+				$link_id = $module_link->save($link_id,array(1=>$link),false,1);
+				$link_text = '/?call='.$link['module'].'.'.$link['method'];
+				if(isset($link['param']))
+					foreach($link['param'] as &$param)
+						$link_text.= '&'.$param['name'].'='.$param['value'];
+				$link_text = $this->check_alias($link_text);
+			}
+		}elseif($link_id){
 			$module_link = new module_link($this->parent);
-			$link_id = $module_link->save($link_id,array(1=>$link),false,1);
-			$link_text = '/?call='.$link['module'].'.'.$link['method'];
-			if(isset($link['param']))
-				foreach($link['param'] as &$param)
-					$link_text.= '&'.$param['name'].'='.$param['value'];
-			//TODO load module and get link_alias
+			$module_link->remove($link_id,false);
 		}
 		$value = array(
 			'title'=>$title,
@@ -92,6 +97,10 @@ class menu extends base_module{
 	public function remove_item($id=NULL){
 		if(!$menu_id = $this->_query->select('menu_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
+		if($link_id = $this->_query->select('link_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('link_id')){
+			$module_link = new module_link($this->parent);
+			$module_link->remove($link_id,false);
+		}
 		parent::remove_category($id, array(), NULL);
 		$this->parent->redirect('admin.php?call=menu.edit&id='.$menu_id);
 	}
@@ -100,6 +109,23 @@ class menu extends base_module{
 		$value = array('title'=>$title);
 		parent::save($id, $value, 'edit', true, array('title'=>$title));
 		$this->parent->redirect('/admin.php?call=menu.admin');
+	}
+	
+	public function check_alias($link){
+		/*$value = array(
+			'link_template' => '^/?call=article.get_by_title&title=(.*?)$',
+			'alias_template' => '/$1'
+		);*/
+		var_dump($link);
+		$alias_data = $this->_query->select('link_template,alias_template')->from($this->_config('alias_table'))->order('order')->query();
+		foreach($alias_data as &$alias){
+			$alias['link_template'] = '%'.$alias['link_template'].'%';
+			if(preg_match($alias['link_template'], $link)){
+				$link = preg_replace($alias['link_template'], $alias['alias_template'], $link);
+				break;
+			}
+		}
+		return $link;
 	}
 	
 	public function _get_param_value($method_name,$param_name){
@@ -174,6 +200,8 @@ class menu_config extends base_module_config{
 		'module/module_link/link_wizard.xhtml.xsl',
 		'module/base_module/base_module.xhtml.xsl',
 	);
+	
+	protected $alias_table = 'menu_link_alias';
 	
 	protected $output_new_argument = true;
 	protected $default_link = '#';

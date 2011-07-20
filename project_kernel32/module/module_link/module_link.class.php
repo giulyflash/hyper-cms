@@ -64,12 +64,12 @@ class module_link extends module{
 
 	public function edit($id=NULL, $module=NULL, $method=NULL, $params=array()){
 		//module, method, params - to made link from
-		//TODO switch show/hide private methods in the list 
+		//TODO switch show/hide private methods in the list
 		if($id){
 			$this->_result['link'] = $this->_query->select()->from('module_link')->where('id',$id)->query1();
 			if(!$this->_result['link']){
 				$this->_message('link not found');
-				$this->parent->redirect('/admin.php?call=module_link._admin');
+				//$this->parent->redirect('/admin.php?call=module_link._admin');
 			}
 			$this->_result['link_data'] = $this->_result['link'];
 			$this->_result['link']['param'] = $this->_query->select()->from('module_link_param')->where('link_id',$id)->order('order')->query();
@@ -78,10 +78,10 @@ class module_link extends module{
 		$module_list = $this->get_module($this->_config('exclude_from_admin_list'));
 		$this->_result['data'] = json_encode($module_list);
 		$this->_result['position'] = $this->_query->select('translit_title,title')->from('position')->query2assoc_array('translit_title','title');
+		//TODO drag-n-drop edit link order
 	}
 	
 	public function save($id=NULL,$link=NULL,$redirect=true,$menu=NULL,$position=NULL,$order=NULL,$draft=NULL){
-		var_dump($link);
 		if(empty($link[1]['module']))
 			throw new my_exception('module name not found');
 		$link_value = array('module_name'=>$link[1]['module']);
@@ -172,13 +172,15 @@ class module_link extends module{
 			}
 	}
 	
-	public function remove($id=NULL){
+	public function remove($id=NULL,$redirect=true){
 		if(!$id)
 			throw new my_exception('id not found');
 		$this->_query->delete()->from($this->module_name)->where('id',$id)->limit(1)->execute();
 		$this->_query->delete()->from($this->module_name.'_param')->where('link_id',$id)->execute();
-		$this->_message('delete successfool');
-		$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
+		if($redirect){
+			$this->_message('delete successfool');
+			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
+		}
 	}
 }
 
