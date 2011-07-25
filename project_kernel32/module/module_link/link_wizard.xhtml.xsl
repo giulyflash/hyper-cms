@@ -8,24 +8,44 @@
 	<table>
 		<tbody>
 			<xsl:if test="$name">
-				<tr class="thead"><th colspan="2"><xsl:value-of select="$name"/></th><th></th></tr>
+				<tr class="thead">
+					<th colspan="2">
+						<xsl:value-of select="$name"/>
+					</th>
+				</tr>
 			</xsl:if>
+			<!-- <tr class="show-hidden">
+				<td colspan="2">
+					<label for="show_hidden{$num}">Показывать защищенные методы:</label>
+					<input id="show_hidden{$num}" type="checkbox"/>
+				</td>
+			</tr> -->
 			<tr class="module">
 				<td>
-					Модуль:
+					Тип объекта:
 				</td>
 				<td>
-					<select class="module_select" autocomplete = "off" name="link[{$num}][module]">
+					<select class="module_select" autocomplete = "off">
 						<option value=""></option>
 					</select>
+					<input type="hidden" name="link[{$num}][module]"/>
 				</td>
 			</tr>
 			<tr class="method">
 				<td>
-					Действие:
+					<p>
+						Объект:
+					</p>
+					<span>или </span><span>действие:</span>
 				</td>
 				<td>
-					<select class="method_select" autocomplete = "off" name="link[{$num}][method]">
+					<p>
+						<select class="object_select" autocomplete = "off">
+							<option value=""></option>
+						</select>
+					</p>
+					<input type="hidden" name="link[{$num}][method]"/>
+					<select class="method_select" autocomplete = "off">
 						<option value=""></option>
 					</select>
 				</td>

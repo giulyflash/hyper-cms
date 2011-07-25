@@ -28,34 +28,15 @@ class file_config extends module_config{
 	protected $overwrite_if_exist = false;
 	
 	protected $callable_method=array(
-		'get'=>array(
-			self::object_name=>array(__CLASS__,'menu_item'),
-			self::role_name=>array(self::role_read,self::role_read),
+		'get,get_list,'=>array(
+			'__access__' => array(
+				__CLASS__ => self::role_read,
+			),
 		),
-		'get_list'=>array(
-			self::object_name=>array(__CLASS__,'menu_item'),
-			self::role_name=>array(self::role_read,self::role_read),
-		),
-		'upload'=>array(
-			self::object_name=>__CLASS__,
-			self::role_name=>self::role_write,
-		),
-		/*'edit'=>array(
-			self::object_name=>__CLASS__,
-			self::role_name=>self::role_write,
-		),
-		'save'=>array(
-			'text'=>FILTER_UNSAFE_RAW,
-			self::object_name=>__CLASS__,
-			self::role_name=>self::role_write,
-		),*/
-		'admin'=>array(
-			self::object_name=>__CLASS__,
-			self::role_name=>self::role_write,
-		),
-		'remove'=>array(
-			self::object_name=>__CLASS__,
-			self::role_name=>self::role_write,
+		'upload,admin,remove,edit,save'=>array(
+			'__access__' => array(
+				__CLASS__ => self::role_write,
+			),
 		),
 	);
 }

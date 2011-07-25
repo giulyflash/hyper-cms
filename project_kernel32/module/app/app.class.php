@@ -46,6 +46,7 @@ class app_config extends config{
 	protected $language_title_name = '__title';
 	protected $language_param_name = '__param';
 	protected $disable_php_filter = '_disable_filter';//disable filter for method parameter 
+	protected $language_obj_name = '__object';
 
 	protected $link = array(
 		'admin_mode.*'=>array('head'=>'user',),
@@ -65,8 +66,12 @@ class app_config extends config{
 	const role_read = 'read';
 	const role_write = 'write';
 	const role_delete = 'delete';
-	const role_name = '__role__';
-	const object_name = '__object__';
+	
+	protected $role_read = 'read';
+	protected $role_write = 'write';
+	protected $role_delete = 'delete';
+	
+	protected $access_name = '__access__';
 }
 
 class app extends module{
@@ -91,6 +96,7 @@ class app extends module{
 	public $language_cache = array();
 	public $error_cache = array();
 	public $output = array();
+	public $compiled_config_cache = array();
 	
 	public function __construct($admin_mode = NULL){
 		//set_error_handler("app::error_handler");
@@ -100,7 +106,7 @@ class app extends module{
 		$this->parent = $this;
 		//$this->module[] = &$this;
 		$this->module_name = get_class($this);//get_called_class();
-		$this->config = new app_config();
+		$this->config = new app_config($temp=NULL,$this);
 		try{
 			$this->_set_call_time();
 			$this->get_domain_config();
@@ -437,8 +443,8 @@ class app extends module{
 		//TODO not only central link
 		//$this->_query->echo_sql = true;
 		$call_db_list = $this->_query->select('module_name, method_name, position, id')->from('module_link')->
-			where('exclude',1,'!=')->_and('center_module',$center_module,'in')->_and('center_method',$center_method,'in')->_and('admin_mode',$this->admin_mode)->
-			order('order')->query();
+			where('exclude',1,'!=')->_and('menu',0)->_and('center_module',$center_module,'in')->_and('center_method',$center_method,'in')->_and('admin_mode',$this->admin_mode)->
+			order('order,id')->query();
 		//create array of link_id for query
 		$link_list = array();
 		if($call_db_list){
@@ -682,47 +688,31 @@ class app extends module{
 	
 	private function check_method_access(&$module, $method_name){
 		$module_name = $module->module_name;
-		$this->prepare_callable_method($module);
-		$callable_method = $module->_config('callable_method',true);
+		//$this->prepare_callable_method($module);
+		$callable_method = $module->_config('callable_method');
 		if(!isset($callable_method[$method_name]))
 			throw new my_exception('access rule not found',$module_name.'.'.$method_name,0);
 		//TODO access rules for users and groups
 		//FIXME temp access rules
 		$access = true;
 		$module_config_class_name = $module->_get_config_name();
-		$module_object_name = constant($module_config_class_name.'::object_name');
-		$module_role_name = constant($module_config_class_name.'::role_name');
 		$module_role_read = constant($module_config_class_name.'::role_read');
 		$module_role_write = constant($module_config_class_name.'::role_write');
 		$module_role_delete = constant($module_config_class_name.'::role_delete');
-		if($method_name == 'admin' || $module_name == 'admin')
+		$access_name = $this->_config('access_name');
+		if($method_name == '_admin' || $module_name == 'admin')
 			$access = false;
-		elseif(!isset($callable_method[$method_name][$module_object_name], $callable_method[$method_name][$module_role_name]))
+		elseif(empty($callable_method[$method_name][$access_name]))
 			throw new my_exception('not found roles for called method', $module_name.'.'.$method_name);
 		else{
-			if(is_array($callable_method[$method_name][$module_role_name])){
-				foreach($callable_method[$method_name][$module_role_name] as $role_type)
-					if($role_type==$module_role_write || $role_type==$module_role_delete){
-						$access = false;
-						break;
-					}
+			foreach($callable_method[$method_name][$access_name] as $obj_name=>&$access_rule){
+				if($access_rule!=$module_role_read)
+					$access = false;
 			}
-			elseif($callable_method[$method_name][$module_role_name]==$module_role_write || $callable_method[$method_name][$module_role_name]==$module_role_delete)
-				$access = false;
 		}
 		if(!$access && !isset($_SESSION['user_info'])){
 			$message_str = '';
-			if(is_array($callable_method[$method_name][$module_role_name])){
-				foreach($callable_method[$method_name][$module_object_name] as $num=>$obj){
-					$message_str = $obj.':'.$callable_method[$method_name][$module_role_name][$num].', ';
-					//TODO language for object names
-				}
-				$message_str = substr($message_str, 0, strlen($message_str)-2);
-			}
-			else
-				$message_str = $callable_method[$method_name][$module_object_name].':'.$callable_method[$method_name][$module_role_name];
-			//$this->message('access denied', $message_str);
-			$this->message('Для использования '.$module_name.'.'.$method_name.' необходимо указать логин и пароль.');
+			$this->message($module_name.'.'.$method_name.': недостаточно прав доступа. Укажите логин и пароль');
 			unset($this->module[count($this->module)-1]);
 			$this->add_user_module();
 			return;
@@ -730,18 +720,18 @@ class app extends module{
 		return true;
 	}
 	
-	private function prepare_callable_method(&$module){
+	/*private function prepare_callable_method(&$module){
 		$temp_rule = array();
 		$callable_method = $module->config->get('callable_method',true);
 		if(!isset($this->calleble_method_cache[$module->module_name])){
-			$this->check_array_comma($callable_method);
+			//$this->check_array_comma($callable_method);
 			$this->calleble_method_cache[$module->module_name] = &$callable_method;
 			$module->config->set('callable_method',$callable_method);
 		}
 		else
 			$callable_method = $this->calleble_method_cache[$module->module_name];
 			//TODO not copy, get from cache
-	}
+	}*/
 	
 	private function add_user_module(){
 		$user_method = 'form';
@@ -793,7 +783,7 @@ class app extends module{
 			elseif(isset($_REQUEST[$param_name])){
 				$value = $_REQUEST[$param_name];
 				if($this->_config('php_filter_eneble')){
-					$callable_method = $obj->_config('callable_method',true);
+					$callable_method = $obj->_config('callable_method');
 					if(isset($callable_method[$method][$param_name]) && $callable_method[$method][$param_name]!=$this->_config('exclude_method_from_link_list'))
 						$filter = $callable_method[$method][$param_name];
 					//TODO array of filters for param: abiblity to add php-filter for admin_list invisible params 
@@ -905,12 +895,15 @@ class app extends module{
 			$this->output['meta']['app_config'] = get_object_vars($this->config);
 	}
 	
-	public function redirect($location){
+	public function redirect($location,$params=array()){
 		if($this->error)
 			$_SESSION['error'] = $this->error;
 		if($this->message)
 			$_SESSION['message'] = $this->message;
+		foreach($params as $name=>$value)
+			$location.= '&'.$name.'='.$value;
 		header("Location: ".$location);
+		die;
 	}
 }
 ?>

@@ -3,8 +3,9 @@ class base_module_config extends module_config{
 	protected $callable_method=array(
 		//TODO check array merge works properly for child modules
 		'get,get_category,get_category_by_title'=>array(
-			self::object_name=>__CLASS__,
-			self::role_name=>self::role_read,
+			'__access__' => array(
+				__CLASS__ => self::role_read,
+			),
 		),
 		'get_category'=>array(
 			'item_fields'=>false,
@@ -19,8 +20,9 @@ class base_module_config extends module_config{
 			'condition'=>false,
 		),
 		'_admin,edit,save,remove,edit_category,save_category,move_category,remove_category,unlock_database,_get_param_value'=>array(
-			self::object_name=>__CLASS__,
-			self::role_name=>self::role_write,
+			'__access__' => array(
+				__CLASS__ => self::role_write,
+			),
 		),
 		'remove_category' => array(
 			'condition' =>false,
@@ -206,7 +208,7 @@ abstract class base_module extends module{
 		}
 		//$this->edit($id);
 		if($redirect)
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect.'&id='.$id);
+			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, array('id'=>$id));
 	}
 	
 	public function remove($id=NULL,$redirect='admin',$message=true,$param = array()){

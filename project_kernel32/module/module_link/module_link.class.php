@@ -5,47 +5,69 @@ class module_link extends module{
 	public function &get_module($exclude = array(), $adnin_method_only=false){
 		//TODO check access for $module->admin_method
 		$exclude = array_merge($exclude, array('admin','app','base_module'));
-		$class_list = array();
+		$obj_list = array();
 		$dir = _module_path;
 		if ($handle = opendir($dir)){
 			$module_root=scandir($dir);
+			$access_title=$this->parent->_config('access_name');
+			$exclude_name = $this->parent->_config('exclude_method_from_link_list');
+			$title_str = $this->parent->_config('language_title_name');
+			$params_title = $this->parent->_config('language_param_name');
+			$obj_title = $this->parent->_config('language_obj_name');
 			foreach($module_root as $class_dir)
 				if(preg_match("%^([a-zA-Z\-_]+)$%",$class_dir,$re) && !in_array($re[1],$exclude)){
 					$module_name = $re[1];
 					$module = new $module_name($this->parent);
-					$callable_method = $module->_config('callable_method',true);
-					app::check_array_comma($callable_method);
-					if($adnin_method_only){
-						$admin_method = $module->_config('admin_method');
-						if($admin_method && isset($callable_method[$admin_method])){
-							$this->add_method($module, $admin_method, $class_list);
+					$callable_method = $module->_config('callable_method');
+					$module_role_read = constant($module->_get_config_name().'::role_read');
+					foreach($callable_method as $method_name=>&$method){
+						$this->add_method($module, $method_name, $method, true, $callable_method, $title_str, $params_title, $exclude_name, $obj_title);
+						if(isset($method['title'])){
+							$method['_write'] = 0;
+							foreach($method[$this->parent->_config('access_name')] as $obj_name=>&$access){
+								if(!isset($obj_list[$obj_name]['title'])){
+									if(isset($this->parent->language_cache[$module->module_name][$obj_title][$obj_name])){
+										if(is_array($this->parent->language_cache[$module->module_name][$obj_title][$obj_name])){
+											$obj_list[$obj_name]['title'] = isset($this->parent->language_cache[$module->module_name][$obj_title][$obj_name]['title'])?
+												$this->parent->language_cache[$module->module_name][$obj_title][$obj_name]['title']:$obj_name;
+											$obj_list[$obj_name]['_method'] = isset($this->parent->language_cache[$module->module_name][$obj_title][$obj_name]['method'])?
+												$this->parent->language_cache[$module->module_name][$obj_title][$obj_name]['method']:NULL;
+											$obj_list[$obj_name]['param'] = isset($this->parent->language_cache[$module->module_name][$obj_title][$obj_name]['param'])?
+												$this->parent->language_cache[$module->module_name][$obj_title][$obj_name]['param']:NULL;
+										}
+										else
+											$obj_list[$obj_name]['title'] = $this->parent->language_cache[$module->module_name][$obj_title][$obj_name];
+									}
+									else
+										$obj_list[$obj_name]['title'] = $obj_name;
+								}
+								$obj_list[$obj_name]['method'][$method_name]['_module'] = $module_name;
+								if($access!=$module_role_read)
+									$method['__write'] = 1;
+								$obj_list[$obj_name]['method'][$method_name]['_write'] = $method['_write'];
+								$obj_list[$obj_name]['method'][$method_name]['params'] = $method['params'];
+								$obj_list[$obj_name]['method'][$method_name]['title'] = $method['title'];
+								//TODO check this reference for method with a lot of objects
+							}
 						}
-					}
-					else{
-						$class_list[$module_name]['title'] = 
-							(!empty($this->parent->language_cache[$module_name][$title_str = $this->parent->_config('language_title_name')]))?
-								$this->parent->language_cache[$module->module_name][$title_str]:$module_name;
-						$params_title=$this->parent->_config('language_param_name');
-						$exclude_name = $this->parent->_config('exclude_method_from_link_list');
-						foreach(array_keys($callable_method) as $callable_name)
-							$this->add_method($module, $callable_name, $class_list, true, $callable_method, $title_str, $params_title, $exclude_name);
 					}
 				}
 		}
 		else
 			throw new exception('module directory not found',_module_path);
-		return $class_list;
+		return $obj_list;
 	}
 	
-	public function add_method(&$module, &$method_name, &$class_list, $need_params = false, &$callable_method=NULL, &$title_str=NULL, &$params_title=NULL, &$exclude_name=NULL){
+	public function add_method(&$module, &$method_name, &$method, $need_params = false, &$callable_method=NULL, &$title_str=NULL, &$params_title=NULL, &$exclude_name=NULL, &$obj_title=NULL){
 		if($method_name && !$this->check_method_exclude($method_name, $callable_method) && method_exists($module, $method_name)){
-			$class_list[$module->module_name]['method'][$method_name]['title'] =
-				(!empty($this->parent->language_cache[$module->module_name][$method_name][$title = $this->parent->_config('language_title_name')]))?
-					($this->parent->language_cache[$module->module_name][$method_name][$title]):$method_name;
+			$method['title'] =
+				(!empty($this->parent->language_cache[$module->module_name][$method_name][$title_str]))?
+					($this->parent->language_cache[$module->module_name][$method_name][$title_str]):$method_name;
 			if($need_params){
 				$method_reflection = new ReflectionMethod($module,$method_name);
 				$params_reflection = $method_reflection->getParameters();
-				$params = &$class_list[$module->module_name]['method'][$method_name]['params'];
+				$method['params'] = array();
+				$params = &$method['params'];
 				foreach($params_reflection as &$param_reflection){
 					$param_name = $param_reflection->name;
 					if(!isset($callable_method[$method_name][$param_name]) || $callable_method[$method_name][$param_name] && $callable_method[$method_name][$param_name]!=$exclude_name){
@@ -124,7 +146,7 @@ class module_link extends module{
 	}
 	
 	public function _admin(){
-		$this->_result = $this->_query->select()->from('module_link')->where('menu',0)->order('position,order')->query2assoc_array('id',NULL,false);
+		$this->_result = $this->_query->select()->from('module_link')->where('menu',0)->order('position,order,id')->query2assoc_array('id',NULL,false);
 		$params = $this->_query->select()->from('module_link_param')->where('link_id',array_keys($this->_result),'in')->query();
 		foreach($params as &$param)
 			$this->_result[$param['link_id']]['params'][] = $param;
@@ -187,8 +209,9 @@ class module_link extends module{
 class module_link_config extends module_config{
 	public $callable_method=array(
 		'_admin,edit,remove,save'=>array(
-			self::object_name=>__CLASS__,
-			self::role_name=>self::role_write,
+			'__access__' => array(
+				__CLASS__ => self::role_write,
+			),
 		),
 		'save'=>array(
 			'link'=>'_disable_filter',
