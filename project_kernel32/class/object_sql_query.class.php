@@ -340,7 +340,6 @@ class object_sql_query{
 		if (function_exists('get_magic_quotes_gpc'))
 			if (get_magic_quotes_gpc())
 				$string = stripslashes($string);
-		//var_dump($string, mysql_real_escape_string($string), '!!!');
 		return mysql_real_escape_string($string);
 	}
 	

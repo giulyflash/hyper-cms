@@ -279,8 +279,9 @@ class site_jkomfort extends module{
 class site_jkomfort_config extends module_config{
 	protected $callable_method=array(
 		'generate,_admin,generate_works'=>array(
-			self::object_name=>__CLASS__,
-			self::role_name=>self::role_write,
+			'__access__' => array(
+				__CLASS__ => self::role_write,
+			),
 		),
 	);
 }

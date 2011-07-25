@@ -45,8 +45,16 @@ abstract class module{
 			throw new my_exception('app object not found',$this->module_name);
 		$this->parent = $parent;//TODO parent to _parent
 		$config_class_name = $this->config_class_name;
-		$this->config = new $config_class_name($this->parent->get_module_config($this->module_name));
-		$this->_inherit_config();
+		if(isset($this->parent->compiled_config_cache[$this->module_name])){
+			$this->config = $this->parent->compiled_config_cache[$this->module_name];
+			$this->config->set_parent($this);
+		}
+		else{
+			$this->config = new $config_class_name($this->parent->get_module_config($this->module_name),$this);
+			$this->_inherit_config();
+			$this->check_callable_method();
+			$this->parent->compiled_config_cache[$this->module_name] = $this->config;
+		}
 		if(!$this->_config('language'))
 			$this->config->set('language', $this->parent->_config('language'));
 		$charset = $this->_config('charset');
@@ -64,6 +72,31 @@ abstract class module{
 			$this->_get_module_language_data($module);
 			if($inherit = $this->_config('parent_module'))
 				$this->_inherit_language($inherit);
+		}
+	}
+	
+	public function check_callable_method(){
+		$callable_method = $this->_config('callable_method');
+		if($callable_method && $this->config_class_name){
+			foreach($callable_method as &$method)
+				if(isset($method[$this->parent->_config('access_name')])){
+					foreach(array_keys($method[$this->parent->_config('access_name')]) as $obj_name){ 
+						if(strpos($obj_name, $this->config_class_name)!==false){
+							$new_obj_name = str_replace($this->config_class_name,$this->module_name,$obj_name);
+							$method[$this->parent->_config('access_name')][$new_obj_name] = $method[$this->parent->_config('access_name')][$obj_name];
+							unset($method[$this->parent->_config('access_name')][$obj_name]);
+						}
+						elseif($parent_module = $this->_config('parent_module'))
+							foreach($parent_module as $module)
+								if(strpos($obj_name, $module.'_config')!==false){
+									$new_obj_name = str_replace($module.'_config',$this->module_name,$obj_name);
+									$method[$this->parent->_config('access_name')][$new_obj_name] = $method[$this->parent->_config('access_name')][$obj_name];
+									unset($method[$this->parent->_config('access_name')][$obj_name]);
+								}
+					}
+				}
+			app::check_array_comma($callable_method);
+			$this->config->set('callable_method',$callable_method);
 		}
 	}
 	
@@ -185,11 +218,16 @@ abstract class module{
 					foreach($parent_value as $name=>$value)
 						$src_include[$name] = ((isset($src_include[$name]) && $src_include[$name]!=$value)?$src_include[$name]:'').$value;
 				elseif($mode=='inherit'){
-					foreach($parent_value as $name=>$value)
-						if(isset($src_include[$name]))
+					$access_name = $this->parent->_config('access_name');
+					foreach($parent_value as $name=>$value){
+						if(isset($src_include[$name])){
 							$src_include[$name] = array_merge($value, $src_include[$name]);
+							if(isset($src_include[$name][$access_name], $value[$access_name]))
+								$src_include[$name][$access_name] = array_merge($value[$access_name], $src_include[$name][$access_name]);
+						}
 						else
 							$src_include[$name] = $value;
+					}
 				}
 				elseif($mode=='merge')
 					$src_include = array_merge($parent_value,$src_include);

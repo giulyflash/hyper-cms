@@ -45,6 +45,10 @@ $language = array(
 			'id' => 'имя меню',			
 			'show_title' => 'показывать заголовок',
 		),
+	),
+	'__object'=>array(
+		'menu'=>'меню',
+		'menu_item'=>'пункт меню',
 	)
 );
 

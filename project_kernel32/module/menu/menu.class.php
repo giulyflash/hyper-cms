@@ -37,7 +37,7 @@ class menu extends base_module{
 	public function remove($id=NULL){
 		parent::remove($id, NULL, true, array('name'=>$this->_query->select('title')->from($this->module_name)->where('id',$id)->query1('title')));
 		$this->_query->delete()->from($this->module_name.$this->_config('category_posfix'))->where('menu_id',$id)->query();
-		$this->parent->redirect('/admin.php?call='.$this->module_name.'.admin');
+		$this->parent->redirect('/admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
 	}
 	
 	public function edit_item($id=NULL, $insert_place=NULL){
@@ -51,7 +51,7 @@ class menu extends base_module{
 			$this->_result['link0'] = $module_link->_result['link'];
 		//TODO draft
 		//TODO alias editor
-		//TODO drag-n-drop edit alias order
+		//TODO drag-n-drop edit alias order of aliases
 	}
 
 	public function save_item($id=NULL,$title=NULL,$insert_place=NULL,$input_type=NULL,$link_text=NULL,$link=array()){
@@ -84,14 +84,14 @@ class menu extends base_module{
 			'menu_id'=>$menu_id,
 		);
 		parent::save_category($id,$value,$insert_place,array('menu_id',$menu_id),NULL);
-		$this->parent->redirect('admin.php?call=menu.edit&id='.$menu_id);
+		$this->parent->redirect('/admin.php?call=menu.edit&id='.$menu_id);
 	}
 
 	public function move_item($id=NULL, $insert_type=NULL, $insert_place=NULL){
 		if(!$menu_id = $this->_query->select('menu_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
 		parent::move_category($id,$insert_type,$insert_place,array('menu_id',$menu_id),NULL);
-		$this->parent->redirect('admin.php?call=menu.edit&id='.$menu_id);
+		$this->parent->redirect('/admin.php?call=menu.edit&id='.$menu_id);
 	}
 
 	public function remove_item($id=NULL){
@@ -102,21 +102,15 @@ class menu extends base_module{
 			$module_link->remove($link_id,false);
 		}
 		parent::remove_category($id, array(), NULL);
-		$this->parent->redirect('admin.php?call=menu.edit&id='.$menu_id);
+		$this->parent->redirect('/admin.php?call=menu.edit&id='.$menu_id);
 	}
 	
 	public function save($id, $title){
 		$value = array('title'=>$title);
 		parent::save($id, $value, 'edit', true, array('title'=>$title));
-		$this->parent->redirect('/admin.php?call=menu.admin');
 	}
 	
 	public function check_alias($link){
-		/*$value = array(
-			'link_template' => '^/?call=article.get_by_title&title=(.*?)$',
-			'alias_template' => '/$1'
-		);*/
-		var_dump($link);
 		$alias_data = $this->_query->select('link_template,alias_template')->from($this->_config('alias_table'))->order('order')->query();
 		foreach($alias_data as &$alias){
 			$alias['link_template'] = '%'.$alias['link_template'].'%';
@@ -174,12 +168,15 @@ class menu extends base_module{
 class menu_config extends base_module_config{
 	protected $callable_method=array(
 		'get'=>array(
-			self::object_name=>array('menu','menu_item'),
-			self::role_name=>array(self::role_read,self::role_read),
+			'__access__' => array(
+				__CLASS__ => self::role_read,
+				'menu_item' => self::role_read
+			),
 		),
 		'_admin,edit,save,remove,edit_item,save_item,move_item,remove_item,unlock_database'=>array(
-			self::object_name=>__CLASS__,
-			self::role_name=>self::role_write,
+			'__access__' => array(
+				__CLASS__ => self::role_write,
+			),
 		),
 		'move_item,save_item,remove_category,edit_category,get_category,get_category_by_title,save_category'=>array(
 			'_exclude'=>true

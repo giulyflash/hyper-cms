@@ -114,8 +114,9 @@ class article extends base_module{
 class article_config extends base_module_config{
 	protected $callable_method = array(
 		'get_by_title' =>array(
-			self::object_name=>__CLASS__,
-			self::role_name=>self::role_read,
+			'__access__' => array(
+				__CLASS__ => self::role_read,
+			),
 		),
 	);
 	

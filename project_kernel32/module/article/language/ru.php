@@ -27,10 +27,18 @@ $language = array(
 			'id' => 'заголовок',
 		),
 	),
-	'__title'=>'статьи',
 	'_admin'=>array(
 		'__title'=>'Статьи',
 	),
+	'__title'=>'статьи',
+	'__object'=>array(
+		'article'=>array(
+			'title'=>'статья',
+			'method'=>'get_by_title',
+			'param'=>'title'
+		),
+		'article_category'=>'категория статей',
+	)
 );
 
 $error = array(

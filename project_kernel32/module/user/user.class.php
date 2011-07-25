@@ -11,16 +11,19 @@ class user_config extends module_config{
 	
 	protected $callable_method=array(
 		'form'=>array(
-			self::object_name=>array(__CLASS__),
-			self::role_name=>array(self::role_read),
+			'__access__' => array(
+				__CLASS__ => self::role_read,
+			),
 		),
 		'login'=>array(
-			self::object_name=>array(__CLASS__),
-			self::role_name=>array(self::role_read),
+			'__access__' => array(
+				__CLASS__ => self::role_read,
+			),
 		),
 		'logout'=>array(
-			self::object_name=>array(__CLASS__),
-			self::role_name=>array(self::role_read),
+			'__access__' => array(
+				__CLASS__ => self::role_read,
+			),
 		),
 	);
 }
