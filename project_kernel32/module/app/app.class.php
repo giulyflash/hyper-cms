@@ -417,13 +417,17 @@ class app extends module{
 		foreach(array_keys($include_src) as $name)
 			if(strpos($name, ',')!==false){
 				$includes = explode(',',$name);
-				foreach($includes as $new_name){
+				foreach($includes as &$new_name){
 					if(is_array($include_src[$name])){
 						//TODO recursive merge
-						if(isset($include_src[$new_name]))
-							$include_src[$new_name] = array_merge($include_src[$new_name], $include_src[$name]);
+						if(isset($include_src[$new_name])){
+							foreach($include_src[$name] as $param_name=>&$value)
+								if(isset($include_src[$new_name][$param_name]) && is_array($include_src[$new_name][$param_name]))
+									$include_src[$new_name][$param_name] = array_merge($include_src[$new_name][$param_name],$value);
+								else
+									$include_src[$new_name][$param_name] = $value;
+						}
 						else
-						//if(!isset($include_src[$new_name]))
 							$include_src[$new_name] = $include_src[$name];
 					}
 					else

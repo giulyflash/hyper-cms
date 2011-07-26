@@ -32,11 +32,7 @@ $language = array(
 	),
 	'__title'=>'статьи',
 	'__object'=>array(
-		'article'=>array(
-			'title'=>'статья',
-			'method'=>'get_by_title',
-			'param'=>'title'
-		),
+		'article'=>'статья',
 		'article_category'=>'категория статей',
 	)
 );

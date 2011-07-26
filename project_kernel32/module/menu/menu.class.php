@@ -186,6 +186,17 @@ class menu_config extends base_module_config{
 		)
 	);
 	
+	protected $object = array(
+		'menu'=>array(
+			'method'=>'get',
+			'param'=>'id'
+		),
+	);
+	
+	protected $object_exclude = array(
+		'menu_item'
+	);
+	
 	protected $include = array(
 		'edit_item'=>
 			'<link href="module/module_link/wizard.css" rel="stylesheet" type="text/css"/>

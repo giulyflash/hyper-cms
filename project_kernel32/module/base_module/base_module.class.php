@@ -19,9 +19,14 @@ class base_module_config extends module_config{
 		'get'=>array(
 			'condition'=>false,
 		),
-		'_admin,edit,save,remove,edit_category,save_category,move_category,remove_category,unlock_database,_get_param_value'=>array(
+		'_admin,edit,save,remove,unlock_database,_get_param_value,edit_category,save_category,move_category,remove_category'=>array(
 			'__access__' => array(
 				__CLASS__ => self::role_write,
+			),
+		),
+		'edit_category,save_category,move_category,remove_category'=>array(
+			'__access__' => array(
+				"base_module_config_category" => self::role_write,
 			),
 		),
 		'remove_category' => array(

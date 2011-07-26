@@ -120,6 +120,17 @@ class article_config extends base_module_config{
 		),
 	);
 	
+	protected $object = array(
+		'article'=>array(
+			'method'=>'get_by_title',
+			'param'=>'title'
+		),
+		'article_category'=>array(
+			'method'=>'get_category_by_title',
+			'param'=>'title'
+		),
+	);
+	
 	protected $link = array(
 		'admin_mode.edit'=>array(
 			'right'=>'file.get_list&module=article'
