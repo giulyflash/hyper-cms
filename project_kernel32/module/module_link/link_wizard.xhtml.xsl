@@ -44,10 +44,10 @@
 							<option value=""></option>
 						</select>
 					</p>
-					<input type="hidden" name="link[{$num}][method]"/>
 					<select class="method_select" autocomplete = "off">
 						<option value=""></option>
 					</select>
+					<input type="hidden" name="link[{$num}][method]"/>
 				</td>
 			</tr>
 			<tr class="params">

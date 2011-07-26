@@ -48,7 +48,6 @@ $language = array(
 	),
 	'__object'=>array(
 		'menu'=>'меню',
-		'menu_item'=>'пункт меню',
 	)
 );
 

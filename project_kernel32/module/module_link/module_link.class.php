@@ -10,44 +10,37 @@ class module_link extends module{
 		if ($handle = opendir($dir)){
 			$module_root=scandir($dir);
 			$access_title=$this->parent->_config('access_name');
+			$obj_title = $this->parent->_config('language_obj_name');
 			$exclude_name = $this->parent->_config('exclude_method_from_link_list');
 			$title_str = $this->parent->_config('language_title_name');
 			$params_title = $this->parent->_config('language_param_name');
-			$obj_title = $this->parent->_config('language_obj_name');
+			$obj_exclude = $this->parent->_config('object_exclude');
 			foreach($module_root as $class_dir)
 				if(preg_match("%^([a-zA-Z\-_]+)$%",$class_dir,$re) && !in_array($re[1],$exclude)){
 					$module_name = $re[1];
 					$module = new $module_name($this->parent);
 					$callable_method = $module->_config('callable_method');
 					$module_role_read = constant($module->_get_config_name().'::role_read');
+					$module_obj = $module->_config('object');
+					$obj_exclude = $module->_config('object_exclude');
 					foreach($callable_method as $method_name=>&$method){
 						$this->add_method($module, $method_name, $method, true, $callable_method, $title_str, $params_title, $exclude_name, $obj_title);
 						if(isset($method['title'])){
 							$method['_write'] = 0;
 							foreach($method[$this->parent->_config('access_name')] as $obj_name=>&$access){
-								if(!isset($obj_list[$obj_name]['title'])){
-									if(isset($this->parent->language_cache[$module->module_name][$obj_title][$obj_name])){
-										if(is_array($this->parent->language_cache[$module->module_name][$obj_title][$obj_name])){
-											$obj_list[$obj_name]['title'] = isset($this->parent->language_cache[$module->module_name][$obj_title][$obj_name]['title'])?
-												$this->parent->language_cache[$module->module_name][$obj_title][$obj_name]['title']:$obj_name;
-											$obj_list[$obj_name]['_method'] = isset($this->parent->language_cache[$module->module_name][$obj_title][$obj_name]['method'])?
-												$this->parent->language_cache[$module->module_name][$obj_title][$obj_name]['method']:NULL;
-											$obj_list[$obj_name]['param'] = isset($this->parent->language_cache[$module->module_name][$obj_title][$obj_name]['param'])?
-												$this->parent->language_cache[$module->module_name][$obj_title][$obj_name]['param']:NULL;
-										}
-										else
-											$obj_list[$obj_name]['title'] = $this->parent->language_cache[$module->module_name][$obj_title][$obj_name];
-									}
-									else
-										$obj_list[$obj_name]['title'] = $obj_name;
+								if(!$obj_exclude || !in_array($obj_name,$obj_exclude)){
+									$obj_list[$obj_name]['title'] = isset($this->parent->language_cache[$module->module_name][$obj_title][$obj_name])?
+										$this->parent->language_cache[$module->module_name][$obj_title][$obj_name]:$obj_name;
+									$obj_list[$obj_name]['_method'] = (isset($module_obj[$obj_name]['method']))?$module_obj[$obj_name]['method']:NULL;
+									$obj_list[$obj_name]['param'] =   (isset($module_obj[$obj_name]['param']))? $module_obj[$obj_name]['param']: NULL;
+									$obj_list[$obj_name]['method'][$method_name]['_module'] = $module_name;
+									if($access!=$module_role_read)
+										$method['__write'] = 1;
+									$obj_list[$obj_name]['method'][$method_name]['_write'] = $method['_write'];
+									$obj_list[$obj_name]['method'][$method_name]['params'] = $method['params'];
+									$obj_list[$obj_name]['method'][$method_name]['title'] = $method['title'];
+									//TODO check this reference for method with a lot of objects
 								}
-								$obj_list[$obj_name]['method'][$method_name]['_module'] = $module_name;
-								if($access!=$module_role_read)
-									$method['__write'] = 1;
-								$obj_list[$obj_name]['method'][$method_name]['_write'] = $method['_write'];
-								$obj_list[$obj_name]['method'][$method_name]['params'] = $method['params'];
-								$obj_list[$obj_name]['method'][$method_name]['title'] = $method['title'];
-								//TODO check this reference for method with a lot of objects
 							}
 						}
 					}

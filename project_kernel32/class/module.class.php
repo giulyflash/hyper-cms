@@ -95,7 +95,11 @@ abstract class module{
 								}
 					}
 				}
+			//if($this->module_name=='article')
+			//	var_dump($callable_method);
 			app::check_array_comma($callable_method);
+			//if($this->module_name=='article')
+			//	var_dump("\n\n\n\n\n\n\n\n\n\n\n",$callable_method);
 			$this->config->set('callable_method',$callable_method);
 		}
 	}

@@ -56,7 +56,7 @@ $(function(){
 		$(this).parent().find('input').val(value);
 		//alert(document.module_data[value]['_method']+': '+document.module_data[value]['param']);
 		if(value && document.module_data[value] && document.module_data[value]['_method'] && document.module_data[value]['param']){
-			show_object_select(true,false,parent);
+			show_object_select(true,true,parent);
 			get_param_value(value,document.module_data[value]['_method'],document.module_data[value]['param'],parent.find('.object_select'),null,true);
 		}
 		else
@@ -82,25 +82,47 @@ $(function(){
 	//event for method select
 	$('.method_select').change(function(){
 		parent = $(this).parent().parent().parent().parent();
+		parent.find('.params input[type="hidden"]').remove();
 		if(!document.module_data){
 			alert('fatal error: data array not found!');
 			return;
 		}
 		method = $(this).val();
+		if(method)
+			show_object_select(false,true,parent);
+		else
+			show_object_select(document.module_data[module]['_method']?true:false,true,parent);
 		$(this).parent().find('input').val(method);
 		module = parent.find('.module_select').val();
-		/*parent.closest("form").find('select').each(function(num,select){
-			select = $(select);
-			if(select.attr('name')=='link['+parent.index()+'][module]')
-				select.val(document.module_data[module]['method'][method]['_module']);
-		});*/
-		//console.log(document.module_data[module]);return;
 		parent.find('.params').css('display','none');
 		if(!method || !document.module_data[module]['method'][method]['params'])
 			return;
 		parent.find('.params .param_box').html('');
 		param_change(parent);
 		parent.find('.params').css('display','table-row');
+	});
+	
+	$('.object_select').change(function(){
+		parent = $(this).parent().parent().parent().parent().parent();
+		module = parent.find('.module_select').val();
+		object = method = $(this).val();
+		parent.find('.params input[type="hidden"]').remove();
+		if(object){
+			parent.find('.params').css('display','none');
+			if(document.module_data[module] && document.module_data[module]['_method'] && document.module_data[module]['param'])
+				$(this).parent().parent().find('.method input').val(document.module_data[module]['_method']);
+			else{
+				alert('wrong data: '+module+'._method not found');
+				return;
+			}
+			parent.find('.params td:last').append(
+				'<input type="hidden" name="link['+parent.index()+'][param][0][name]" value="'+document.module_data[module]['param']+'"/>'+
+				'<input type="hidden" name="link['+parent.index()+'][param][0][value]" value="'+object+'"/>'
+			);
+			show_object_select(true,false,parent);
+		}
+		else
+			show_object_select(true,true,parent);
 	});
 });
 
@@ -153,8 +175,9 @@ function param_change(parent,param_select,need_not_value){
 			if(option.val() && p_select_value!=option.val())
 				option.remove();
 		});
+		console.log(option_html);
 		for(param_name in option_html){
-			new_option = $("</option>");
+			new_option = $("<option/>");
 			new_option.attr('value',param_name);
 			new_option.append(option_html[param_name]);
 			p_select.append(new_option);
