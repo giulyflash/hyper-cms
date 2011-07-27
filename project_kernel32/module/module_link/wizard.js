@@ -38,7 +38,7 @@ $(function(){
 					});
 					parameter_name = document.link_data['param'][i]['param_name'];
 					param_list.append('<option value="'+parameter_name+'" selected=1>'+document.module_data[module_name]['method'][method_name]['params'][parameter_name]+'</option>');
-					get_param_value(module_name,method_name,parameter_name,param_list,document.link_data['param'][i]['value']);
+					get_param_value(document.module_data[module_name]['method'][method_name]['_module'],method_name,parameter_name,param_list,document.link_data['param'][i]['value']);
 				}
 			}
 			param_change(parent,param_list,true);
@@ -56,8 +56,13 @@ $(function(){
 		$(this).parent().find('input').val(value);
 		//alert(document.module_data[value]['_method']+': '+document.module_data[value]['param']);
 		if(value && document.module_data[value] && document.module_data[value]['_method'] && document.module_data[value]['param']){
+			console.log(document.module_data);
+			if(document.module_data[value]['method'][document.module_data[value]['_method']] && document.module_data[value]['method'][document.module_data[value]['_method']]['_module'])
+				data_module_name = document.module_data[value]['method'][document.module_data[value]['_method']]['_module'];
+			else
+				data_module_name = document.module_data[value]['module'];
 			show_object_select(true,true,parent);
-			get_param_value(value,document.module_data[value]['_method'],document.module_data[value]['param'],parent.find('.object_select'),null,true);
+			get_param_value(data_module_name, document.module_data[value]['_method'],document.module_data[value]['param'],parent.find('.object_select'),null,true);
 		}
 		else
 			show_object_select(false,true,parent);
@@ -134,7 +139,7 @@ function param_change(parent,param_select,need_not_value){
 	if(param_select){
 		if(param){
 			if(!need_not_value)
-				get_param_value(module,method,param,param_select);
+				get_param_value(document.module_data[module]['method'][method]['_module'],method,param,param_select);
 		}
 		else
 			param_select.parent().parent().remove();

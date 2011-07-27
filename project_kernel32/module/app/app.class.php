@@ -97,6 +97,7 @@ class app extends module{
 	public $error_cache = array();
 	public $output = array();
 	public $compiled_config_cache = array();
+	public $path = array();
 	
 	public function __construct($admin_mode = NULL){
 		//set_error_handler("app::error_handler");
@@ -248,6 +249,10 @@ class app extends module{
 	}
 	
 	//service section
+	
+	public function add_path($path){
+		$this->path[] = $path;
+	}
 	
 	public function check_admin_mode(){
 		if($this->admin_mode){
