@@ -34,6 +34,7 @@ class module_link extends module{
 									$obj_list[$obj_name]['_method'] = (isset($module_obj[$obj_name]['method']))?$module_obj[$obj_name]['method']:NULL;
 									$obj_list[$obj_name]['param'] =   (isset($module_obj[$obj_name]['param']))? $module_obj[$obj_name]['param']: NULL;
 									$obj_list[$obj_name]['method'][$method_name]['_module'] = $module_name;
+									$obj_list[$obj_name]['module'] = $module_name;
 									if($access!=$module_role_read)
 										$method['__write'] = 1;
 									$obj_list[$obj_name]['method'][$method_name]['_write'] = $method['_write'];
