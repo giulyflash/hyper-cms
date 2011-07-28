@@ -53,19 +53,20 @@ $(function(){
 			return;
 		}
 		value = $(this).val();
-		$(this).parent().find('input').val(value);
-		//alert(document.module_data[value]['_method']+': '+document.module_data[value]['param']);
+		$(this).parent().find('input').val('');
 		if(value && document.module_data[value] && document.module_data[value]['_method'] && document.module_data[value]['param']){
-			console.log(document.module_data);
 			if(document.module_data[value]['method'][document.module_data[value]['_method']] && document.module_data[value]['method'][document.module_data[value]['_method']]['_module'])
 				data_module_name = document.module_data[value]['method'][document.module_data[value]['_method']]['_module'];
 			else
 				data_module_name = document.module_data[value]['module'];
+			$(this).parent().find('input').val(data_module_name);
 			show_object_select(true,true,parent);
 			get_param_value(data_module_name, document.module_data[value]['_method'],document.module_data[value]['param'],parent.find('.object_select'),null,true);
 		}
-		else
+		else{
 			show_object_select(false,true,parent);
+			$(this).parent().find('input').val(value);
+		}
 		if(!value){
 			parent.find('.method, .params').css('display','none');
 			return;
@@ -114,8 +115,14 @@ $(function(){
 		parent.find('.params input[type="hidden"]').remove();
 		if(object){
 			parent.find('.params').css('display','none');
-			if(document.module_data[module] && document.module_data[module]['_method'] && document.module_data[module]['param'])
-				$(this).parent().parent().find('.method input').val(document.module_data[module]['_method']);
+			if(document.module_data[module] && document.module_data[module]['_method'] && document.module_data[module]['param']){
+				$('.method input').val(document.module_data[module]['_method']);
+				if(document.module_data[module]['method'][document.module_data[module]['_method']] && document.module_data[module]['method'][document.module_data[module]['_method']]['_module'])
+					data_module_name = document.module_data[module]['method'][document.module_data[module]['_method']]['_module'];
+				else
+					data_module_name = document.module_data[module]['module'];
+				$('.module input').val(data_module_name);
+			}
 			else{
 				alert('wrong data: '+module+'._method not found');
 				return;
@@ -135,7 +142,6 @@ function param_change(parent,param_select,need_not_value){
 	module = parent.find('.module_select').val();
 	method = parent.find('.method_select').val();
 	param = param_select?($(param_select).val()):null;
-	//alert(module+'; '+method+'; '+param);
 	if(param_select){
 		if(param){
 			if(!need_not_value)
@@ -180,7 +186,6 @@ function param_change(parent,param_select,need_not_value){
 			if(option.val() && p_select_value!=option.val())
 				option.remove();
 		});
-		console.log(option_html);
 		for(param_name in option_html){
 			new_option = $("<option/>");
 			new_option.attr('value',param_name);
