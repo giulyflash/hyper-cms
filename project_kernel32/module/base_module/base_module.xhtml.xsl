@@ -162,35 +162,7 @@
 					<input type="text" value="{title}" name="title"/>
 				</td>
 			</tr>
-			<tr>
-				<td>
-					Ссылка:
-				</td>
-				<td>
-					<input id="radio_href_input" type="radio" value="input" name="input_type" checked="1"/>
-					<label for="radio_href_input">Ввести ссылку</label>
-					<br/>
-					<input id="radio_href_article" type="radio" value="article" name="input_type"/>
-					<label for="radio_href_article">Ссылка на статью</label>
-					<br/>
-				</td>
-			</tr>
 		</table>
-		<div class="input_text">
-			<input id="href_input" type="text" value="{link}" name="link"/>
-		</div>
-		<div class="input_article">
-			<select name="link_article" autocomplete="off">
-				<xsl:for-each select="article/item">
-					<option value="{translit_title}">
-						<xsl:if test="translit_title=../../link">
-							<xsl:attribute name="selected">1</xsl:attribute>
-						</xsl:if>
-						<xsl:value-of select="title"/>
-					</option>
-				</xsl:for-each>
-			</select>
-		</div>
 		<input type="submit" value="Сохранить"/>
 	</form>
 </xsl:template>

@@ -20,29 +20,63 @@ $(function(){
 		$('.method_select').each(function(num,method_list){
 			method_list = $(method_list);
 			get_module_name(method_list);
-			for(i in document.module_data[module_name]['method'])
-				method_list.append('<option value="'+i+'" '+(method_name==i?'selected="1"':'')+'>'+document.module_data[module_name]['method'][i]['title']+'</option>');
+			if(document.module_data[module_name]['_method'] && method_name == document.module_data[module_name]['_method']){
+				param_count = 0;
+				for(i in document.link_data['param']){
+					if(is_condition && document.link_data['param'][i]['type']=='condition' ||
+						!is_condition && document.link_data['param'][i]['type']=='param'){
+							param_count++;
+							param_id = i;
+						}
+				}
+				if(param_count==1 && document.link_data['param'][param_id]['param_name']==document.module_data[module_name]['param']){
+					obect_select = method_list.parent().find('.object_select');
+					parent = obect_select.parent().parent().parent().parent();
+					//function get_param_value(module,method,param,obj,value,exact){
+					get_param_value(
+						module_name,
+						method_name,
+						document.link_data['param'][param_id]['param_name'],
+						obect_select,
+						document.link_data['param'][param_id]['value'],
+						true
+					);
+					parent.find('.params td:last').append(
+						'<input type="hidden" name="link['+is_condition+'][param][0][name]" value="'+document.module_data[module_name]['param']+'"/>'+
+						'<input type="hidden" name="link['+is_condition+'][param][0][value]" value="'+document.link_data['param'][param_id]['value']+'"/>'
+					);
+					show_object_select(true,false,parent);
+				}
+				method_list.val(method_name);
+			}
+			else
+				for(i in document.module_data[module_name]['method'])
+					method_list.append('<option value="'+i+'" '+(method_name==i?'selected="1"':'')+'>'+document.module_data[module_name]['method'][i]['title']+'</option>');
+			method_list.parent().parent().parent().find('.module input[type="hidden"]').val(module_name);
+			method_list.parent().find('input[type="hidden"]').val(method_name);
 			method_list.parent().parent().css('display','table-row');
 		});
 		//init params
 		$('.param_box').each(function(num,param_box){
 			param_box = $(param_box);
-			get_module_name(param_box);
-			for(i in document.link_data['param']){
-				if(document.link_data['param'][i]['type']==(is_condition?'condition':'param')){
-					param_box.append(get_param_td_html());
-					param_list = param_box.find('.param_select').last();
-					var parent_internal = parent;
-					param_list.change(function(){
-						param_change(parent_internal,$(this));
-					});
-					parameter_name = document.link_data['param'][i]['param_name'];
-					param_list.append('<option value="'+parameter_name+'" selected=1>'+document.module_data[module_name]['method'][method_name]['params'][parameter_name]+'</option>');
-					get_param_value(document.module_data[module_name]['method'][method_name]['_module'],method_name,parameter_name,param_list,document.link_data['param'][i]['value']);
+			if(param_box.parent().parent().parent().find('.method p').css('display')!='block'){
+				get_module_name(param_box);
+				for(i in document.link_data['param']){
+					if(document.link_data['param'][i]['type']==(is_condition?'condition':'param')){
+						param_box.append(get_param_td_html());
+						param_list = param_box.find('.param_select').last();
+						var parent_internal = parent;
+						param_list.change(function(){
+							param_change(parent_internal,$(this));
+						});
+						parameter_name = document.link_data['param'][i]['param_name'];
+						param_list.append('<option value="'+parameter_name+'" selected=1>'+document.module_data[module_name]['method'][method_name]['params'][parameter_name]+'</option>');
+						get_param_value(document.module_data[module_name]['method'][method_name]['_module'],method_name,parameter_name,param_list,document.link_data['param'][i]['value']);
+					}
 				}
+				param_change(parent,param_list,true);
+				param_box.parent().parent().css('display','table-row');
 			}
-			param_change(parent,param_list,true);
-			param_box.parent().parent().css('display','table-row');
 		});
 	}
 	//event for module select
@@ -247,7 +281,7 @@ function set_param_value(obj, value_list, value, exact){
 	if(exact){
 		obj.html('<option></option>');
 		for(param_dinamic in value_list){
-			obj.append('<option value="'+param_dinamic+'">'+value_list[param_dinamic]+'</option>');
+			obj.append('<option value="'+param_dinamic+'"'+((typeof(value)!='undefined' && param_dinamic==value)?' selected="1"':'')+'>'+value_list[param_dinamic]+'</option>');
 		}
 		obj.parent().find('img').remove();
 		obj.css('display','block');
@@ -305,9 +339,9 @@ function sort_obj(arr){
 
 function get_module_name($obj){
 	parent = $obj.parent().parent().parent().parent();
-	is_condition = parent.index()-1;
-	if(is_condition<0)
-		is_condition = 0;
+	is_condition = parent.index();
+	/*if(is_condition<0)
+		is_condition = 0;*/
 	if(is_condition){
 		module_name = document.link_data['center_module'];
 		method_name = document.link_data['center_method'];
