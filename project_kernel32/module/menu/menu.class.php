@@ -40,12 +40,12 @@ class menu extends base_module{
 		$this->parent->redirect('/admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
 	}
 	
-	public function edit_item($id=NULL, $insert_place=NULL){
-		if(!$menu_id = $this->_query->select('menu_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('menu_id'))
+	public function edit_item($id=NULL, $insert_place=NULL, $menu_id=NULL){
+		if(!$menu_id && !$menu_id = $this->_query->select('menu_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
 		parent::edit_category($id);
 		$module_link = new module_link($this->parent);
-		$module_link->edit($this->_result['link_id']);
+		$module_link->edit(isset($this->_result['link_id'])?$this->_result['link_id']:NULL);
 		$this->_result['data'] = $module_link->_result['data'];
 		if(isset($module_link->_result['link']))
 			$this->_result['link0'] = $module_link->_result['link'];
@@ -54,8 +54,8 @@ class menu extends base_module{
 		//TODO drag-n-drop edit alias order of aliases
 	}
 
-	public function save_item($id=NULL,$title=NULL,$insert_place=NULL,$input_type=NULL,$link_text=NULL,$link=array()){
-		if(!$menu_id = $this->_query->select('menu_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('menu_id'))
+	public function save_item($id=NULL,$title=NULL,$insert_place=NULL,$input_type=NULL,$link_text=NULL,$link=array(),$menu_id){
+		if(!$menu_id && !$menu_id = $this->_query->select('menu_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
 		if(!$title){
 			$this->_message('menu item name must not be empty');
@@ -202,11 +202,6 @@ class menu_config extends base_module_config{
 			'<link href="module/module_link/wizard.css" rel="stylesheet" type="text/css"/>
 			<script type="text/javascript" src="module/module_link/wizard.js"></script>
 			<script type="text/javascript" src="module/menu/admin.js"></script>',
-	);
-	
-	protected $template_include = array(
-		'module/module_link/link_wizard.xhtml.xsl',
-		'module/base_module/base_module.xhtml.xsl',
 	);
 	
 	protected $alias_table = 'menu_link_alias';

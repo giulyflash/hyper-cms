@@ -58,10 +58,9 @@ class article extends base_module{
 	public function save_category($id=NULL,$title=NULL,$insert_place=NULL,$condition = array()){
 		if(!$title){
 			$this->_message('category name must not be empty');
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.admin');
+			$this->parent->redirect('admin.php?call='.$this->module_name.'.edit_category&id='.$id.'&insert_place='.$insert_place);
 			return;
 		}
-		$link = $input_type=='article'?$link_article:$link;
 		$value = array('title'=>$title);
 		parent::save_category($id,$value,$insert_place);
 	}

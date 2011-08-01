@@ -48,7 +48,12 @@ class base_module_config extends module_config{
 		)
 	);
 	
+	/*protected $template_include = array(
+		'module/base_module/base_module.xhtml.xsl',
+	);*/
+	
 	protected $template_include = array(
+		'module/module_link/link_wizard.xhtml.xsl',
 		'module/base_module/base_module.xhtml.xsl',
 	);
 	
@@ -203,13 +208,13 @@ abstract class base_module extends module{
 		if($id){
 			$this->_query->update($this->module_name)->set($value)->where('id',$id)->limit(1)->execute();
 			if($output_message)
-				$this->_message('edit successfool',$params);
+				$this->_message('edited seccessfully',$params);
 		}
 		else{
 			$this->_query->insert($this->module_name)->values($value)->execute();
 			$id = $this->parent->db->insert_id();
 			if($output_message)
-				$this->_message('add successfool',$params);
+				$this->_message('added seccessfully',$params);
 		}
 		//$this->edit($id);
 		if($redirect)
@@ -219,7 +224,7 @@ abstract class base_module extends module{
 	public function remove($id=NULL,$redirect='admin',$message=true,$param = array()){
 		if($id){
 			if($title)
-				$this->_message('delete successfooly',$param);
+				$this->_message('deleted seccessfully',$param);
 			else
 				$this->_query->delete()->from($this->module_name)->where('id',$id)->query1();
 		}
@@ -239,7 +244,7 @@ abstract class base_module extends module{
 		if($id){
 			$title = $this->_query->select('title')->from($table_name)->where('id',$id)->query1('title');
 			$this->_query->update($table_name)->set($value)->where('id',$id)->limit(1)->execute();
-			$this->_message('category edited successfooly',array('title'=>$title));
+			$this->_message('category edited successfully',array('title'=>$title));
 		}
 		else{
 			if($insert_place){
@@ -338,7 +343,7 @@ abstract class base_module extends module{
 			$this->_query->execute();;
 		}
 		$this->_query->unlock()->execute();
-		$this->_message('category moved successfooly',array('title'=>$target['title']));
+		$this->_message('category moved successfully',array('title'=>$target['title']));
 		if($redirect)
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect);
 	}
@@ -362,7 +367,7 @@ abstract class base_module extends module{
 			$this->_query->execute();
 		}
 		$this->_query->unlock()->execute();
-		$this->_message('category deleted successfooly',array('name'=>$target['title']));
+		$this->_message('category deleted successfully',array('name'=>$target['title']));
 		if($redirect)
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect);
 	}

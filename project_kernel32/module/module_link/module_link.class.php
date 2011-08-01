@@ -98,34 +98,34 @@ class module_link extends module{
 	}
 	
 	public function save($id=NULL,$link=NULL,$redirect=true,$menu=NULL,$position=NULL,$order=NULL,$draft=NULL){
-		if(empty($link[1]['module']))
+		if(empty($link[0]['module']))
 			throw new my_exception('module name not found');
-		$link_value = array('module_name'=>$link[1]['module']);
-		if(!empty($link[1]['method']))
-			$link_value['method_name'] = $link[1]['method'];
-		if(!empty($link[2]['module']))
-			$link_value['center_module'] = $link[2]['module'];
-		if(!empty($link[2]['module']))
-			$link_value['center_method'] = $link[2]['method'];
+		$link_value = array('module_name'=>$link[0]['module']);
+		if(!empty($link[0]['method']))
+			$link_value['method_name'] = $link[0]['method'];
+		if(!empty($link[1]['module']))
+			$link_value['center_module'] = $link[1]['module'];
+		if(!empty($link[1]['module']))
+			$link_value['center_method'] = $link[1]['method'];
 		$link_value['position'] = $position?$position:$this->parent->_config('main_position_name');
 		$link_value['order'] = $order?$order:1;
 		$link_value['exclude'] = $draft?1:0;
 		$link_value['menu'] = $menu?1:0;
 		if($id){
 			$this->_query->update($this->module_name)->set($link_value)->where('id',$id)->limit(1)->execute();
-			$message = 'edit successfool';
+			$message = 'edited seccessfully';
 			$this->_query->delete()->from($this->module_name.'_param')->where('link_id',$id)->query();
 		}
 		else{
 			$this->_query->insert($this->module_name)->values($link_value)->execute();
 			if(!$id = $this->_query->insert_id())
 				throw new my_exception('id not found');
-			$message = 'add successfool';
+			$message = 'added seccessfully';
 		}
 		foreach($link as $link_num=>&$link_item){
 			if(isset($link_item['param']))
 				foreach($link_item['param'] as $order=>&$param){
-					$type = ($link_num-1==1)?'condition':'param';
+					$type = ($link_num==1)?'condition':'param';
 					$param_value = array('param_name'=>$param['name'], 'type'=>$type, 'link_id'=>$id, 'order'=>$order);
 					if(isset($param['value']))
 						$param_value['value'] = $param['value'];
@@ -194,7 +194,7 @@ class module_link extends module{
 		$this->_query->delete()->from($this->module_name)->where('id',$id)->limit(1)->execute();
 		$this->_query->delete()->from($this->module_name.'_param')->where('link_id',$id)->execute();
 		if($redirect){
-			$this->_message('delete successfool');
+			$this->_message('deleted seccessfully');
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
 		}
 	}

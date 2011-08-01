@@ -38,9 +38,9 @@ $language = array(
 );
 
 $error = array(
-	'edit successfooly' => 'Статья "$title" успешно отредактирована',
-	'add successfooly' => 'Статья "$title" успешно добавлена',
-	'delete successfooly' => 'Статья "$title" успешно удалена',
+	'edited seccessfooly' => 'Статья "$title" успешно отредактирована',
+	'added seccessfooly' => 'Статья "$title" успешно добавлена',
+	'deleted seccessfooly' => 'Статья "$title" успешно удалена',
 	'article not found' => 'Статья "$title" не найдена',
 	'id is empty' => 'Указан пустой идентификатор статьи',
 	'category name must not be empty'=>'Имя категории не должно быть пустым',

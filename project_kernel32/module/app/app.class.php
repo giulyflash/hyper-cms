@@ -179,7 +179,7 @@ class app extends module{
 		$this->error[$error['class']][$error['method']][] = $error;
 	}*/
 	
-	public function _exception($exception,$lvl=2){
+	public function _exception($exception,$lvl=0){
 		$error = array();
 		$time = new date_microtime();
 		$backtrace = $exception->getTrace();
