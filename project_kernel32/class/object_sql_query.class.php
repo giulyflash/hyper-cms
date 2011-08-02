@@ -360,7 +360,7 @@ class object_sql_query{
 	
 	//output 
 	
-	public function execute(){
+	public function execute($need_num_rows = false){
 		if($this->parent->sql){
 			if(!empty($this->parent->echo_sql))
 				echo $this->parent->sql.'<br/>';
@@ -368,7 +368,14 @@ class object_sql_query{
 			$sql_query_method = $this->parent->sql_query_method;
 			if(!method_exists($sql_query_class, $sql_query_method))
 				throw new my_exception('method not found for this class',($sql_query_class->module_name).'.'.$sql_query_method);
+			if($need_num_rows)
+				$this->parent->sql = str_replace('SELECT','SELECT SQL_CALC_FOUND_ROWS', $this->parent->sql, $_num=1);
 			$this->parent->query_result = $sql_query_class->$sql_query_method($this->parent->sql);
+			if($need_num_rows){
+				$rows = $sql_query_class->$sql_query_method('SELECT FOUND_ROWS()');
+				if(isset($rows[0]['FOUND_ROWS()']))
+					$this->parent->query_result['__num_rows'] = $rows[0]['FOUND_ROWS()'];
+			}
 			$this->set_sql();
 			return new object_sql_query(NULL, $this->parent);
 		}
@@ -401,6 +408,16 @@ class object_sql_query{
 		return $this->parent->query_result;
 	}
 	
+	public function query_page($page=1,$count=NULL){
+		$page = (int)$page;
+		$count = (int)$count;
+		$sql = $this->parent->get_sql1();
+		$sql = preg_replace('%^(.+) LIMIT[0-9 ]+,?[0-9 ]*$%', '\1',$sql);
+		if($page && $count)
+			$this->parent->set_sql($sql.' LIMIT '.($page-1)*$count.','.$count);
+		$this->parent->execute(true);
+		return $this->parent->query_result;
+	}
 	
 	public function query2assoc_array($name_column, $value_column=NULL, $unset=true){
 		$this->parent->execute();

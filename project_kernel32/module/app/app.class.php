@@ -844,6 +844,7 @@ class app extends module{
 	private function form_output(){
 		//prepare $this->output array for template engine
 		$this->output['module'] = array();
+		$center_position = $this->_config('main_position_name');
 		foreach ($this->module as $module){
 			if(empty($this->output['language'][$module->module_name][$module->method_name]) && 
 				!empty($this->language_cache[$module->module_name][$module->method_name])){
@@ -874,7 +875,7 @@ class app extends module{
 				$result['_position'] = $module->position;
 			if(($template = $module->_config('template')) && $result['_module_name']!='app')
 				$result['_template'] = $template;
-			if($module->_config('output_all_argument') && !empty($module->argument_all)){
+			if(($module->_config('output_all_argument') || $module->position==$center_position) && !empty($module->argument_all)){
 				$result['argument'] = &$module->argument_all;
 				if($module->_config('output_new_argument') && !empty($module->argument_new))
 					$result['argument_new'] = $module->argument_new;

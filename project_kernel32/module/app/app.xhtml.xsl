@@ -81,4 +81,101 @@
 	</xsl:for-each> 
 </xsl:template>
 
+<xsl:template name="shownavigation">
+	<xsl:param name="obj_count"/>
+	<xsl:param name="page_size"/>
+	<xsl:param name="page"/>
+	<xsl:param name="url"/>
+	<!--<xsl:param name="max_page_count" select="5"/>-->
+	<xsl:param name="page_indent" select="3"/>
+	<!--<xsl:value-of select="concat($obj_count,'|',$page_size,'|',$page,'|',$url)"/>-->
+	<xsl:variable name="page_new"><xsl:if test="not($page) or $page=''">1</xsl:if><xsl:value-of select="$page"/></xsl:variable>
+	<xsl:variable name="page_count" select="ceiling($obj_count div $page_size)"/>
+	<xsl:variable name="overflow_check" select="(-2*$page_indent + $page_count) &gt; 0"/>
+	<xsl:variable name="page_start">
+		<xsl:choose>
+			<xsl:when test="($page_count - $page_new) &lt; $page_indent and $overflow_check">
+				<xsl:value-of select="-2*$page_indent + $page_count"/>
+			</xsl:when>
+			<xsl:when test="(-1*$page_indent+$page_new) &gt; 0  and $overflow_check">
+				<xsl:value-of select="-1*$page_indent+$page_new"/>
+			</xsl:when>
+			<xsl:otherwise>1</xsl:otherwise>
+		</xsl:choose>
+	</xsl:variable>
+	<xsl:if test="$obj_count &gt; $page_size">
+		<div  style="clear: both;"></div>
+		<center>
+			<div class="pagenavigation">
+				<xsl:if test="$page_new &gt; 1">
+					<xsl:if test="$page_start &gt; 1">
+						<span class="toback" alt="1" title="1">
+							<a href="{$url}&amp;page=1">
+								&lt;&lt;
+							</a>
+						</span>
+					</xsl:if>
+					<span class="toback" alt="назад" title="назад">
+						<a href="{$url}&amp;page={-1+$page_new}">
+							&lt;
+						</a>
+					</span>
+				</xsl:if>
+				<xsl:call-template name="show_nav">
+					<xsl:with-param name="page_count" select="$page_count"/>
+					<xsl:with-param name="url" select="$url"/>
+					<xsl:with-param name="page" select="$page_start"/>
+					<xsl:with-param name="page_lim" select="$page_start+2*$page_indent"/>
+					<xsl:with-param name="curr_page" select="$page_new"/>
+				</xsl:call-template>
+				<xsl:if test="$page_new &lt; $page_count">
+					<span class="forward" alt="вперед" title="вперед">
+						<a href="{$url}&amp;page={$page_new+1}">
+							&gt;
+						</a>
+					</span>
+					<xsl:if test="$page_start+2*$page_indent &lt; $page_count">
+						<span class="forward" alt="{$page_count}" title="{$page_count}">
+							<a href="{$url}&amp;page={$page_count}">
+								&gt;&gt;
+							</a>
+						</span>
+					</xsl:if>
+				</xsl:if>
+			</div>
+		</center>
+	</xsl:if>
+</xsl:template>
+
+<xsl:template name="show_nav">
+	<xsl:param name="url"/>
+	<xsl:param name="page" select="1"/>
+	<xsl:param name="page_count"/>
+	<xsl:param name="curr_page"/>
+	<xsl:param name="page_lim"/>
+	<xsl:choose>
+		<xsl:when test="$page=$curr_page">
+			<span class="curr">
+				<xsl:value-of select="$page"/>
+			</span>
+		</xsl:when>
+		<xsl:otherwise>
+			<span>
+				<a href="{$url}&amp;page={$page}">
+					<xsl:value-of select="$page"/>
+				</a>
+			</span>
+		</xsl:otherwise>
+	</xsl:choose>
+	<xsl:if test="$page_count &gt; $page and $page_lim &gt; $page">
+		<xsl:call-template name="show_nav">
+			<xsl:with-param name="page" select="$page+1"/>
+			<xsl:with-param name="page_count" select="$page_count"/>
+			<xsl:with-param name="url" select="$url"/>
+			<xsl:with-param name="curr_page" select="$curr_page"/>
+			<xsl:with-param name="page_lim" select="$page_lim"/>
+		</xsl:call-template>
+	</xsl:if>
+</xsl:template>
+
 </xsl:stylesheet>
