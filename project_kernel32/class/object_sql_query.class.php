@@ -416,6 +416,8 @@ class object_sql_query{
 		if($page && $count)
 			$this->parent->set_sql($sql.' LIMIT '.($page-1)*$count.','.$count);
 		$this->parent->execute(true);
+		$this->parent->query_result['__page_size'] = $count;
+		$this->parent->query_result['__page'] = $page;
 		return $this->parent->query_result;
 	}
 	

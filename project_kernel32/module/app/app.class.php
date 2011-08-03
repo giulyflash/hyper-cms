@@ -536,7 +536,7 @@ class app extends module{
 			$this->add_module_include($admin_mode.($module->module_name).'.*', $include_cache, $module->module_name, $this->loaded_module_include);
 			if($module->method_name){
 				$this->add_module_include($admin_mode.$module->module_name.$module->method_name, $include_cache, $module->module_name, $this->loaded_module_include);
-				if($this->admin_mode)
+				//if($this->admin_mode)
 					$this->add_module_include($module->method_name, $include_cache, $module->module_name, $this->loaded_module_include);
 			}
 		}
