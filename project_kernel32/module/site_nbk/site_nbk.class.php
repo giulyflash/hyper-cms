@@ -5,26 +5,40 @@ class site_nbk extends module{
 	
 	public function _admin(){}
 	
-	public function get($order='num',$page=1,$count=NULL){
+	public function get($order='num',$page=1,$count=NULL,$search=NULL,$filter=NULL){
 		if(!$count)
 			$count = $this->_config('page_count');
 		$tablename = $this->_config('table');
-		$this->_result = $this->_query->select()->from($tablename)->order($order)->query_page($page,$count);
-		foreach($this->_result as &$item){
-			if(is_array($item)){
-				$debt_date = new DateTime();
-				$debt_date->createFromFormat($this->_config('db_date_format'), $item['debt_date']);
-				$item['debt_date'] = $debt_date->format('m.Y');
-				$pay_date = new DateTime();
-				$pay_date->createFromFormat($this->_config('db_date_format'), $item['pay_date']);
-				$item['pay_date'] = $debt_date->format('m.Y');
-			}
+		$this->_query->select()->injection(',DATE_FORMAT(debt_date,"%m.%Y") as debt_date_formatted, DATE_FORMAT(pay_date,"%m.%Y") as pay_date_formatted ')->from($tablename);
+		if($search){
+			$this->_query->where('num',$search,'like');
+			$this->_query->_or('account',$search,'like');
+			$this->_query->_or('street',$search,'like');
+			$this->_query->_or('house',$search,'like');
+			$this->_query->_or('flat',$search,'like');
+			//$this->_query->_or('privatizated',$search);
+			$this->_query->_or('owner',$search,'like');
+			$this->_query->_or('account_comment',$search,'like');
+			$this->_query->_or('debt',$search,'like');
+			$this->_query->_or('balance',$search,'like');
+			$this->_query->_or('charges',$search,'like');
+			$this->_query->_or('control_summ',$search,'like');
+			/*$this->_query->_or('debt_date',$search,'like');
+			$this->_query->_or('pay_date',$search,'like');*/
+			$this->_query->_or('comment',$search,'like');
 		}
+		elseif($filter){
+			//TODO filter
+		}
+		//$this->_query->echo_sql = true;
+		$this->_result = $this->_query->order($order)->query_page($page,$count);
 		$page_count = ceil($this->_result['__num_rows']/$count);
+		//impossible to do mor than 700 turns for loop in XSLT, have to do it there
 		$page_select_html = '';
 		for($i=1; $i<=$page_count; $i++)
 			$page_select_html.='<option value="'.$i.'" '.($i==$page?'selected="1"':'').'>'.$i.'</option>';
 		$this->_result['_page_select_html'] = &$page_select_html;
+		//form field list and sorting reference - it easier, then XSLT 
 		$field = array(
 			'num'=>array('title'=>'№ п/п'),
 			'account'=>array('title'=>'Лицевой счет'),
@@ -164,7 +178,8 @@ class site_nbk_config extends module_config{
 	);
 	
 	protected $include=array(
-		'get'=>'<script type="text/javascript" src="module/site_nbk/list.js"></script>',
+		'get'=>'<script type="text/javascript" src="module/site_nbk/list.js"></script>
+			<link href="module/site_nbk/index.css" rel="stylesheet" type="text/css"/>',
 	);
 	
 	//protected $default_method = '_admin';
