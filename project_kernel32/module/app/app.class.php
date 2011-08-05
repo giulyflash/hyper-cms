@@ -158,6 +158,10 @@ class app extends module{
 			$this->message = $_SESSION['message'];
 			unset($_SESSION['message']);
 		}
+		if(!empty($_SESSION['current_call']))
+			$_SESSION['previous_call'] = $_SESSION['current_call'];
+		//var_dump($_SERVER['REQUEST_URI']);
+		$_SESSION['current_call'] = $_SERVER['REQUEST_URI'];
 	}
 	
 	//error section
