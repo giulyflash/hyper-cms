@@ -5,7 +5,7 @@
 <xsl:template match="root/module/item[_module_name='site_nbk' and (_method_name='get' or _method_name='search')]">
 	<xsl:call-template name="debt_nav"/>
 	<table class="nbk_admin">
-		<xsl:variable name="href_order">/?call=site_nbk<xsl:if test="argument/count!=''">&amp;count=<xsl:value-of select="argument/count"/></xsl:if>&amp;order=</xsl:variable>
+		<xsl:variable name="href_order">/?call=site_nbk<xsl:if test="argument/count!=''">&amp;count=<xsl:value-of select="argument/count"/></xsl:if><xsl:if test="argument/search!=''">&amp;search=<xsl:value-of select="argument/search"/></xsl:if><xsl:if test="argument/filter!=''">&amp;filter=<xsl:value-of select="argument/filter"/></xsl:if>&amp;order=</xsl:variable>
 		<xsl:variable name="sort_base_text">сортировка по полю </xsl:variable>
 		<tr>
 			<xsl:for-each select="_field/*">
@@ -48,8 +48,22 @@
 				<td><a href="{$href_base}{id}" alt="{$edit_popup}{id}"  title="{$edit_popup}{id}"><xsl:value-of select="balance"/></a></td>
 				<td><a href="{$href_base}{id}" alt="{$edit_popup}{id}"  title="{$edit_popup}{id}"><xsl:value-of select="charges"/></a></td>
 				<td><a href="{$href_base}{id}" alt="{$edit_popup}{id}"  title="{$edit_popup}{id}"><xsl:value-of select="control_summ"/></a></td>
-				<td><a href="{$href_base}{id}" alt="{$edit_popup}{id}"  title="{$edit_popup}{id}"><xsl:value-of select="debt_date"/></a></td>
-				<td><a href="{$href_base}{id}" alt="{$edit_popup}{id}"  title="{$edit_popup}{id}"><xsl:value-of select="pay_date"/></a></td>
+				<td><a href="{$href_base}{id}" alt="{$edit_popup}{id}"  title="{$edit_popup}{id}">
+					<xsl:choose>
+						<xsl:when test="debt_date_formatted='00.0000'">-</xsl:when>
+						<xsl:otherwise>
+							<xsl:value-of select="debt_date_formatted"/>
+						</xsl:otherwise>
+					</xsl:choose>
+				</a></td>
+				<td><a href="{$href_base}{id}" alt="{$edit_popup}{id}"  title="{$edit_popup}{id}">
+					<xsl:choose>
+						<xsl:when test="pay_date_formatted='00.0000'">-</xsl:when>
+						<xsl:otherwise>
+							<xsl:value-of select="pay_date_formatted"/>
+						</xsl:otherwise>
+					</xsl:choose>
+				</a></td>
 				<td>
 					<a class="href" href="/?call=site_nbk.edit_comment&amp;id={id}">
 						<xsl:choose>
@@ -75,19 +89,27 @@
 
 <xsl:template name="debt_nav">
 	<div class="page_nav">
-		<xsl:variable name="href_nav">/?call=site_nbk<xsl:if test="argument/order!=''">&amp;order=<xsl:value-of select="argument/order"/></xsl:if><xsl:if test="argument/count!=''">&amp;count=<xsl:value-of select="argument/count"/></xsl:if></xsl:variable>
+		<xsl:variable name="href_nav">/?call=site_nbk<xsl:if test="argument/order!=''">&amp;order=<xsl:value-of select="argument/order"/></xsl:if><xsl:if test="argument/count!=''">&amp;count=<xsl:value-of select="argument/count"/></xsl:if><xsl:if test="argument/search!=''">&amp;search=<xsl:value-of select="argument/search"/></xsl:if><xsl:if test="argument/filter!=''">&amp;filter=<xsl:value-of select="argument/filter"/></xsl:if></xsl:variable>
 		<xsl:call-template name="shownavigation">
 			<xsl:with-param name="obj_count" select="__num_rows"/>
 			<xsl:with-param name="page_size" select="__page_size"/>
 			<xsl:with-param name="page" select="__page"/>
 			<xsl:with-param name="url"><xsl:value-of select="$href_nav"/></xsl:with-param>
 		</xsl:call-template>
-		страница:<select name="page">
-			<xsl:value-of select="_page_select_html" disable-output-escaping="yes"/>
-		</select>
+		<span class="page_select">
+			страница:<select name="page">
+				<xsl:value-of select="_page_select_html" disable-output-escaping="yes"/>
+			</select>
+		</span>
 		<form method="post" action="/?call=site_nbk.get" enctype="multipart/form-data">
-			<input type="hidden" value="{order}" name="order"/>
-			строк на странице:<input type="text" value="{__page_size}" name="count"/>
+			<input type="hidden" value="{argument/order}" name="order"/>
+			<input type="hidden" value="{argument/filter}" name="filter"/>
+			<span class="page_size">
+				строк на странице:<input type="text" size="1" value="{__page_size}" name="count"/>
+			</span>
+			<span class="search_field">
+				быстрый поиск:<input type="text" size="15" value="{argument/search}" name="search"/>
+			</span>
 			<input type="submit" value="Ok"/>
 		</form>
 	</div>

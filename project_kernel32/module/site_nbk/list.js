@@ -4,7 +4,7 @@ $(function(){
 			return false;
 	});
 	$('.page_nav select').change(function(){
-		form = $(this).parent().find('form');
+		form = $(this).parent().parent().find('form');
 		form.attr('action',form.attr('action')+'&page='+$(this).val());
 		form.submit();
 	});
