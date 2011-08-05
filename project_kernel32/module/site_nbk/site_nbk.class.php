@@ -6,6 +6,7 @@ class site_nbk extends module{
 	public function _admin(){}
 	
 	public function get($order='num',$page=1,$count=NULL,$search=NULL,$filter=NULL){
+		//TODO if search or filter or num are different with session/previous_call - set default page
 		if(!$count)
 			$count = $this->_config('page_count');
 		$tablename = $this->_config('table');
@@ -16,21 +17,17 @@ class site_nbk extends module{
 			$this->_query->_or('street',$search,'like');
 			$this->_query->_or('house',$search,'like');
 			$this->_query->_or('flat',$search,'like');
-			//$this->_query->_or('privatizated',$search);
 			$this->_query->_or('owner',$search,'like');
 			$this->_query->_or('account_comment',$search,'like');
 			$this->_query->_or('debt',$search,'like');
 			$this->_query->_or('balance',$search,'like');
 			$this->_query->_or('charges',$search,'like');
 			$this->_query->_or('control_summ',$search,'like');
-			/*$this->_query->_or('debt_date',$search,'like');
-			$this->_query->_or('pay_date',$search,'like');*/
 			$this->_query->_or('comment',$search,'like');
 		}
 		elseif($filter){
 			//TODO filter
 		}
-		//$this->_query->echo_sql = true;
 		$this->_result = $this->_query->order($order)->query_page($page,$count);
 		$page_count = ceil($this->_result['__num_rows']/$count);
 		//impossible to do mor than 700 turns for loop in XSLT, have to do it there
