@@ -6,7 +6,6 @@ class site_nbk extends module{
 	public function _admin(){}
 	
 	public function get($order='num',$page=1,$count=NULL,$search=NULL,$filter=NULL){
-		//TODO if search or filter or num are different with session/previous_call - set default page
 		if(!$count)
 			$count = $this->_config('page_count');
 		$tablename = $this->_config('table');
@@ -26,44 +25,89 @@ class site_nbk extends module{
 			$this->_query->_or('comment',$search,'like');
 		}
 		elseif($filter){
-			//TODO filter
+			if(is_array($filter))
+				$filter_is_array = true;
+			else{
+				$filter=json_decode($filter,true);
+				$filter_is_array = false;
+				if(!$filter)
+					$this->_message('wrong filter');
+			}
+			if($filter){
+				$this->_query->injection(' WHERE 1=1 ');
+				$field_conf = $this->_config('field');
+				foreach(array_keys($filter) as $field_name){
+					if(!isset($field_conf[$field_name]))
+						throw new my_exception('undefined field',array('name'=>$field_name));
+					switch($field_conf[$field_name]['type']){
+						case 'string':
+						case 'text':{
+							if(strlen($filter[$field_name]))
+								$this->_query->_and($field_name,$filter[$field_name],'like');
+							else
+								unset($filter[$field_name]);
+							break;
+						}
+						default:{
+							if(isset($filter[$field_name]['type']) && $filter[$field_name]['type']==1){
+								if(isset($filter[$field_name]['min'])){
+									$this->_query->_and($field_name,$filter[$field_name]['min']);
+									unset($filter[$field_name]['max']);
+								}
+								else
+									unset($filter[$field_name]);
+							}
+							else{
+								unset($filter[$field_name]['type']);
+								if(isset($filter[$field_name]['min']) && $filter[$field_name]['min']!==''){
+									if(isset($filter[$field_name]['max']) && $filter[$field_name]['max']!=='')
+										$this->_query->_and($field_name,array($filter[$field_name]['min'],$filter[$field_name]['max']),'between');
+									else{
+										$this->_query->_and($field_name,$filter[$field_name]['min'],'>=');
+										unset($filter[$field_name]['max']);
+									}
+								}
+								else{
+									if(isset($filter[$field_name]['max']) && $filter[$field_name]['max']!==''){
+										$this->_query->_and($field_name,$filter[$field_name]['max'],'<=');
+										unset($filter[$field_name]['min']);
+									}
+									else
+										unset($filter[$field_name]);
+								}
+							}
+						}
+					}
+				}
+				if($filter && $filter_is_array){
+					$this->parent->redirect('/?call='.$this->module_name.($order?'&order='.$order:'').(($page&&$page!=1)?'&page='.$page:'').(($count&&$count!=$this->_config('page_count'))?'&count='.$count:'').($filter?('&filter='.json_encode($filter)):''));
+					die;
+				}
+			}
 		}
+		//$this->_query->echo_sql = true;
 		$this->_result = $this->_query->order($order)->query_page($page,$count);
 		$page_count = ceil($this->_result['__num_rows']/$count);
 		//impossible to do mor than 700 turns for loop in XSLT, have to do it there
 		$page_select_html = '';
 		for($i=1; $i<=$page_count; $i++)
 			$page_select_html.='<option value="'.$i.'" '.($i==$page?'selected="1"':'').'>'.$i.'</option>';
-		$this->_result['_page_select_html'] = &$page_select_html;
-		//form field list and sorting reference - it easier, then XSLT 
-		$field = array(
-			'num'=>array('title'=>'№ п/п'),
-			'account'=>array('title'=>'Лицевой счет'),
-			'street'=>array('title'=>'Улица'),
-			'house'=>array('title'=>'Дом'),
-			'flat'=>array('title'=>'Квартира'),
-			'privatizated'=>array('title'=>'Приватизация'),
-			'owner'=>array('title'=>'Владелец/Квартиросъемщик'),
-			'account_comment'=>array('title'=>'Комментарий к лицевому счету'),
-			'debt'=>array('title'=>'Долг на момент контроля'),
-			'balance'=>array('title'=>'Остаток на кон.мес. на момент контроля'),
-			'charges'=>array('title'=>'Начисления'),
-			'control_summ'=>array('title'=>'Оплата<=суммы контроля'),
-			'debt_date'=>array('title'=>'Месяц начала задолженности'),
-			'pay_date'=>array('title'=>'Дата платежа'),
-			'comment'=>array('title'=>'Комментарий'),
-		);
+		if($page_select_html)
+			$this->_result['_page_select_html'] = &$page_select_html;
+		$field = $this->_config('field');
 		foreach($field as $field_name=>&$field_value){
 			if(strpos($order,$field_name)!==false){
 				if(strpos($order,$field_name.' desc')!==false){
 					$to_replace = (strpos($order,$field_name.' desc,')!==false)?($field_name.' desc,'):($field_name.' desc');
 					$field_value['order'] = trim(str_replace($to_replace, '', $order));
 					$field_value['order'] = $field_name.($field_value['order']?',':'').$field_value['order'];
+					$field_value['desc'] = 'desc';
 				}
 				else{
 					$to_replace = (strpos($order,$field_name.',')!==false)?($field_name.','):$field_name;
 					$field_value['order'] = trim(str_replace($to_replace, '', $order));
 					$field_value['order'] = $field_name.' desc'.($field_value['order']?',':'').$field_value['order'];
+					$field_value['desc'] = 'asc';
 				}
 				if(substr($field_value['order'],-1)==',')
 					$field_value['order'] = substr($field_value['order'],0,-1);
@@ -158,6 +202,13 @@ class site_nbk extends module{
 			$output = "0000-00-00 00:00:00";
 		return $output;
 	}
+	
+	public function filter($filter=NULL,$order=NULL,$count=NULL){
+		$this->_result['field'] = $this->_config('field');
+		if($filter = json_decode($filter,true))
+			foreach($filter as $field=>$value)
+				$this->_result['field'][$field]['value'] = $value;
+	}
 }
 
 class site_nbk_config extends module_config{
@@ -167,16 +218,80 @@ class site_nbk_config extends module_config{
 				__CLASS__ => self::role_write,
 			),
 		),
-		'get'=>array(
+		'get,filter'=>array(
 			'__access__' => array(
 				__CLASS__ => self::role_read,
 			),
+			'filter'=>'_disable_filter',
 		),
 	);
 	
 	protected $include=array(
-		'get'=>'<script type="text/javascript" src="module/site_nbk/list.js"></script>
+		'get,filter'=>'<script type="text/javascript" src="module/site_nbk/list.js"></script>
 			<link href="module/site_nbk/index.css" rel="stylesheet" type="text/css"/>',
+	);
+	
+	protected $field = array(
+		'num'=>array(
+			'title'=>'№ п/п',
+			'type'=>'int'
+		),
+		'account'=>array(
+			'title'=>'Лицевой счет',
+			'type'=>'string'
+		),
+		'street'=>array(
+			'title'=>'Улица',
+			'type'=>'string'
+		),
+		'house'=>array(
+			'title'=>'Дом',
+			'type'=>'string'
+		),
+		'flat'=>array(
+			'title'=>'Квартира',
+			'type'=>'string'
+		),
+		'privatizated'=>array(
+			'title'=>'Приватизация',
+			'type'=>'bool'
+		),
+		'owner'=>array(
+			'title'=>'Владелец/Квартиросъемщик',
+			'type'=>'string'
+		),
+		'acc_comm'=>array(
+			'title'=>'Комментарий к лицевому счету',
+			'type'=>'text'
+		),
+		'debt'=>array(
+			'title'=>'Долг на момент контроля',
+			'type'=>'float'
+		),
+		'balance'=>array(
+			'title'=>'Остаток на кон.мес. на момент контроля',
+			'type'=>'float'
+		),
+		'charges'=>array(
+			'title'=>'Начисления',
+			'type'=>'float'
+		),
+		'control_summ'=>array(
+			'title'=>'Оплата<=суммы контроля',
+			'type'=>'float'
+		),
+		'debt_date'=>array(
+			'title'=>'Месяц начала задолженности',
+			'type'=>'date'
+		),
+		'pay_date'=>array(
+			'title'=>'Дата платежа',
+			'type'=>'date'
+		),
+		'comment'=>array(
+			'title'=>'Комментарий',
+			'type'=>'text'
+		),
 	);
 	
 	//protected $default_method = '_admin';

@@ -8,4 +8,9 @@ $(function(){
 		form.attr('action',form.attr('action')+'&page='+$(this).val());
 		form.submit();
 	});
+	$('.filter_radio_type_switch').change(function(){
+		$(this).parent().find('span,input[type="text"]:last').toggle();
+		first_input = $(this).parent().find('input[type="text"]:first');
+		first_input.attr('size',first_input.attr('size')==10?32:10);
+	});
 });

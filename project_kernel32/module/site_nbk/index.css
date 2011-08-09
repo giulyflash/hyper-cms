@@ -53,6 +53,29 @@ span.page_select select{
 
 span.page_size, span.page_size input, 
 span.search_field, span.search_field input,
-span.page_select, span.page_select select{
+span.page_select, span.page_select select,
+span.default_sort{
 	margin-left: 1em;
+}
+table.nbk_filter{
+	border-collapse: collapse;
+}
+table.nbk_filter td{
+	border: 1px solid black;
+	border-width: 0 1px 1px 0;
+	padding: 5px 4px;
+}
+table.nbk_filter td:FIRST-CHILD{
+	border-left-width: 1px;
+}
+table.nbk_filter tr:first-child td{
+	border-top-width: 1px;
+}
+table.nbk_filter tr:last-child td{
+	border-width: 0;
+	text-align: center;
+}
+
+p.empty{
+	font-weight: bold;
 }
