@@ -75,6 +75,7 @@ class app_config extends config{
 }
 
 class app extends module{
+	const call_list_count = 5;//max count of calls, reembered in $_SESSION
 	public $admin_mode;
 	public $db;
 	public $call_string;
@@ -158,10 +159,13 @@ class app extends module{
 			$this->message = $_SESSION['message'];
 			unset($_SESSION['message']);
 		}
-		if(!empty($_SESSION['current_call']))
-			$_SESSION['previous_call'] = $_SESSION['current_call'];
-		//var_dump($_SERVER['REQUEST_URI']);
-		$_SESSION['current_call'] = $_SERVER['REQUEST_URI'];
+		//
+		if(!isset($_SESSION['call']))
+			$_SESSION['call'] = array();
+		if(!isset($_SESSION['call'][0]) || $_SERVER['REQUEST_URI']!=$_SESSION['call'][0])
+			array_unshift($_SESSION['call'],$_SERVER['REQUEST_URI']);
+		if(count($_SESSION['call'])>$this::call_list_count)
+			array_splice($_SESSION['call'],-1);
 	}
 	
 	//error section
@@ -798,16 +802,16 @@ class app extends module{
 				if($this->_config('php_filter_eneble')){
 					$callable_method = $obj->_config('callable_method');
 					if(isset($callable_method[$method][$param_name]) && $callable_method[$method][$param_name]!=$this->_config('exclude_method_from_link_list'))
-						$filter = $callable_method[$method][$param_name];
-					//TODO array of filters for param: abiblity to add php-filter for admin_list invisible params 
+						$filter = $callable_method[$method][$param_name]; 
 					elseif(!($default_argument_filter = $this->_config('default_argument_filter')))
 						throw new my_exception('php filter enabled but default filter is undefined');
 					else
 						$filter = $default_argument_filter;
 					if(!$filter)
 						$value = false;
-					elseif(!$filter==$this->_config('disable_php_filter'))
+					elseif($filter!=$this->_config('disable_php_filter')){
 						$value = filter_var($value, $filter);
+					}
 				}
 			}
 			if($value===false){

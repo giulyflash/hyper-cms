@@ -4,6 +4,7 @@
 
 <xsl:template match="/root/module/item" priority="-0.75">
 	<xsl:value-of select="_module_name"/>.<xsl:value-of select="_method_name"/>: шаблон не найден<br/>
+	<a href="{/root/session/call/item[position()=2]}">Назад</a><br/>
 </xsl:template>
 
 <xsl:template name="_call">
@@ -70,7 +71,10 @@
 			</xsl:if>
 			<xsl:value-of select="text" disable-output-escaping="yes"/>
 		</div>
-	</xsl:for-each> 
+	</xsl:for-each>
+	<xsl:if test="root/error/*/*/item">
+		<a href="{/root/session/call/item[position()=2]}">Назад</a>
+	</xsl:if>
 </xsl:template>
 
 <xsl:template name="_message">
@@ -106,18 +110,16 @@
 	<xsl:if test="$obj_count &gt; $page_size">
 		<div class="pagenavigation">
 			<xsl:if test="$page_new &gt; 1">
-				<xsl:if test="$page_start &gt; 1">
-					<span class="toback" alt="1" title="1">
-						<a href="{$url}&amp;page=1">
-							&lt;&lt;
-						</a>
-					</span>
-				</xsl:if>
 				<span class="toback" alt="назад" title="назад">
 					<a href="{$url}&amp;page={-1+$page_new}">
 						&lt;
 					</a>
 				</span>
+				<xsl:if test="$page_start &gt; 1">
+					<span class="toback" alt="1" title="1">
+						<a href="{$url}&amp;page=1">1</a>
+					</span>...
+				</xsl:if>
 			</xsl:if>
 			<xsl:call-template name="show_nav">
 				<xsl:with-param name="page_count" select="$page_count"/>
@@ -127,18 +129,18 @@
 				<xsl:with-param name="curr_page" select="$page_new"/>
 			</xsl:call-template>
 			<xsl:if test="$page_new &lt; $page_count">
+				<xsl:if test="$page_start+2*$page_indent &lt; $page_count">
+					...<span class="forward" alt="{$page_count}" title="{$page_count}">
+						<a href="{$url}&amp;page={$page_count}">
+							<xsl:value-of select = "$page_count"/>
+						</a>
+					</span>
+				</xsl:if>
 				<span class="forward" alt="вперед" title="вперед">
 					<a href="{$url}&amp;page={$page_new+1}">
 						&gt;
 					</a>
 				</span>
-				<xsl:if test="$page_start+2*$page_indent &lt; $page_count">
-					<span class="forward" alt="{$page_count}" title="{$page_count}">
-						<a href="{$url}&amp;page={$page_count}">
-							&gt;&gt;
-						</a>
-					</span>
-				</xsl:if>
 			</xsl:if>
 		</div>
 	</xsl:if>
