@@ -139,7 +139,7 @@
 			</span>
 		</xsl:if>
 		<!-- /?call={_module_name}{$href_count}{$href_page}{$href_order}{$href_filter}{$href_search} -->
-		<form method="post" action="/?call={_module_name}{$href_count}{$href_order}{$href_filter}" enctype="multipart/form-data">
+		<form method="post" action="/?call={_module_name}{$href_order}{$href_filter}" enctype="multipart/form-data">
 			<a href="/?call={_module_name}.filter{$href_count}{$href_order}{$href_filter}">фильтры</a> | <a href="/?call={_module_name}{$href_count}{$href_order}">сбросить</a>
 			<span class="page_size">
 				строк на странице:<input type="text" size="1" value="{__page_size}" name="count"/>
@@ -177,7 +177,7 @@
 
 <xsl:template match="root/module/item[_module_name='site_nbk' and (_method_name='filter')]">
 	<xsl:variable name="action">/?call=<xsl:value-of select="_module_name"/><xsl:if test="argument/order!=''">&amp;order=<xsl:value-of select="argument/order"/></xsl:if><xsl:if test="argument/count and argument/count!=''">&amp;count=<xsl:value-of select="argument/count"/></xsl:if></xsl:variable>
-	<form method="post" action="{$action}" enctype="multipart/form-data">
+	<form method="post" action="{$action}" enctype="multipart/form-data" class="filter_table">
 		<table class="nbk_filter">
 			<xsl:for-each select="field/*">
 				<tr>
@@ -192,8 +192,24 @@
 							<xsl:when test="type='string' or type='text'">
 								содержит: <input type="text" value="{value}" name="filter[{name()}]"/>
 							</xsl:when>
+							<xsl:when test="type='bool'">
+								<select name="filter[{name()}]">
+									<option></option>
+									<option value="0">
+										<xsl:if test="value='0'"><xsl:attribute name="selected">1</xsl:attribute></xsl:if>нет
+									</option>
+									<option value="1">
+										<xsl:if test="value='1'"><xsl:attribute name="selected">1</xsl:attribute></xsl:if>да
+									</option>
+								</select>
+							</xsl:when>
 							<xsl:otherwise>
-								<span>с: </span><input type="text" value="{value/min}" name="filter[{name()}][min]" size="10"/><span> по: </span><input type="text" value="{value/max}" name="filter[{name()}][max]" size="10"/><br/>
+								<xsl:variable name="style"><xsl:if test="value/type=1">display:none</xsl:if></xsl:variable>
+								<xsl:variable name="size"><xsl:choose>
+									<xsl:when test="value/type=1">32</xsl:when>
+									<xsl:otherwise>10</xsl:otherwise>
+								</xsl:choose></xsl:variable>
+								<span style="{$style}">с: </span><input type="text" size="{$size}" value="{value/min}" name="filter[{name()}][min]"/><span style="{$style}"> по: </span><input style="{$style}" type="text" value="{value/max}" name="filter[{name()}][max]" size="10"/><br/>
 								<input class="filter_radio_type_switch" type="radio" id="{name()}_type0" name="filter[{name()}][type]" value="0">
 									<xsl:if test="not(value/type) or value/type=0">
 										<xsl:attribute name="checked">1</xsl:attribute>
@@ -209,7 +225,7 @@
 					</td>
 				</tr>
 			</xsl:for-each>
-			<tr><td colspan="2"><input type="submit" value="сохранить"/></td></tr>
+			<tr><td colspan="2"><input type="submit" class="drop" value="сбросить"/><input type="submit" value="ок"/></td></tr>
 		</table>
 	</form>
 </xsl:template>

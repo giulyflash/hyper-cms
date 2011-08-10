@@ -79,3 +79,11 @@ table.nbk_filter tr:last-child td{
 p.empty{
 	font-weight: bold;
 }
+
+.ui-datepicker{
+	width: 230px;
+}
+
+.filter_table tr:last-child input{
+	width: 150px;
+}

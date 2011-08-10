@@ -17,7 +17,7 @@ class site_nbk extends module{
 			$this->_query->_or('house',$search,'like');
 			$this->_query->_or('flat',$search,'like');
 			$this->_query->_or('owner',$search,'like');
-			$this->_query->_or('account_comment',$search,'like');
+			$this->_query->_or('acc_comm',$search,'like');
 			$this->_query->_or('debt',$search,'like');
 			$this->_query->_or('balance',$search,'like');
 			$this->_query->_or('charges',$search,'like');
@@ -34,6 +34,9 @@ class site_nbk extends module{
 					$this->_message('wrong filter');
 			}
 			if($filter){
+				$date_pattern = '%([0-9]+)\.([0-9]+)\.([0-9]+)$%';
+				$replace_patterd = '$3-$2-$1';
+				//
 				$this->_query->injection(' WHERE 1=1 ');
 				$field_conf = $this->_config('field');
 				foreach(array_keys($filter) as $field_name){
@@ -48,9 +51,18 @@ class site_nbk extends module{
 								unset($filter[$field_name]);
 							break;
 						}
+						case 'bool':{
+							if($filter[$field_name]!='')
+								$this->_query->_and($field_name,$filter[$field_name]);
+							else
+								unset($filter[$field_name]);
+							break;
+						}
 						default:{
 							if(isset($filter[$field_name]['type']) && $filter[$field_name]['type']==1){
 								if(isset($filter[$field_name]['min'])){
+									if($field_conf[$field_name]['type']=='date')
+										$filter[$field_name]['min'] = preg_replace($date_pattern, $replace_patterd, $filter[$field_name]['min']);
 									$this->_query->_and($field_name,$filter[$field_name]['min']);
 									unset($filter[$field_name]['max']);
 								}
@@ -60,8 +72,13 @@ class site_nbk extends module{
 							else{
 								unset($filter[$field_name]['type']);
 								if(isset($filter[$field_name]['min']) && $filter[$field_name]['min']!==''){
-									if(isset($filter[$field_name]['max']) && $filter[$field_name]['max']!=='')
+									if($field_conf[$field_name]['type']=='date')
+										$filter[$field_name]['min'] = preg_replace($date_pattern, $replace_patterd, $filter[$field_name]['min']);
+									if(isset($filter[$field_name]['max']) && $filter[$field_name]['max']!==''){
+										if($field_conf[$field_name]['type']=='date')
+											$filter[$field_name]['max'] = preg_replace($date_pattern, $replace_patterd, $filter[$field_name]['max']);
 										$this->_query->_and($field_name,array($filter[$field_name]['min'],$filter[$field_name]['max']),'between');
+									}
 									else{
 										$this->_query->_and($field_name,$filter[$field_name]['min'],'>=');
 										unset($filter[$field_name]['max']);
@@ -69,6 +86,8 @@ class site_nbk extends module{
 								}
 								else{
 									if(isset($filter[$field_name]['max']) && $filter[$field_name]['max']!==''){
+										if($field_conf[$field_name]['type']=='date')
+											$filter[$field_name]['max'] = preg_replace($date_pattern, $replace_patterd, $filter[$field_name]['max']);
 										$this->_query->_and($field_name,$filter[$field_name]['max'],'<=');
 										unset($filter[$field_name]['min']);
 									}
@@ -163,13 +182,13 @@ class site_nbk extends module{
 				'flat'  => $sheet->getCell('E'.$line)->getValue(),
 				'privatizated'  => ($sheet->getCell('F'.$line)->getValue()?1:0),
 				'owner'  => $sheet->getCell('G'.$line)->getValue(),
-				'account_comment'  => $sheet->getCell('H'.$line)->getValue(),
+				'acc_comm'  => $sheet->getCell('H'.$line)->getValue(),
 				'debt'  => $sheet->getCell('I'.$line)->getValue(),
 				'balance'  => $sheet->getCell('J'.$line)->getValue(),
 				'charges'  => $sheet->getCell('K'.$line)->getValue(),
 				'control_summ'  => $sheet->getCell('R'.$line)->getValue(),
-				'debt_date'  => self::convert_date($sheet->getCell('S'.$line)->getFormattedValue()),
-				'pay_date'  => self::convert_date($sheet->getCell('T'.$line)->getFormattedValue()),
+				'debt_date'  => $this->convert_date($sheet->getCell('S'.$line)->getFormattedValue()),
+				'pay_date'  => $this->convert_date($sheet->getCell('T'.$line)->getFormattedValue()),
 				'comment' => ''
 			);
 			if($this->_query->select('id')->from($this->_config('table'))->where('account',$value['account'])->query1()){
@@ -188,15 +207,15 @@ class site_nbk extends module{
 		$output_index_error = true;
 	}
 	
-	private static function convert_date($str){
-		if(!preg_match('%^(.*?)-(.*?)-(.*?)$%',$str,$re))
-			throw new my_exception('wrong data format');
+	private function convert_date($str, $format='%([0-9]+)-([0-9]+)-([0-9]+)$%',$output_format='20$3-$1-$2'){
+		var_dump($str,$format,$output_format);
+		if(!preg_match($format,$str,$re)){
+			throw new my_exception('wrong data format',array('format'=>$format, 'date'=>$str));
+		}
 		if($re[1] && $re[2] && $re[3]){
-			$date_str = '20'.$re[3].'-'.$re[1].'-'.$re[2];
-			//var_dump($str, $date_str);
+			$date_str = preg_replace($format, $output_format, $str);
 			$date = new DateTime($date_str);
 			$output = $date->format($this->_config('db_date_format'));
-			//var_dump($str, $date_str, $output); die;
 		}
 		else
 			$output = "0000-00-00 00:00:00";
@@ -204,10 +223,19 @@ class site_nbk extends module{
 	}
 	
 	public function filter($filter=NULL,$order=NULL,$count=NULL){
+		$reverse_date_pattern = '%([0-9]+)\-([0-9]+)\-([0-9]+)%';
+		$reverse_replace_patterd = '$3.$2.$1';
 		$this->_result['field'] = $this->_config('field');
 		if($filter = json_decode($filter,true))
-			foreach($filter as $field=>$value)
+			foreach($filter as $field=>&$value){
+				if($this->_result['field'][$field]['type']=='date'){
+					if(isset($value['min']))
+						$value['min'] = preg_replace($reverse_date_pattern, $reverse_replace_patterd, $value['min']);
+					if(isset($value['max']))
+						$value['max'] = preg_replace($reverse_date_pattern, $reverse_replace_patterd, $value['max']);
+				}
 				$this->_result['field'][$field]['value'] = $value;
+			}
 	}
 }
 
@@ -229,6 +257,12 @@ class site_nbk_config extends module_config{
 	protected $include=array(
 		'get,filter'=>'<script type="text/javascript" src="module/site_nbk/list.js"></script>
 			<link href="module/site_nbk/index.css" rel="stylesheet" type="text/css"/>',
+		'filter'=>'
+			<link rel="stylesheet" href="/extensions/datapicker/jquery.ui.all.css">
+			<script src="/extensions/datapicker/jquery.ui.core.js"></script>
+			<script src="/extensions/datapicker/jquery.ui.widget.js"></script>
+			<script src="/extensions/datapicker/jquery.ui.datepicker.js"></script>
+			<script src="/extensions/datapicker/jquery.ui.datepicker-ru.js"></script>',
 	);
 	
 	protected $field = array(
