@@ -92,7 +92,7 @@
 							</a>
 						</td>
 						<td>
-							<center><a class="remove" href="/?call={_module_name}.remove&amp;id={id}"><xsl:value-of select="comment"/>Х</a></center>
+							<center><a class="remove" href="/?call={../_module_name}.remove&amp;id={id}"><xsl:value-of select="comment"/>Х</a></center>
 						</td>
 					</tr>
 				</xsl:for-each>
@@ -175,9 +175,12 @@
 	</form>
 </xsl:template>
 
-<xsl:template match="root/module/item[_module_name='site_nbk' and (_method_name='filter')]">
-	<xsl:variable name="action">/?call=<xsl:value-of select="_module_name"/><xsl:if test="argument/order!=''">&amp;order=<xsl:value-of select="argument/order"/></xsl:if><xsl:if test="argument/count and argument/count!=''">&amp;count=<xsl:value-of select="argument/count"/></xsl:if></xsl:variable>
+<xsl:template match="root/module/item[_module_name='site_nbk' and (_method_name='filter' or _method_name='edit')]">
+	<xsl:variable name="action">/?call=<xsl:value-of select="_module_name"/><xsl:if test="_method_name='edit'">.save<xsl:if test="argument/filter!=''">&amp;filter=<xsl:value-of select="argumetn/filter"/></xsl:if></xsl:if><xsl:if test="argument/order!=''">&amp;order=<xsl:value-of select="argument/order"/></xsl:if><xsl:if test="argument/count and argument/count!=''">&amp;count=<xsl:value-of select="argument/count"/></xsl:if></xsl:variable>
 	<form method="post" action="{$action}" enctype="multipart/form-data" class="filter_table">
+		<xsl:if test="argument/id and argument/id!=''">
+			<input type="hidden" value="{argument/id}" name="id"/>
+		</xsl:if>
 		<table class="nbk_filter">
 			<xsl:for-each select="field/*">
 				<tr>
@@ -189,37 +192,11 @@
 							<xsl:attribute name="class">date</xsl:attribute>
 						</xsl:if>
 						<xsl:choose>
-							<xsl:when test="type='string' or type='text'">
-								содержит: <input type="text" value="{value}" name="filter[{name()}]"/>
-							</xsl:when>
-							<xsl:when test="type='bool'">
-								<select name="filter[{name()}]">
-									<option></option>
-									<option value="0">
-										<xsl:if test="value='0'"><xsl:attribute name="selected">1</xsl:attribute></xsl:if>нет
-									</option>
-									<option value="1">
-										<xsl:if test="value='1'"><xsl:attribute name="selected">1</xsl:attribute></xsl:if>да
-									</option>
-								</select>
+							<xsl:when test="../../_method_name='filter'">
+								<xsl:call-template name="filter_value"/>
 							</xsl:when>
 							<xsl:otherwise>
-								<xsl:variable name="style"><xsl:if test="value/type=1">display:none</xsl:if></xsl:variable>
-								<xsl:variable name="size"><xsl:choose>
-									<xsl:when test="value/type=1">32</xsl:when>
-									<xsl:otherwise>10</xsl:otherwise>
-								</xsl:choose></xsl:variable>
-								<span style="{$style}">с: </span><input type="text" size="{$size}" value="{value/min}" name="filter[{name()}][min]"/><span style="{$style}"> по: </span><input style="{$style}" type="text" value="{value/max}" name="filter[{name()}][max]" size="10"/><br/>
-								<input class="filter_radio_type_switch" type="radio" id="{name()}_type0" name="filter[{name()}][type]" value="0">
-									<xsl:if test="not(value/type) or value/type=0">
-										<xsl:attribute name="checked">1</xsl:attribute>
-									</xsl:if>
-								</input><label for="{name()}_type0">интервал</label>
-								<input class="filter_radio_type_switch" type="radio" id="{name()}_type1" name="filter[{name()}][type]" value="1">
-									<xsl:if test="value/type=1">
-										<xsl:attribute name="checked">1</xsl:attribute>
-									</xsl:if>
-								</input><label for="{name()}_type1">точное значение</label>
+								<xsl:call-template name="editor_value"/>
 							</xsl:otherwise>
 						</xsl:choose>
 					</td>
@@ -228,6 +205,70 @@
 			<tr><td colspan="2"><input type="submit" class="drop" value="сбросить"/><input type="submit" value="ок"/></td></tr>
 		</table>
 	</form>
+</xsl:template>
+
+<xsl:template name="filter_value">
+	<xsl:choose>
+		<xsl:when test="type='string' or type='text'">
+			содержит: <input type="text" value="{value}" name="filter[{name()}]"/>
+		</xsl:when>
+		<xsl:when test="type='bool'">
+			<select name="filter[{name()}]">
+				<option></option>
+				<option value="0">
+					<xsl:if test="value='0'"><xsl:attribute name="selected">1</xsl:attribute></xsl:if>нет
+				</option>
+				<option value="1">
+					<xsl:if test="value='1'"><xsl:attribute name="selected">1</xsl:attribute></xsl:if>да
+				</option>
+			</select>
+		</xsl:when>
+		<xsl:otherwise>
+			<xsl:variable name="style"><xsl:if test="value/type=1">display:none</xsl:if></xsl:variable>
+			<xsl:variable name="size"><xsl:choose>
+				<xsl:when test="value/type=1">32</xsl:when>
+				<xsl:otherwise>10</xsl:otherwise>
+			</xsl:choose></xsl:variable>
+			<span style="{$style}">с: </span><input type="text" size="{$size}" value="{value/min}" name="filter[{name()}][min]"/><span style="{$style}"> по: </span><input style="{$style}" type="text" value="{value/max}" name="filter[{name()}][max]" size="10"/><br/>
+			<input class="filter_radio_type_switch" type="radio" id="{name()}_type0" name="filter[{name()}][type]" value="0">
+				<xsl:if test="not(value/type) or value/type=0">
+					<xsl:attribute name="checked">1</xsl:attribute>
+				</xsl:if>
+			</input><label for="{name()}_type0">интервал</label>
+			<input class="filter_radio_type_switch" type="radio" id="{name()}_type1" name="filter[{name()}][type]" value="1">
+				<xsl:if test="value/type=1">
+					<xsl:attribute name="checked">1</xsl:attribute>
+				</xsl:if>
+			</input><label for="{name()}_type1">точное значение</label>
+		</xsl:otherwise>
+	</xsl:choose>
+</xsl:template>
+
+<xsl:template name="editor_value">
+	<xsl:choose>
+		<xsl:when test="name()='num'">
+			<xsl:value-of select="value"/>
+		</xsl:when>
+		<xsl:when test="type='bool'">
+			<select name="filter[{name()}]">
+				<option></option>
+				<option value="0">
+					<xsl:if test="value='0'"><xsl:attribute name="selected">1</xsl:attribute></xsl:if>нет
+				</option>
+				<option value="1">
+					<xsl:if test="value='1'"><xsl:attribute name="selected">1</xsl:attribute></xsl:if>да
+				</option>
+			</select>
+		</xsl:when>
+		<xsl:when test="type='text'">
+			<textarea type="text" name="filter[{name()}]">
+				<xsl:value-of select="value"/>
+			</textarea>
+		</xsl:when>
+		<xsl:otherwise>
+			<input type="text" value="{value}" name="filter[{name()}]"/>
+		</xsl:otherwise>
+	</xsl:choose>
 </xsl:template>
 
 </xsl:stylesheet>
