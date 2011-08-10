@@ -81,7 +81,7 @@ p.empty{
 }
 
 .ui-datepicker{
-	width: 230px;
+	font-size: 0.9em!important;
 }
 
 .filter_table tr:last-child input{

@@ -34,8 +34,8 @@ class site_nbk extends module{
 					$this->_message('wrong filter');
 			}
 			if($filter){
-				$date_pattern = '%([0-9]+)\.([0-9]+)\.([0-9]+)$%';
-				$replace_patterd = '$3-$2-$1';
+				$date_pattern = $this->_config('date_pattern');
+				$replace_patterd = $this->_config('replace_patterd');
 				//
 				$this->_query->injection(' WHERE 1=1 ');
 				$field_conf = $this->_config('field');
@@ -223,41 +223,62 @@ class site_nbk extends module{
 	}
 	
 	public function filter($filter=NULL,$order=NULL,$count=NULL){
-		$reverse_date_pattern = '%([0-9]+)\-([0-9]+)\-([0-9]+)%';
-		$reverse_replace_patterd = '$3.$2.$1';
+		$reverse_date_pattern = $this->_config('reverse_date_pattern');
+		$reverse_replace_pattern = $this->_config('reverse_replace_pattern');
 		$this->_result['field'] = $this->_config('field');
 		if($filter = json_decode($filter,true))
 			foreach($filter as $field=>&$value){
 				if($this->_result['field'][$field]['type']=='date'){
 					if(isset($value['min']))
-						$value['min'] = preg_replace($reverse_date_pattern, $reverse_replace_patterd, $value['min']);
+						$value['min'] = preg_replace($reverse_date_pattern, $reverse_replace_pattern, $value['min']);
 					if(isset($value['max']))
-						$value['max'] = preg_replace($reverse_date_pattern, $reverse_replace_patterd, $value['max']);
+						$value['max'] = preg_replace($reverse_date_pattern, $reverse_replace_pattern, $value['max']);
 				}
 				$this->_result['field'][$field]['value'] = $value;
 			}
+	}
+	
+	public function edit($id=NULL, $filter=NULL,$order=NULL,$count=NULL){
+		$reverse_date_pattern = $this->_config('reverse_date_pattern');
+		$reverse_replace_pattern = $this->_config('reverse_replace_pattern');
+		$this->_result['field'] = $this->_config('field');
+		if($id){
+			$field_value = $this->_query->select()->injection(',DATE_FORMAT(debt_date,"%d.%m.%Y") as debt_date_formatted, DATE_FORMAT(pay_date,"%d.%m.%Y") as pay_date_formatted ')->from($tablename = $this->_config('table'))->where('id',$id)->query1();
+			//var_dump($field_value);
+			if(!$field_value)
+				$this->_message('record not found by id',array('id'=>$id));
+			else
+				foreach($field_value as $name=>&$value){
+					if(isset($this->_result['field'][$name])){
+						if($this->_result['field'][$name]['type']=='date')
+							$value = preg_replace($reverse_date_pattern,$reverse_replace_pattern,$value);
+						$this->_result['field'][$name]['value'] = $value;
+					}
+				}
+		}
+	}
+	
+	public function save($id=NULL, $filter=NULL,$order=NULL,$count=NULL){
+		
 	}
 }
 
 class site_nbk_config extends module_config{
 	protected $callable_method=array(
-		'generate,generate_works,_admin'=>array(
+		'generate,generate_works,_admin,edit,edit_comment,edit_account_comment,remove,get,filter'=>array(
 			'__access__' => array(
 				__CLASS__ => self::role_write,
 			),
 		),
 		'get,filter'=>array(
-			'__access__' => array(
-				__CLASS__ => self::role_read,
-			),
 			'filter'=>'_disable_filter',
 		),
 	);
 	
 	protected $include=array(
-		'get,filter'=>'<script type="text/javascript" src="module/site_nbk/list.js"></script>
-			<link href="module/site_nbk/index.css" rel="stylesheet" type="text/css"/>',
-		'filter'=>'
+		'get,filter,edit'=>'<script type="text/javascript" src="/module/site_nbk/list.js"></script>
+			<link href="/module/site_nbk/index.css" rel="stylesheet" type="text/css"/>',
+		'filter,edit'=>'
 			<link rel="stylesheet" href="/extensions/datapicker/jquery.ui.all.css">
 			<script src="/extensions/datapicker/jquery.ui.core.js"></script>
 			<script src="/extensions/datapicker/jquery.ui.widget.js"></script>
@@ -332,5 +353,10 @@ class site_nbk_config extends module_config{
 	protected $page_count = 20;
 	protected $table = 'debtor_list';
 	protected $db_date_format = 'Y-m-d H:i:s';
+	
+	protected $date_pattern = '%([0-9]+)\.([0-9]+)\.([0-9]+)$%';
+	protected $replace_patterd = '$3-$2-$1';
+	protected $reverse_date_pattern = '%([0-9]+)\-([0-9]+)\-([0-9]+).*%';
+	protected $reverse_replace_pattern = '$3.$2.$1';
 }
 ?>
