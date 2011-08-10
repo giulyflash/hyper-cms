@@ -138,7 +138,7 @@ class object_sql_query{
 				}
 				if(count($value)!=2)
 					throw new my_exception('count of values array for between must be 2');
-				$sql = $quot.self::escstr($name).$quot.' BETWEEN '.$this->escstr($value[0]).' AND '.$this->escstr($value[1]);
+				$sql = $quot.self::escstr($name).$quot.' BETWEEN \''.$this->escstr($value[0]).'\' AND \''.$this->escstr($value[1]).'\'';
 				break;
 			}
 			default:{
