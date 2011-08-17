@@ -20,7 +20,7 @@
 				<div class="user_container">
 					<div class="input_container">
 						<p>
-							<input placeholder="логин" name="login" autocomplete="off"/>
+							<input placeholder="логин" name="login"/>
 						</p>
 						<p>
 							<input placeholder="пароль" type="password" name="password"/>
