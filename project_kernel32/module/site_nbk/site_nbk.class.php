@@ -5,11 +5,38 @@ class site_nbk extends module{
 	
 	public function _admin(){}
 	
-	public function get($order='num',$page=1,$count=NULL,$search=NULL,$filter=NULL){
+	public function get($order='num',$page=1,$count=NULL,$search=NULL,$filter=NULL, $column=NULL){
+		if(!$column)
+			$column = $this->_config('column');
 		if(!$count)
 			$count = $this->_config('page_count');
 		$tablename = $this->_config('table');
-		$this->_query->select()->injection(',DATE_FORMAT(debt_date,"%m.%Y") as debt_date_formatted, DATE_FORMAT(pay_date,"%m.%Y") as pay_date_formatted ')->from($tablename);
+		$field = $this->_config('field');
+		$redirect_params = array();
+		if($column && is_array($column)){
+			$column_str = '';
+			foreach($field as $field_name=>&$field_value)
+				if(isset($column[$field_name]))
+					$column_str.='1';
+				else
+					$column_str.='0';
+			while(substr($column_str,-1,1)=='0')
+				$column_str = substr($column_str,0,-1);
+			$redirect_params['column'] = $column_str;
+		}
+		else{
+			$select_str = 'SELECT ';
+			$i = 0;
+			foreach(array_keys($field) as $field_name){
+				if($chr = substr($column,$i,1))
+					$select_str.= (isset($field[$field_name]['field'])?$field[$field_name]['field']:$field_name).', ';
+				else
+					unset($field[$field_name]);
+				$i++;
+			}
+			$select_str = substr($select_str,0,-2);
+		}
+		$this->_query->injection($select_str)->from($tablename);
 		if($search){
 			$this->_query->where('num',$search,'like');
 			$this->_query->_or('account',$search,'like');
@@ -98,22 +125,36 @@ class site_nbk extends module{
 						}
 					}
 				}
-				if($filter && $filter_is_array){
-					$this->parent->redirect('/?call='.$this->module_name.($order?'&order='.$order:'').(($page&&$page!=1)?'&page='.$page:'').(($count&&$count!=$this->_config('page_count'))?'&count='.$count:'').($filter?('&filter='.json_encode($filter)):''));
-					die;
-				}
+				if($filter_is_array)
+					$redirect_params['filter'] = json_encode($filter);
 			}
+		}
+		if($redirect_params){
+			if($order)
+				$redirect_params['order'] = $order;
+			if($page && $page!=1)
+				$redirect_params['page'] = $page;
+			if($count && $count!=$this->_config('page_count'))
+				$redirect_params['count'] = $count;
+			if($search)
+				$redirect_params['search'] = $search;
+			if($filter && !isset($redirect_params['filter']))
+				$redirect_params['filter'] = $filter;
+			if($column && !isset($redirect_params['column']) && $column!=$this->_config('column'))
+				$redirect_params['column'] = $column_str;
+			$this->parent->redirect('/?call='.$this->module_name,$redirect_params);
 		}
 		//$this->_query->echo_sql = true;
 		$this->_result = $this->_query->order($order)->query_page($page,$count);
-		$page_count = ceil($this->_result['__num_rows']/$count);
 		//impossible to do mor than 700 turns for loop in XSLT, have to do it there
+		$this->_result['__max_page'] = ceil($this->_result['__num_rows']/$count);
 		$page_select_html = '';
-		for($i=1; $i<=$page_count; $i++)
+		for($i=1; $i<=$this->_result['__max_page']; $i++)
 			$page_select_html.='<option value="'.$i.'" '.($i==$page?'selected="1"':'').'>'.$i.'</option>';
 		if($page_select_html)
 			$this->_result['_page_select_html'] = &$page_select_html;
-		$field = $this->_config('field');
+		$this->_result['_default_page_count'] = &$this->_config('page_count');
+		//$field = $this->_config('field');
 		foreach($field as $field_name=>&$field_value){
 			if(strpos($order,$field_name)!==false){
 				if(strpos($order,$field_name.' desc')!==false){
@@ -135,6 +176,11 @@ class site_nbk extends module{
 				$field_value['order'] = $field_name.($order?',':'').$order;
 		}
 		$this->_result['_field'] = $field;
+		$this->_result['field_row'] = $this->_config('field');
+		//
+		if($filter = json_decode($filter,true))
+			foreach($filter as $field=>&$value)
+				$this->_result['field_row'][$field]['value'] = $value;
 	}
 	
 	public function mb_ucfirst($str, $enc = null){
@@ -222,7 +268,7 @@ class site_nbk extends module{
 		return $output;
 	}
 	
-	public function filter($filter=NULL,$order=NULL,$count=NULL){
+	public function filter($filter=NULL,$order=NULL,$count=NULL,$column=NULL){
 		$reverse_date_pattern = $this->_config('reverse_date_pattern');
 		$reverse_replace_pattern = $this->_config('reverse_replace_pattern');
 		$this->_result['field'] = $this->_config('field');
@@ -238,7 +284,7 @@ class site_nbk extends module{
 			}
 	}
 	
-	public function edit($id=NULL, $filter=NULL,$order=NULL,$count=NULL){
+	public function edit($id=NULL, $filter=NULL,$order=NULL,$count=NULL,$column=NULL){
 		$reverse_date_pattern = $this->_config('reverse_date_pattern');
 		$reverse_replace_pattern = $this->_config('reverse_replace_pattern');
 		$this->_result['field'] = $this->_config('field');
@@ -258,28 +304,39 @@ class site_nbk extends module{
 		}
 	}
 	
-	public function save($id=NULL, $filter=NULL,$order=NULL,$count=NULL){
+	public function save($id=NULL, $filter=NULL,$order=NULL,$count=NULL, $column=NULL){
 		
+	}
+	
+	public function column($filter=NULL,$order=NULL,$count=NULL, $column=NULL){
+		$this->_result['field'] = $this->_config('field');
+		$i=0;
+		foreach($this->_result['field'] as $field_name=>&$field){
+			if(substr($column,$i,1))
+				$field['active'] = 1;
+			$i++;
+		}
 	}
 }
 
 class site_nbk_config extends module_config{
 	protected $callable_method=array(
-		'generate,generate_works,_admin,edit,edit_comment,edit_account_comment,remove,get,filter'=>array(
+		'generate,generate_works,_admin,edit,edit_comment,edit_account_comment,remove,get,filter,column'=>array(
 			'__access__' => array(
 				__CLASS__ => self::role_write,
 			),
 		),
-		'get,filter'=>array(
+		'get,filter,column'=>array(
 			'filter'=>'_disable_filter',
+			'column'=>'_disable_filter',
 		),
 	);
 	
 	protected $include=array(
-		'get,filter,edit'=>'<script type="text/javascript" src="/module/site_nbk/list.js"></script>
-			<link href="/module/site_nbk/index.css" rel="stylesheet" type="text/css"/>',
-		'filter,edit'=>'
-			<link rel="stylesheet" href="/extensions/datapicker/jquery.ui.all.css">
+		'get,filter,edit,column'=>'<link href="/module/site_nbk/index.css" rel="stylesheet" type="text/css"/>',
+		'get,filter,edit'=>'<link href="/module/site_nbk/index.css" rel="stylesheet" type="text/css"/>
+			<script src="/module/site_nbk/list.js"></script>',
+		'filter,edit'=>'<link rel="stylesheet" href="/extensions/datapicker/jquery.ui.all.css">
 			<script src="/extensions/datapicker/jquery.ui.core.js"></script>
 			<script src="/extensions/datapicker/jquery.ui.widget.js"></script>
 			<script src="/extensions/datapicker/jquery.ui.datepicker.js"></script>
@@ -289,68 +346,73 @@ class site_nbk_config extends module_config{
 	protected $field = array(
 		'num'=>array(
 			'title'=>'№ п/п',
-			'type'=>'int'
+			'type'=>'int',
+			'field'=>'num',
 		),
 		'account'=>array(
 			'title'=>'Лицевой счет',
-			'type'=>'string'
+			'type'=>'string',
 		),
 		'street'=>array(
 			'title'=>'Улица',
-			'type'=>'string'
+			'type'=>'string',
 		),
 		'house'=>array(
 			'title'=>'Дом',
-			'type'=>'string'
+			'type'=>'string',
 		),
 		'flat'=>array(
 			'title'=>'Квартира',
-			'type'=>'string'
+			'type'=>'string',
 		),
 		'privatizated'=>array(
 			'title'=>'Приватизация',
-			'type'=>'bool'
+			'type'=>'bool',
 		),
 		'owner'=>array(
 			'title'=>'Владелец/Квартиросъемщик',
-			'type'=>'string'
+			'type'=>'string',
 		),
 		'acc_comm'=>array(
 			'title'=>'Комментарий к лицевому счету',
-			'type'=>'text'
+			'type'=>'text',
 		),
 		'debt'=>array(
 			'title'=>'Долг на момент контроля',
-			'type'=>'float'
+			'type'=>'float',
 		),
 		'balance'=>array(
 			'title'=>'Остаток на кон.мес. на момент контроля',
-			'type'=>'float'
+			'type'=>'float',
 		),
 		'charges'=>array(
 			'title'=>'Начисления',
-			'type'=>'float'
+			'type'=>'float',
 		),
 		'control_summ'=>array(
 			'title'=>'Оплата<=суммы контроля',
-			'type'=>'float'
+			'type'=>'float',
 		),
 		'debt_date'=>array(
 			'title'=>'Месяц начала задолженности',
-			'type'=>'date'
+			'type'=>'date',
+			'field'=>'DATE_FORMAT(debt_date,"%m.%Y") as debt_date',
 		),
 		'pay_date'=>array(
 			'title'=>'Дата платежа',
-			'type'=>'date'
+			'type'=>'date',
+			'field'=>'DATE_FORMAT(pay_date,"%m.%Y") as pay_date',
 		),
 		'comment'=>array(
 			'title'=>'Комментарий',
-			'type'=>'text'
+			'type'=>'text',
 		),
 	);
 	
+	protected $column = '111110101';
+	
 	//protected $default_method = '_admin';
-	protected $page_count = 20;
+	protected $page_count = 25;
 	protected $table = 'debtor_list';
 	protected $db_date_format = 'Y-m-d H:i:s';
 	

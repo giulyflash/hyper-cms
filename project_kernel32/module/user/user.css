@@ -1,5 +1,10 @@
 .user_container{
 	margin: 20px auto;
+	width: 180px;
+}
+
+.container .logined{
+	margin: 20px 0px;
 }
 
 .user_container p{
@@ -20,6 +25,7 @@
 .user_container .input_container input{
 	border-radius: 6px;
 	padding: 1px 5px;
+	width: 167px;
 }
 
 .user_container label{

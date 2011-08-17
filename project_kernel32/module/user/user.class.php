@@ -5,8 +5,7 @@ class user_config extends module_config{
 	protected $output_config = true;
 	protected $include = array(
 		'*'=>'<link href="module/user/user.css" rel="stylesheet" type="text/css">',
-		'form'=>'<link href="module/user/user.css" rel="stylesheet" type="text/css">
-		<script type="text/javascript" src="/module/user/form.js"></script>',
+		'form'=>'<link href="module/user/user.css" rel="stylesheet" type="text/css">',
 	);
 	
 	protected $callable_method=array(
@@ -38,7 +37,7 @@ class user extends module{
 	public function login($login=NULL,$password=NULL){
 		if($user_info = $this->_query->select('id,login,status,language')->from(__CLASS__)->where('login',$login)->_and('password',md5($password))->query1()){
 			$_SESSION['user_info'] = $user_info;
-			$this->parent->redirect($this->parent->admin_mode?'admin.php':'/');
+			$this->redirect();
 			//TODO redirect to proper place, not admin.php
 		}
 		else
@@ -47,9 +46,17 @@ class user extends module{
 	}
 	
 	public function logout(){
-		session_unset();
-		//TODO redirect in the same place, not to root
-		$this->parent->redirect($this->parent->admin_mode?'admin.php':'/');
+		$this->redirect(true);
+	}
+	
+	private function redirect($unset=NULL){
+		if(isset($_SESSION['call'][1]))
+			$redirect = $_SESSION['call'][1];
+		else
+			$redirect = $this->parent->admin_mode?'/admin.php':'/';
+		if($unset)
+			session_unset();
+		$this->parent->redirect($redirect);
 	}
 	
 	public function _admin(){

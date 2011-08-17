@@ -110,7 +110,7 @@ class module_link extends module{
 		$link_value['position'] = $position?$position:$this->parent->_config('main_position_name');
 		$link_value['order'] = $order?$order:1;
 		$link_value['exclude'] = $draft?1:0;
-		$link_value['menu'] = $menu?1:0;
+		$link_value['inactive'] = $menu?1:0;
 		if($id){
 			$this->_query->update($this->module_name)->set($link_value)->where('id',$id)->limit(1)->execute();
 			$message = 'edited seccessfully';
@@ -140,7 +140,7 @@ class module_link extends module{
 	}
 	
 	public function _admin(){
-		$this->_result = $this->_query->select()->from('module_link')->where('menu',0)->order('position,order,id')->query2assoc_array('id',NULL,false);
+		$this->_result = $this->_query->select()->from('module_link')->where('inactive',0)->order('position,order,id')->query2assoc_array('id',NULL,false);
 		$params = $this->_query->select()->from('module_link_param')->where('link_id',array_keys($this->_result),'in')->query();
 		foreach($params as &$param)
 			$this->_result[$param['link_id']]['params'][] = $param;
