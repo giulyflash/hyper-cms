@@ -111,7 +111,7 @@ class object_sql_query{
 					throw new my_exception('wrong value type');
 				if($operand == '=' && $value === NULL)
 					$sql = $quot.self::escstr($name).$quot.' IS NULL';
-				if($operand == 'like')
+				elseif($operand == 'like')
 					$sql = $quot.self::escstr($name).$quot.' LIKE "%'.self::escstr($value).'%"';
 				else
 					$sql = $quot.self::escstr($name).$quot.$operand.'"'.self::escstr($value).'"';

@@ -331,10 +331,32 @@ class app extends module{
 				$this->center_method = $call[2];
 			}
 		}
+		elseif(!$this->admin_mode && $this->_config('config_from_db') &&
+			$db_call = $this->_query->select(array('param_name','value'))->from('module_param')->where('module_name','app')->_and('param_name',array('default_module','default_method','default_param'),'in')->query()
+		){
+			foreach(array_keys($db_call) as $key)
+				$db_call[$db_call[$key]['param_name']] = $db_call[$key]['value'];
+			if(empty($db_call['default_module']))
+				throw new my_exception('default call module not found in db');
+			else
+				$this->center_module = $db_call['default_module'];
+			if(!empty($db_call['default_method']))
+				$this->center_method = $db_call['default_method'];
+			if(!empty($db_call['default_param']))
+				$this->center_params = $this->parse_center_params($db_call['default_param']);
+		}
 		elseif($default_module = $this->_config('default_module'))
 			$this->center_module = $default_module;
 		else
 			throw new my_exception('default module not found');
+	}
+	
+	private function parse_center_params($params){
+		$result = array();
+		preg_match_all('%(.*?)=(.*?)(;|$)%', $params, $temp_params);
+		foreach($temp_params as $key=>&$param_name)
+			$result[$param_name] = $temp_params[2][$key];
+		return $result;
 	}
 	
 	private function get_module_link(){
@@ -350,7 +372,7 @@ class app extends module{
 			'module_name' => $this->center_module,
 			'method_name' => $this->center_method, 
 			'position' => $this->_config('main_position_name'),
-			'params' => NULL,
+			'params' => (!empty($this->center_params))?$this->center_params:NULL,
 		));
 	}
 	
@@ -458,16 +480,18 @@ class app extends module{
 		if($this->center_method)
 			$center_method[] = $this->center_method;//TODO nedd to get center method from call
 		//TODO not only central link
-		//$this->_query->echo_sql = true;
+		//var_dump($this->admin_mode);
 		$call_db_list = $this->_query->select('module_name, method_name, position, id')->from('module_link')->
-			where('exclude',1,'!=')->_and('menu',0)->_and('center_module',$center_module,'in')->_and('center_method',$center_method,'in')->_and('admin_mode',$this->admin_mode)->
+			where('exclude',1,'!=')->_and('inactive',0)->_and('center_module',$center_module,'in')->_and('center_method',$center_method,'in')->_and('admin_mode',$this->admin_mode)->
 			order('order,id')->query();
 		//create array of link_id for query
+		//var_dump($call_db_list);
 		$link_list = array();
 		if($call_db_list){
-			foreach($call_db_list as $call)
+			foreach($call_db_list as &$call)
 				if(!isset($link_list[$call['id']]))
 					$link_list[$call['id']] = true;
+			$call['params'] = array();
 			$link_param = $this->_query->select()->from('module_link_param')->where('link_id',array_keys($link_list),'in')->query();
 			//grouping params by link_id
 			$param_group = array();
@@ -494,7 +518,7 @@ class app extends module{
 		//get config for modules from db and put them to cache
 		$this->get_module_list();
 		if($this->_config('config_from_db')){
-			$db_params = $this->_query->select('module_name,param_name,value')->from('module_param')->where('module_name',$this->module_list,'in')->query();
+			$db_params = $this->_query->select('module_name,param_name,value')->from('module_param')->where('module_name',array_merge(array('app'),$this->module_list),'in')->query();
 			foreach($db_params as $param)
 				$this->config_cache[$param['module_name']][$param['param_name']] = $param['value'];
 		}
@@ -686,7 +710,7 @@ class app extends module{
 	}
 	
 	private function get_call_method(&$module, &$call){
-		if(!empty($call['method_name']))
+		if(!empty($call['method_name']) && $call['method_name']!='*')
 			return $call['method_name'];
 		if($default_method_name = $module->_config('default_method'))
 			return $default_method_name;
@@ -762,9 +786,9 @@ class app extends module{
 		}
 	}
 	
-	private function user_module_exists($user_default_method){
+	private function user_module_exists($user_default_method='form'){
 		foreach($this->call_list as $call)
-			if($call['module_name'] == 'user' && ($call['method_name'] == 'form' || !$call['method_name']))
+			if($call['module_name'] == 'user' && ($call['method_name'] == $user_default_method || !$call['method_name'] || $call['method_name']=='*'))
 				return true;
 	}
 	
@@ -789,6 +813,7 @@ class app extends module{
 		//if $args is array $_REQUEST params will be ignored
 		$method_reflection = new ReflectionMethod($obj,$method);
 		$params_reflection = $method_reflection->getParameters();
+		$disable_php_filter = $this->_config('disable_php_filter');
 		$params = array();
 		foreach($params_reflection as &$param_reflection){
 			$param_name = $param_reflection->name;
@@ -809,7 +834,7 @@ class app extends module{
 						$filter = $default_argument_filter;
 					if(!$filter)
 						$value = false;
-					elseif($filter!=$this->_config('disable_php_filter')){
+					elseif($filter!=$disable_php_filter){
 						$value = filter_var($value, $filter);
 					}
 				}
@@ -914,6 +939,8 @@ class app extends module{
 	}
 	
 	public function redirect($location,$params=array()){
+		if(!isset($_SESSION))
+			session_start();
 		if($this->error)
 			$_SESSION['error'] = $this->error;
 		if($this->message)

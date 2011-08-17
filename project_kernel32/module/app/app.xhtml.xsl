@@ -91,7 +91,7 @@
 	<xsl:param name="page"/>
 	<xsl:param name="url"/>
 	<!--<xsl:param name="max_page_count" select="5"/>-->
-	<xsl:param name="page_indent" select="3"/>
+	<xsl:param name="page_indent" select="5"/>
 	<!--<xsl:value-of select="concat($obj_count,'|',$page_size,'|',$page,'|',$url)"/>-->
 	<xsl:variable name="page_new"><xsl:if test="not($page) or $page=''">1</xsl:if><xsl:value-of select="$page"/></xsl:variable>
 	<xsl:variable name="page_count" select="ceiling($obj_count div $page_size)"/>
@@ -111,33 +111,40 @@
 		<div class="pagenavigation">
 			<xsl:if test="$page_new &gt; 1">
 				<span class="toback" alt="назад" title="назад">
-					<a href="{$url}&amp;page={-1+$page_new}">
+					<a href="{$url}&amp;page={-1+$page_new}"  alt="{-1+$page_new}" title="{-1+$page_new}">
 						&lt;
 					</a>
 				</span>
 				<xsl:if test="$page_start &gt; 1">
 					<span class="toback" alt="1" title="1">
-						<a href="{$url}&amp;page=1">1</a>
-					</span>...
+						<a href="{$url}&amp;page=1" alt="1" title="1">1</a>
+					</span>
+					<span сlass="point">...</span>
 				</xsl:if>
 			</xsl:if>
+			<xsl:variable name="indent_tail"><xsl:choose>
+				<xsl:when test="$page = 1">3</xsl:when>
+				<xsl:when test="$page &lt; (-1+$page_indent)*2-1">2</xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose></xsl:variable>
 			<xsl:call-template name="show_nav">
 				<xsl:with-param name="page_count" select="$page_count"/>
 				<xsl:with-param name="url" select="$url"/>
 				<xsl:with-param name="page" select="$page_start"/>
-				<xsl:with-param name="page_lim" select="$page_start+2*$page_indent"/>
+				<xsl:with-param name="page_lim" select="$page_start+2*$page_indent+$indent_tail"/>
 				<xsl:with-param name="curr_page" select="$page_new"/>
 			</xsl:call-template>
 			<xsl:if test="$page_new &lt; $page_count">
 				<xsl:if test="$page_start+2*$page_indent &lt; $page_count">
-					...<span class="forward" alt="{$page_count}" title="{$page_count}">
-						<a href="{$url}&amp;page={$page_count}">
+					<span сlass="point">...</span>
+					<span class="forward" alt="{$page_count}" title="{$page_count}">
+						<a href="{$url}&amp;page={$page_count}" alt="{$page_count}" title="{$page_count}">
 							<xsl:value-of select = "$page_count"/>
 						</a>
 					</span>
 				</xsl:if>
 				<span class="forward" alt="вперед" title="вперед">
-					<a href="{$url}&amp;page={$page_new+1}">
+					<a href="{$url}&amp;page={$page_new+1}"  alt="{$page_new+1}" title="{$page_new+1}">
 						&gt;
 					</a>
 				</span>

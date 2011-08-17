@@ -13,6 +13,19 @@
 			</li>
 		</xsl:for-each>
 	</ul>
+	<p>
+		<a href="/admin.php?call=admin._admin">Общие настройки</a>
+	</p>
+</xsl:template>
+
+<xsl:template match="root/module/item[_module_name='admin' and _method_name='']">
+	<a href="/admin.php?call=admin.main_page">Главная страница</a>
+</xsl:template>
+
+<xsl:template match="root/module/item[_module_name='admin' and _method_name='main_page']">
+	<xsl:call-template name="module_link_wizard">
+		<xsl:with-param name="name">Что связываем:</xsl:with-param>
+	</xsl:call-template>
 </xsl:template>
 
 </xsl:stylesheet>

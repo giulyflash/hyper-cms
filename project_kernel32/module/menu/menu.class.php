@@ -3,7 +3,7 @@ class menu extends base_module{
 	protected $config_class_name = 'menu_config';
 	
 	public function _admin($page=null, $count=null, $show='all'){
-		$this->_result = $this->_query->select()->from('menu')->query();
+		$this->_result = $this->_query->select()->from($this->module_name)->query();
 		$this->_result['lt'] = '<';
 		$this->_result['gt'] = '>';
 		if(!$this->_result)
@@ -13,7 +13,7 @@ class menu extends base_module{
 	public function get($id = 1, $show_title=NULL){
 		parent::get_category(NULL,NULL,NULL,NULL,'id,title,depth,link',array('menu_id',$id));
 		if($show_title)
-			$this->_result['title'] = $this->_query->select('title')->from('menu')->where('id',$id)->query1('title');
+			$this->_result['title'] = $this->_query->select('title')->from($this->module_name)->where('id',$id)->query1('title');
 	}
 	
 	/*function build_menu(&$src, &$result_node, $parent_id=NULL){

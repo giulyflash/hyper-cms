@@ -20,12 +20,10 @@
 				<div class="user_container">
 					<div class="input_container">
 						<p>
-							<label for="_user_login">Логин</label>
-							<input id="_user_login" name="login" autocomplete="off"/>
+							<input placeholder="логин" name="login" autocomplete="off"/>
 						</p>
 						<p>
-							<label for="_user_password">Пароль</label>
-							<input id="_user_password" type="password" name="password"/>
+							<input placeholder="пароль" type="password" name="password"/>
 						</p>
 					</div>
 					<xsl:if test="not(_config/registration) or config/registration!=''">

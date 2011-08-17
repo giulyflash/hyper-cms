@@ -5,15 +5,21 @@ class admin_config extends module_config{
 	);
 	
 	protected $callable_method=array(
-		'get'=>array(
+		'get,_admin,main_page'=>array(
 			'__access__' => array(
-				__CLASS__ => self::role_read,
+				__CLASS__ => self::role_write,
 			),
 		),
+	);
+	
+	protected $template_include = array(
+		'module/module_link/link_wizard.xhtml.xsl',
 	);
 }
 
 class admin extends module{
+	public function _admin(){}
+	
 	protected $config_class_name = 'admin_config';
 	
 	public function get(){
@@ -84,6 +90,11 @@ class admin extends module{
 	private function check_method_exclude($method, &$callable_method){
 		if(!empty($callable_method[$method][$this->parent->_config('exclude_method_from_link_list')]))
 		return true;
+	}
+	
+	public function main_page(){
+		$module_link = new module_link($this->parent);
+		$module_link->edit();
 	}
 }
 ?>
