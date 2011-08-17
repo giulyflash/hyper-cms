@@ -25,16 +25,15 @@ class site_nbk extends module{
 			$redirect_params['column'] = $column_str;
 		}
 		else{
-			$select_str = 'SELECT ';
+			$select_str = 'SELECT `id`';
 			$i = 0;
 			foreach(array_keys($field) as $field_name){
 				if($chr = substr($column,$i,1))
-					$select_str.= (isset($field[$field_name]['field'])?$field[$field_name]['field']:$field_name).', ';
+					$select_str.= ', '.(isset($field[$field_name]['field'])?$field[$field_name]['field']:$field_name);
 				else
 					unset($field[$field_name]);
 				$i++;
 			}
-			$select_str = substr($select_str,0,-2);
 		}
 		$this->_query->injection($select_str)->from($tablename);
 		if($search){
@@ -51,7 +50,7 @@ class site_nbk extends module{
 			$this->_query->_or('control_summ',$search,'like');
 			$this->_query->_or('comment',$search,'like');
 		}
-		elseif($filter){
+		if($filter){
 			if(is_array($filter))
 				$filter_is_array = true;
 			else{
@@ -176,11 +175,11 @@ class site_nbk extends module{
 				$field_value['order'] = $field_name.($order?',':'').$order;
 		}
 		$this->_result['_field'] = $field;
-		$this->_result['field_row'] = $this->_config('field');
+		$this->_result['field_raw'] = $this->_config('field');
 		//
 		if($filter = json_decode($filter,true))
 			foreach($filter as $field=>&$value)
-				$this->_result['field_row'][$field]['value'] = $value;
+				$this->_result['field_raw'][$field]['value'] = $value;
 	}
 	
 	public function mb_ucfirst($str, $enc = null){
@@ -287,7 +286,7 @@ class site_nbk extends module{
 	public function edit($id=NULL, $filter=NULL,$order=NULL,$count=NULL,$column=NULL){
 		$reverse_date_pattern = $this->_config('reverse_date_pattern');
 		$reverse_replace_pattern = $this->_config('reverse_replace_pattern');
-		$this->_result['field'] = $this->_config('field');
+		$this->_result['field_raw'] = $this->_config('field');
 		if($id){
 			$field_value = $this->_query->select()->injection(',DATE_FORMAT(debt_date,"%d.%m.%Y") as debt_date_formatted, DATE_FORMAT(pay_date,"%d.%m.%Y") as pay_date_formatted ')->from($tablename = $this->_config('table'))->where('id',$id)->query1();
 			//var_dump($field_value);
@@ -295,10 +294,10 @@ class site_nbk extends module{
 				$this->_message('record not found by id',array('id'=>$id));
 			else
 				foreach($field_value as $name=>&$value){
-					if(isset($this->_result['field'][$name])){
-						if($this->_result['field'][$name]['type']=='date')
+					if(isset($this->_result['field_raw'][$name])){
+						if($this->_result['field_raw'][$name]['type']=='date')
 							$value = preg_replace($reverse_date_pattern,$reverse_replace_pattern,$value);
-						$this->_result['field'][$name]['value'] = $value;
+						$this->_result['field_raw'][$name]['value'] = $value;
 					}
 				}
 		}

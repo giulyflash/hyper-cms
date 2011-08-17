@@ -17,16 +17,26 @@ $(function(){
 		}
 		return false;
 	});
-	$('.page_nav span.filter>img, .page_nav span.column>img, .page_nav .div_logo').click(function(){
-		if($(this).attr('class')=='div_logo')
+	$('.page_nav span.filter>img, .page_nav span.column>img, .page_nav .div_logo, .page_nav input.cancel').click(function(){
+		if($(this).hasClass('div_logo'))
 			var div = $(this).parent();
+		else if($(this).hasClass('cancel'))
+			var div = $(this).parent().parent().parent().parent().parent().parent().parent();
 		else
 			var div = $(this).parent().find('>div');
 		div.toggle();
-		$('div.curtain').toggle();
+		var curtain = $('div.curtain'); 
+		curtain.toggle();
+		curtain.height($(document).height());
+		return false;
 	});
 	$('div.curtain').click(function(){
 		$('.page_nav span.filter>div, .page_nav span.column>div,div.curtain').hide();
+	});
+	$('.filter_radio_type_switch').click(function(){
+		if($(this).val()=='1'){
+			
+		}
 	});
 });
 

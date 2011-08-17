@@ -1,17 +1,17 @@
 .nbk_admin_file{
 	margin: 0 auto;
 }
-
-table.nbk_admin{
-	border-color: black;
+table.nbk_admin, table.nbk_admin td, table.nbk_admin th{
+	border-color: #999999;
 	border-style: solid;
+}
+table.nbk_admin{
 	border-width: 1px 0 0 1px;
 	border-collapse: collapse;
 	min-width: 1000px;
 }
 table.nbk_admin td, table.nbk_admin th{
 	border-width: 0 1px 1px 0;
-	border-style: solid;
 	padding: 0px 8px;
 }
 table.nbk_admin td a, table.nbk_admin th a{
@@ -53,12 +53,21 @@ div.pagenavigation .point{
 	color: blue;
 	text-decoration: none;
 }
-
-div.page_nav div, div.page_nav form{
-	display: inline;
+.page_nav form span{
+	padding-left: 10px;
 }
-div.page_nav form{
-	padding-left: 1em;
+.page_nav form div{
+	padding: 6px 7px 5px 5px;
+	border: 1px solid #777;
+	border-radius: 10px;
+	display: inline;
+	margin-left: 10px;
+}
+.page_nav form div span:FIRST-CHILD{
+	padding-left: 0;
+}
+.page_nav{
+	padding-bottom: 3px;
 }
 
 .page_nav form>span, .page_nav form>span input, .page_nav td>span{
@@ -99,9 +108,9 @@ p.empty{
 .nbk_kolumn_picker tr:last-child td{
 	text-align: center;
 }
-
 .page_nav td:FIRST-CHILD img{
 	margin-right: 8px;
+	cursor: pointer;
 }
 .page_nav td:FIRST-CHILD a:last-child img{
 	margin-right: 0;
@@ -122,6 +131,11 @@ a.page_nav_control:hover{
 	position: absolute;
 	display: none;
 }
+.page_nav .filter h4, .page_nav .column h4{
+	margin: 0 auto 10px;
+	text-align: center;
+	text-decoration: underline;
+} 
 .page_nav .filter div div, .page_nav .column div div{
 	position: relative;
 	top: -40px;
@@ -133,6 +147,9 @@ a.page_nav_control:hover{
 	border-radius: 0px 15px 15px 15px;
 	z-index: 12;
 }
+.page_nav .column div div{
+	border-radius: 15px;
+}
 .page_nav img.div_logo{
 	position: relative;
 	top: -38px;
@@ -143,6 +160,9 @@ a.page_nav_control:hover{
 	display: block;
 	z-index: 13;
 	background: white;
+}
+.page_nav img.column_logo{
+	left: 73px;
 }
 .curtain{
 	z-index: 10;
