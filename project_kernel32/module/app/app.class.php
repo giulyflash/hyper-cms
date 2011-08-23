@@ -162,10 +162,12 @@ class app extends module{
 		//
 		if(!isset($_SESSION['call']))
 			$_SESSION['call'] = array();
-		if(!isset($_SESSION['call'][0]) || $_SERVER['REQUEST_URI']!=$_SESSION['call'][0])
-			array_unshift($_SESSION['call'],$_SERVER['REQUEST_URI']);
+		$request_uri = (!empty($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/favicon.ico')?$_SERVER['REQUEST_URI']:'/';
+		if(!isset($_SESSION['call'][0]) || $request_uri!=$_SESSION['call'][0])
+			array_unshift($_SESSION['call'],$request_uri);
 		if(count($_SESSION['call'])>$this::call_list_count)
 			array_splice($_SESSION['call'],-1);
+		//var_dump($_SESSION['call']);
 	}
 	
 	//error section

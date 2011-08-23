@@ -88,7 +88,7 @@
 				</td>
 				<td><b>Порядковый номер:</b></td>
 				<td>
-					<select name="order" autocompleate="off">
+					<select name="order" autocomplete="off">
 						<xsl:call-template name="order_loop">
 							<xsl:with-param name="max">10</xsl:with-param>
 							<xsl:with-param name="selected" select="link_data/order"/>

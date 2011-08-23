@@ -17,6 +17,8 @@ table.nbk_admin td, table.nbk_admin th{
 table.nbk_admin td a, table.nbk_admin th a{
 	color: black;
 	text-decoration: none;
+	width:100%;
+	display: block;
 }
 
 table.nbk_admin td a.href, table.nbk_admin td a.remove{
@@ -54,7 +56,10 @@ div.pagenavigation .point{
 	text-decoration: none;
 }
 .page_nav form span{
-	padding-left: 10px;
+	padding-left: 4px;
+}
+.page_nav form span:FIRST-CHILD{
+	padding-left: 6px;
 }
 .page_nav form div{
 	padding: 6px 7px 5px 5px;
@@ -76,17 +81,17 @@ div.pagenavigation .point{
 .page_nav tr:FIRST-CHILD span{
 	margin-left: 0;
 }
-table.nbk_filter{
+table.nbk_input{
 	border-collapse: collapse;
 }
-table.nbk_filter tr td{
+table.nbk_input tr td{
 	padding: 8px;
-	border-top: 1px dotted #777;
+	border-bottom: 1px dotted #777;
 }
-table.nbk_filter tr:last-child td, table.nbk_filter tr:first-child td{
+table.nbk_input tr:last-child td{
 	border: 0;
 }
-table.nbk_filter tr:last-child td{
+table.nbk_input tr:last-child td{
 	text-align: center;
 }
 

@@ -5,7 +5,7 @@ class site_nbk extends module{
 	
 	public function _admin(){}
 	
-	public function get($order='num',$page=1,$count=NULL,$search=NULL,$filter=NULL, $column=NULL){
+	public function get($order='num',$page=1,$count=NULL,$search=NULL,$filter=NULL, $column=NULL, $export=NULL){
 		if(!$column)
 			$column = $this->_config('column');
 		if(!$count)
@@ -28,10 +28,10 @@ class site_nbk extends module{
 			$select_str = 'SELECT `id`';
 			$i = 0;
 			foreach(array_keys($field) as $field_name){
-				if($chr = substr($column,$i,1))
+				if((int)substr($column,$i,1)){
 					$select_str.= ', '.(isset($field[$field_name]['field'])?$field[$field_name]['field']:$field_name);
-				else
-					unset($field[$field_name]);
+					$field[$field_name]['selected'] = 1;
+				}
 				$i++;
 			}
 		}
@@ -50,7 +50,7 @@ class site_nbk extends module{
 			$this->_query->_or('control_summ',$search,'like');
 			$this->_query->_or('comment',$search,'like');
 		}
-		if($filter){
+		if($filter && !$redirect_params){
 			if(is_array($filter))
 				$filter_is_array = true;
 			else{
@@ -62,7 +62,6 @@ class site_nbk extends module{
 			if($filter){
 				$date_pattern = $this->_config('date_pattern');
 				$replace_patterd = $this->_config('replace_patterd');
-				//
 				$this->_query->injection(' WHERE 1=1 ');
 				$field_conf = $this->_config('field');
 				foreach(array_keys($filter) as $field_name){
@@ -71,15 +70,19 @@ class site_nbk extends module{
 					switch($field_conf[$field_name]['type']){
 						case 'string':
 						case 'text':{
-							if(strlen($filter[$field_name]))
+							if(strlen($filter[$field_name])){
 								$this->_query->_and($field_name,$filter[$field_name],'like');
+								$field[$field_name]['filter'] = $filter[$field_name];
+							}
 							else
 								unset($filter[$field_name]);
 							break;
 						}
 						case 'bool':{
-							if($filter[$field_name]!='')
+							if($filter[$field_name]!=''){
 								$this->_query->_and($field_name,$filter[$field_name]);
+								$field[$field_name]['filter'] = $filter[$field_name];
+							}
 							else
 								unset($filter[$field_name]);
 							break;
@@ -90,6 +93,8 @@ class site_nbk extends module{
 									if($field_conf[$field_name]['type']=='date')
 										$filter[$field_name]['min'] = preg_replace($date_pattern, $replace_patterd, $filter[$field_name]['min']);
 									$this->_query->_and($field_name,$filter[$field_name]['min']);
+									$field[$field_name]['filter']['type'] = 1;
+									$field[$field_name]['filter']['min'] = $filter[$field_name]['min'];
 									unset($filter[$field_name]['max']);
 								}
 								else
@@ -103,18 +108,21 @@ class site_nbk extends module{
 									if(isset($filter[$field_name]['max']) && $filter[$field_name]['max']!==''){
 										if($field_conf[$field_name]['type']=='date')
 											$filter[$field_name]['max'] = preg_replace($date_pattern, $replace_patterd, $filter[$field_name]['max']);
+										$field[$field_name]['filter']['max'] = $filter[$field_name]['max'];
 										$this->_query->_and($field_name,array($filter[$field_name]['min'],$filter[$field_name]['max']),'between');
 									}
 									else{
 										$this->_query->_and($field_name,$filter[$field_name]['min'],'>=');
 										unset($filter[$field_name]['max']);
 									}
+									$field[$field_name]['filter']['min'] = $filter[$field_name]['min'];
 								}
 								else{
 									if(isset($filter[$field_name]['max']) && $filter[$field_name]['max']!==''){
 										if($field_conf[$field_name]['type']=='date')
 											$filter[$field_name]['max'] = preg_replace($date_pattern, $replace_patterd, $filter[$field_name]['max']);
 										$this->_query->_and($field_name,$filter[$field_name]['max'],'<=');
+										$field[$field_name]['filter']['max'] = $filter[$field_name]['max'];
 										unset($filter[$field_name]['min']);
 									}
 									else
@@ -128,23 +136,30 @@ class site_nbk extends module{
 					$redirect_params['filter'] = json_encode($filter);
 			}
 		}
-		if($redirect_params){
-			if($order)
-				$redirect_params['order'] = $order;
-			if($page && $page!=1)
-				$redirect_params['page'] = $page;
-			if($count && $count!=$this->_config('page_count'))
-				$redirect_params['count'] = $count;
-			if($search)
-				$redirect_params['search'] = $search;
-			if($filter && !isset($redirect_params['filter']))
-				$redirect_params['filter'] = $filter;
-			if($column && !isset($redirect_params['column']) && $column!=$this->_config('column'))
-				$redirect_params['column'] = $column_str;
-			$this->parent->redirect('/?call='.$this->module_name,$redirect_params);
-		}
+		if($redirect_params)
+			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($order,$page,$count,$search,$filter,$column,$export,$redirect_params));
 		//$this->_query->echo_sql = true;
-		$this->_result = $this->_query->order($order)->query_page($page,$count);
+		$this->_query->order($order);
+		if($export){
+			$result = $this->_query->query();
+			require_once ('extensions/PHPExcel/PHPExcel.php');
+			$objPHPExcel = new PHPExcel();
+			$objPHPExcel->setActiveSheetIndex(0);
+			$objPHPExcel->getActiveSheet()->SetCellValue('A1', 'Hello');
+			$objPHPExcel->getActiveSheet()->SetCellValue('B2', 'world!');
+			$objPHPExcel->getActiveSheet()->SetCellValue('C1', 'Hello');
+			$objPHPExcel->getActiveSheet()->SetCellValue('D2', 'world!');
+			$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+			ob_end_clean();
+			header('Content-Type: application/ms-excel');
+			header('Content-Disposition: attachment;filename="Report.xls"');
+			$objWriter->save('php://output');
+			$objPHPExcel->disconnectWorksheets();
+			unset($objPHPExcel);
+			die;
+		}
+		else
+			$this->_result = $this->_query->query_page($page,$count);
 		//impossible to do mor than 700 turns for loop in XSLT, have to do it there
 		$this->_result['__max_page'] = ceil($this->_result['__num_rows']/$count);
 		$page_select_html = '';
@@ -154,32 +169,50 @@ class site_nbk extends module{
 			$this->_result['_page_select_html'] = &$page_select_html;
 		$this->_result['_default_page_count'] = &$this->_config('page_count');
 		//$field = $this->_config('field');
+		
 		foreach($field as $field_name=>&$field_value){
-			if(strpos($order,$field_name)!==false){
-				if(strpos($order,$field_name.' desc')!==false){
-					$to_replace = (strpos($order,$field_name.' desc,')!==false)?($field_name.' desc,'):($field_name.' desc');
-					$field_value['order'] = trim(str_replace($to_replace, '', $order));
-					$field_value['order'] = $field_name.($field_value['order']?',':'').$field_value['order'];
-					$field_value['desc'] = 'desc';
+			if($filter && isset($filter[$field_name]))
+				$field_value['value'] = $filter[$field_name];
+			if(isset($field_value['selected'])){
+				if(strpos($order,$field_name)!==false){
+					if(strpos($order,$field_name.' desc')!==false){
+						$to_replace = (strpos($order,$field_name.' desc,')!==false)?($field_name.' desc,'):($field_name.' desc');
+						$field_value['order'] = trim(str_replace($to_replace, '', $order));
+						$field_value['order'] = $field_name.($field_value['order']?',':'').$field_value['order'];
+						$field_value['desc'] = 'desc';
+					}
+					else{
+						$to_replace = (strpos($order,$field_name.',')!==false)?($field_name.','):$field_name;
+						$field_value['order'] = trim(str_replace($to_replace, '', $order));
+						$field_value['order'] = $field_name.' desc'.($field_value['order']?',':'').$field_value['order'];
+						$field_value['desc'] = 'asc';
+					}
+					if(substr($field_value['order'],-1)==',')
+						$field_value['order'] = substr($field_value['order'],0,-1);
 				}
-				else{
-					$to_replace = (strpos($order,$field_name.',')!==false)?($field_name.','):$field_name;
-					$field_value['order'] = trim(str_replace($to_replace, '', $order));
-					$field_value['order'] = $field_name.' desc'.($field_value['order']?',':'').$field_value['order'];
-					$field_value['desc'] = 'asc';
-				}
-				if(substr($field_value['order'],-1)==',')
-					$field_value['order'] = substr($field_value['order'],0,-1);
+				else
+					$field_value['order'] = $field_name.($order?',':'').$order;
 			}
-			else
-				$field_value['order'] = $field_name.($order?',':'').$order;
 		}
 		$this->_result['_field'] = $field;
-		$this->_result['field_raw'] = $this->_config('field');
-		//
-		if($filter = json_decode($filter,true))
-			foreach($filter as $field=>&$value)
-				$this->_result['field_raw'][$field]['value'] = $value;
+	}
+	
+	private function get_redirect_params($order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $redirect_params=array()){
+		if($order && $order!='num')
+			$redirect_params['order'] = $order;
+		if($page && $page!=1)
+			$redirect_params['page'] = $page;
+		if($count && $count!=$this->_config('page_count'))
+			$redirect_params['count'] = $count;
+		if($search)
+			$redirect_params['search'] = $search;
+		if($filter && !isset($redirect_params['filter']))
+			$redirect_params['filter'] = $filter;
+		if($column && !isset($redirect_params['column']) && $column!=$this->_config('column'))
+			$redirect_params['column'] = $column;
+		if($export)
+			$redirect_params['export'] = $export;
+		return $redirect_params;
 	}
 	
 	public function mb_ucfirst($str, $enc = null){
@@ -188,7 +221,7 @@ class site_nbk extends module{
 	}
 
 	
-	public function generate($is_default=false){
+	public function import($is_default=true){
 		if($is_default)
 			return;
 		if(empty($_FILES["path"]["name"])){
@@ -267,67 +300,55 @@ class site_nbk extends module{
 		return $output;
 	}
 	
-	public function filter($filter=NULL,$order=NULL,$count=NULL,$column=NULL){
-		$reverse_date_pattern = $this->_config('reverse_date_pattern');
-		$reverse_replace_pattern = $this->_config('reverse_replace_pattern');
-		$this->_result['field'] = $this->_config('field');
-		if($filter = json_decode($filter,true))
-			foreach($filter as $field=>&$value){
-				if($this->_result['field'][$field]['type']=='date'){
-					if(isset($value['min']))
-						$value['min'] = preg_replace($reverse_date_pattern, $reverse_replace_pattern, $value['min']);
-					if(isset($value['max']))
-						$value['max'] = preg_replace($reverse_date_pattern, $reverse_replace_pattern, $value['max']);
-				}
-				$this->_result['field'][$field]['value'] = $value;
-			}
-	}
-	
-	public function edit($id=NULL, $filter=NULL,$order=NULL,$count=NULL,$column=NULL){
-		$reverse_date_pattern = $this->_config('reverse_date_pattern');
-		$reverse_replace_pattern = $this->_config('reverse_replace_pattern');
-		$this->_result['field_raw'] = $this->_config('field');
+	public function edit($id=NULL, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL){
+		$this->_result['_field'] = $this->_config('field');
 		if($id){
-			$field_value = $this->_query->select()->injection(',DATE_FORMAT(debt_date,"%d.%m.%Y") as debt_date_formatted, DATE_FORMAT(pay_date,"%d.%m.%Y") as pay_date_formatted ')->from($tablename = $this->_config('table'))->where('id',$id)->query1();
-			//var_dump($field_value);
+			$select_str = 'SELECT `id`';
+			foreach($this->_result['_field'] as $field_name=>&$field)
+				$select_str.= ', '.(isset($field['field'])?$field['field']:('`'.$field_name.'`'));
+			$field_value = $this->_query->injection($select_str)->from($tablename = $this->_config('table'))->where('id',$id)->query1();
 			if(!$field_value)
 				$this->_message('record not found by id',array('id'=>$id));
 			else
-				foreach($field_value as $name=>&$value){
-					if(isset($this->_result['field_raw'][$name])){
-						if($this->_result['field_raw'][$name]['type']=='date')
-							$value = preg_replace($reverse_date_pattern,$reverse_replace_pattern,$value);
-						$this->_result['field_raw'][$name]['value'] = $value;
-					}
-				}
+				foreach($field_value as $name=>&$value)
+					$this->_result['_field'][$name]['value'] = $value;
 		}
 	}
 	
-	public function save($id=NULL, $filter=NULL,$order=NULL,$count=NULL, $column=NULL){
-		
-	}
-	
-	public function column($filter=NULL,$order=NULL,$count=NULL, $column=NULL){
-		$this->_result['field'] = $this->_config('field');
-		$i=0;
-		foreach($this->_result['field'] as $field_name=>&$field){
-			if(substr($column,$i,1))
-				$field['active'] = 1;
-			$i++;
+	public function save($value=NULL, $id=NULL, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $redirect=true){
+		//var_dump($value);die;
+		$date_pattern = $this->_config('date_pattern');
+		$replace_pattern = $this->_config('replace_pattern');
+		$field = $this->_config('field');
+		foreach($value as $name=>&$val){
+			if(isset($field[$name]['type']) && $field[$name]['type']=='date')
+				$val=$this->convert_date($val,$date_pattern,$replace_pattern);
 		}
+		$tablename = $this->_config('table');
+		if($id){
+			$this->_query->update($tablename)->set($value)->limit(1)->execute();
+			$this->_message('record edited successfully');
+		}
+		else{
+			$this->_query->insert($tablename)->values($value)->execute();
+			$this->_message('record added successfully');
+		}
+		if($redirect)
+			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($order,$page,$count,$search,$filter,$column,$export));
 	}
 }
 
 class site_nbk_config extends module_config{
 	protected $callable_method=array(
-		'generate,generate_works,_admin,edit,edit_comment,edit_account_comment,remove,get,filter,column'=>array(
+		'import,_admin,edit,remove,get,save'=>array(
 			'__access__' => array(
 				__CLASS__ => self::role_write,
 			),
 		),
-		'get,filter,column'=>array(
+		'get,edit,save'=>array(
 			'filter'=>'_disable_filter',
 			'column'=>'_disable_filter',
+			'value'=>'_disable_filter',
 		),
 	);
 	
@@ -335,11 +356,13 @@ class site_nbk_config extends module_config{
 		'get,filter,edit,column'=>'<link href="/module/site_nbk/index.css" rel="stylesheet" type="text/css"/>',
 		'get,filter,edit'=>'<link href="/module/site_nbk/index.css" rel="stylesheet" type="text/css"/>
 			<script src="/module/site_nbk/list.js"></script>',
-		'filter,edit'=>'<link rel="stylesheet" href="/extensions/datapicker/jquery.ui.all.css">
+		'get,edit'=>'<link rel="stylesheet" href="/extensions/datapicker/jquery.ui.all.css">
 			<script src="/extensions/datapicker/jquery.ui.core.js"></script>
 			<script src="/extensions/datapicker/jquery.ui.widget.js"></script>
 			<script src="/extensions/datapicker/jquery.ui.datepicker.js"></script>
 			<script src="/extensions/datapicker/jquery.ui.datepicker-ru.js"></script>',
+		'edit'=>'<script type="text/javascript" src="extensions/ckeditor/ckeditor.js"></script>
+			<script src="/module/site_nbk/edit.js"></script>'
 	);
 	
 	protected $field = array(
@@ -359,6 +382,9 @@ class site_nbk_config extends module_config{
 		'house'=>array(
 			'title'=>'Дом',
 			'type'=>'string',
+			//'field'=>'CONCAT(house,house_text) as house',
+			'sort'=>'house,house_text',
+			'sort_desc'=>'house desc,house_text desc',
 		),
 		'flat'=>array(
 			'title'=>'Квартира',
@@ -395,12 +421,12 @@ class site_nbk_config extends module_config{
 		'debt_date'=>array(
 			'title'=>'Месяц начала задолженности',
 			'type'=>'date',
-			'field'=>'DATE_FORMAT(debt_date,"%m.%Y") as debt_date',
+			'field'=>'DATE_FORMAT(debt_date,"%d.%m.%Y") as debt_date',
 		),
 		'pay_date'=>array(
 			'title'=>'Дата платежа',
 			'type'=>'date',
-			'field'=>'DATE_FORMAT(pay_date,"%m.%Y") as pay_date',
+			'field'=>'DATE_FORMAT(pay_date,"%d.%m.%Y") as pay_date',
 		),
 		'comment'=>array(
 			'title'=>'Комментарий',

@@ -19,7 +19,9 @@ $output_index_error = true;
 spl_autoload_register('autoload');
 function autoload($class_name){
 	global $output_index_error;
-	if (file_exists($class_file = _module_path.$class_name.'/'.$class_name._class_ext))
+	if(strpos($class_name, 'PHPExcel') !== False)
+		return;
+	elseif (file_exists($class_file = _module_path.$class_name.'/'.$class_name._class_ext))
 		require_once($class_file);
 	elseif(file_exists($class_file = _kernel_path.$class_name._class_ext))
 		require_once($class_file);
