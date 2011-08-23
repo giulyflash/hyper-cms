@@ -1,4 +1,5 @@
 $(function(){
+	console.log(window.location);
 	$('.page_nav select[name="page"]').first().focus();
 	$('.nbk_admin a.remove').click(function(){
 		if(!confirm('Вы действительно хотите удалить запись?'))
@@ -11,9 +12,21 @@ $(function(){
 		if(e['originalEvent']['keyCode']>=37 && e['originalEvent']['keyCode']<=40)
 			page_redirect($(this).parent().parent());
 	});
-	$('.filter_table input.drop').click(function(){
-		if(confirm('Вы действительно хотите сбросить текущий фильтр?')){
-			window.location = $(this).parent().parent().parent().parent().parent().attr('action');
+	$('.nbk_input input.drop').click(function(){
+		var text = 'Вы действительно хотите ';
+		var table =  $(this).parent().parent().parent().parent().parent();
+		switch(table.parent().attr('class')){
+			case 'filter': text = text + 'сбросить текущий фильтр'; break;
+			case 'column': text = text + 'сбросить выбор колонок'; break;
+			default: text = text + 'отменить редактирование';
+		}
+		text = text+'?';
+		if(confirm(text)){
+			var location = table.attr('action');
+			if(location != location.href)
+				window.location = location;
+			else
+				hide_curtain();
 		}
 		return false;
 	});
@@ -30,15 +43,28 @@ $(function(){
 		curtain.height($(document).height());
 		return false;
 	});
-	$('div.curtain').click(function(){
-		$('.page_nav span.filter>div, .page_nav span.column>div,div.curtain').hide();
-	});
-	$('.filter_radio_type_switch').click(function(){
-		if($(this).val()=='1'){
-			
+	$('div.curtain').click(hide_curtain);
+	$('.filter_radio_type_switch').change(function(){
+		var matches = $(this).parent().find('input[type="text"]');
+		var first = matches.first();
+		var last = matches.last();
+		if($(this).val()==1){
+			first.css('width','100%');
+			last.css('display','none');
+			$(this).parent().find('span').css('display','none');
+		}
+		else{
+			first.css('width','');
+			last.css('display','inline');
+			$(this).parent().find('span').css('display','inline');
 		}
 	});
+	$('.nbk_input .date input[type="text"]').datepicker();
 });
+
+function hide_curtain(){
+	$('.page_nav span.filter>div, .page_nav span.column>div,div.curtain').hide();
+}
 
 function page_redirect(form){
 	var location = /*'http://'+window.location.hostname+*/form.attr('action');
@@ -48,5 +74,8 @@ function page_redirect(form){
 		location = location+'&search='+form[0]['search'].value;
 	if(form[0]['page'].value && form[0]['page'].value!=1)
 		location = location+'&page='+form[0]['page'].value;
-	window.location = location; 
+	if(location != location.href)
+		window.location = location;
+	else
+		hide_curtain();
 }
