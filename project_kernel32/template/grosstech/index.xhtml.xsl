@@ -56,6 +56,7 @@
 					<div>
 						<div>
 							<div>
+								<a target="_blank" class="kasperski" href="http://www.kaspersky.ru/" alt="http://www.kaspersky.ru/" title="http://www.kaspersky.ru/"></a>
 								<p>
 									&#169; 2011 <a href="http://grosstech.ru">Grosstech</a>, <a href="mailto:kulakov.serg@gmail.com">Кулаков Сергей</a>
 								</p>

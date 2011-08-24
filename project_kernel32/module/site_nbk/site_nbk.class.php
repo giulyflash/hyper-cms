@@ -142,19 +142,61 @@ class site_nbk extends module{
 		$this->_query->order($order);
 		if($export){
 			$result = $this->_query->query();
+			//var_dump($result);die;
 			require_once ('extensions/PHPExcel/PHPExcel.php');
 			$objPHPExcel = new PHPExcel();
 			$objPHPExcel->setActiveSheetIndex(0);
-			$objPHPExcel->getActiveSheet()->SetCellValue('A1', 'Hello');
-			$objPHPExcel->getActiveSheet()->SetCellValue('B2', 'world!');
-			$objPHPExcel->getActiveSheet()->SetCellValue('C1', 'Hello');
-			$objPHPExcel->getActiveSheet()->SetCellValue('D2', 'world!');
+			$sheet=$objPHPExcel->getActiveSheet();
+			//
+			$col = 0;
+			$cellStyle = new PHPExcel_Style();
+			$cellStyle = array('borders' => array(	
+				'top'	=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
+				'right'	=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
+				'bottom'=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
+				'left'	=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
+			));
+			$headStyle = array(
+				'borders' => array(
+					'top'	=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
+					'right'	=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
+					'bottom'=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
+					'left'	=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
+				),
+				'font' => array(
+					'italic' => true,
+					'bold' => true,
+				)
+			);
+			foreach($field as &$item)
+				if(isset($item['selected'])){
+					$sheet->setCellValueByColumnAndRow($col, 1, $item['title']);
+					$sheet->getStyleByColumnAndRow($col,1)->applyFromArray($headStyle);
+					$col++;
+				}
+			foreach($result as $num=>&$item){
+				$col = 0;
+				foreach($item as $field_name=>&$value)
+					if($field_name!='id'){
+						/*switch($field[$field_name]['type']){
+							case 'date':
+								
+						}*/
+						$sheet->setCellValueByColumnAndRow($col, $num+2, $value);
+						$sheet->getStyleByColumnAndRow($col,$num+2)->applyFromArray($cellStyle);
+						$col++;
+					}
+			}
+			//
 			$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
 			ob_end_clean();
+			$cur_date = new DateTime();
+			$file_name='Report_'.(($export==1)?$cur_date->format('Y-m-d_H-i-s'):translit::transliterate($export)).'.xls';
 			header('Content-Type: application/ms-excel');
-			header('Content-Disposition: attachment;filename="Report.xls"');
+			header("Content-Disposition: attachment;filename=$file_name");
 			$objWriter->save('php://output');
 			$objPHPExcel->disconnectWorksheets();
+			unset($sheet);
 			unset($objPHPExcel);
 			die;
 		}
