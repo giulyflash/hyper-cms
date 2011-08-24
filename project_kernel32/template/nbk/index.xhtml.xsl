@@ -7,6 +7,9 @@
 	<xsl:call-template name="_head"/>
 </head>
 <body>
+	<!-- <xsl:for-each select="/root/session/call/item">
+		<p><xsl:value-of select="concat(position()-1,': ',.)"/></p>
+	</xsl:for-each> -->
 	<div class="container">
 		<xsl:call-template name="_call"/>
 	</div>

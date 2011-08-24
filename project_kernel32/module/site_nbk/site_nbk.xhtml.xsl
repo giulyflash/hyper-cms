@@ -366,7 +366,7 @@
 	<xsl:param name="href_filter"/>
 	<xsl:param name="href_column"/>
 	<xsl:param name="type">edit</xsl:param>
-	<div>
+	<div class="editor {$type}">
 		<xsl:choose>
 			<xsl:when test="$type='filter'">
 				<img class="div_logo" src="module/site_nbk/img/filter.png" alt="Фильтрация выборки" title="Фильтрация выборки"/>
@@ -375,58 +375,56 @@
 				<img class="div_logo column_logo" src="module/site_nbk/img/column.png" alt="Выбор колонок" title="Выбор колонок"/>
 			</xsl:when>
 		</xsl:choose>
-		<div class="{$type}">
-			<xsl:variable name="action"><xsl:choose>
-				<xsl:when test="$type='filter'"><xsl:value-of select="$href_column"/></xsl:when>
-				<xsl:when test="$type='column'"><xsl:value-of select="$href_filter"/></xsl:when>
-				<xsl:otherwise><xsl:value-of select="concat($href_column,$href_filter)"/></xsl:otherwise>
-			</xsl:choose></xsl:variable>
-			<xsl:variable name="method"><xsl:if test="$type='edit'">.save</xsl:if></xsl:variable>
-			<xsl:choose>
-				<xsl:when test="$type='filter'">
-					<h4>Фильтрация выборки</h4>
-				</xsl:when>
-				<xsl:when test="$type='column'">
-					<h4>Выбор колонок</h4>
-				</xsl:when>
-				<xsl:otherwise>
-					<h4>Редактирование записи № <xsl:value-of select="_field/id/value"/></h4>
-				</xsl:otherwise>
-			</xsl:choose>
-			<form class="nbk_editor_table {_method_name}" action="/?call={_module_name}{$method}{$href_order}{$href_page}{$href_count}{$href_search}{$action}" enctype="multipart/form-data" method="post">
-				<xsl:if test="_field/id"><input type="hidden" name="id" value="{_field/id}"/></xsl:if>
-				<table class="nbk_input">
-					<xsl:for-each select="_field/*">
-						<xsl:if test="name()!='id'">
-							<tr>
-								<xsl:if test="type='date'"><xsl:attribute name="class">date</xsl:attribute></xsl:if>
-								<xsl:choose>
-									<xsl:when test="$type='filter'"> 
-										<xsl:call-template name="nbk_filter_value"/>
-									</xsl:when>
-									<xsl:when test="$type='column'"> 
-										<xsl:call-template name="nbk_column_value"/>
-									</xsl:when>
-									<xsl:otherwise>
-										<xsl:call-template name="nbk_editor_value"/>
-									</xsl:otherwise>
-								</xsl:choose>
-							</tr>
+		<xsl:variable name="action"><xsl:choose>
+			<xsl:when test="$type='filter'"><xsl:value-of select="$href_column"/></xsl:when>
+			<xsl:when test="$type='column'"><xsl:value-of select="$href_filter"/></xsl:when>
+			<xsl:otherwise><xsl:value-of select="concat($href_column,$href_filter)"/></xsl:otherwise>
+		</xsl:choose></xsl:variable>
+		<xsl:variable name="method"><xsl:if test="$type='edit'">.save</xsl:if></xsl:variable>
+		<form action="/?call={_module_name}{$method}{$href_order}{$href_page}{$href_count}{$href_search}{$action}" enctype="multipart/form-data" method="post">
+			<xsl:if test="_field/id"><input type="hidden" name="id" value="{_field/id}"/></xsl:if>
+			<table class="nbk_input">
+				<tr>
+					<td colspan="2">
+						<h4>
+							<xsl:choose>
+								<xsl:when test="$type='filter'">Фильтрация выборки</xsl:when>
+								<xsl:when test="$type='column'">Выбор колонок</xsl:when>
+								<xsl:otherwise>Редактирование записи № <xsl:value-of select="_field/id/value"/></xsl:otherwise>
+							</xsl:choose>
+						</h4>
+					</td>
+				</tr>
+				<xsl:for-each select="_field/*">
+					<xsl:if test="name()!='id'">
+						<tr>
+							<xsl:if test="type='date'"><xsl:attribute name="class">date</xsl:attribute></xsl:if>
+							<xsl:choose>
+								<xsl:when test="$type='filter'"> 
+									<xsl:call-template name="nbk_filter_value"/>
+								</xsl:when>
+								<xsl:when test="$type='column'"> 
+									<xsl:call-template name="nbk_column_value"/>
+								</xsl:when>
+								<xsl:otherwise>
+									<xsl:call-template name="nbk_editor_value"/>
+								</xsl:otherwise>
+							</xsl:choose>
+						</tr>
+					</xsl:if>
+				</xsl:for-each>
+				<tr>
+					<td colspan="2">
+						<xsl:if test="$type='filter' or $type='column'">
+							<input type="submit" class="drop" value="сбросить"/>
 						</xsl:if>
-					</xsl:for-each>
-					<tr>
-						<td colspan="2">
-							<xsl:if test="$type='filter' or $type='column'">
-								<input type="submit" class="drop" value="сбросить"/>
-							</xsl:if>
-							<input type="submit" value="ок"/>
-							<xsl:variable name="cancel">window.location='/?call=<xsl:value-of select="concat(_module_name,$href_order,$href_page,$href_count,$href_search,$action)"/>'; return false;</xsl:variable>
-							<input type="submit" class="cancel" onclick="{$cancel}" value="отмена"/>
-						</td>
-					</tr>
-				</table>
-			</form>
-		</div>
+						<input type="submit" value="ок"/>
+						<xsl:variable name="cancel">window.location='/?call=<xsl:value-of select="concat(_module_name,$href_order,$href_page,$href_count,$href_search,$action)"/>'; return false;</xsl:variable>
+						<input type="submit" class="cancel" onclick="{$cancel}" value="отмена"/>
+					</td>
+				</tr>
+			</table>
+		</form>
 	</div>
 </xsl:template>
 
