@@ -88,6 +88,46 @@ table.nbk_input tr td{
 	padding: 8px;
 	border-bottom: 1px dotted #777;
 }
+.editor.edit table.nbk_input input{
+	min-width: 250px;
+}
+.editor.filter table.nbk_input tr:last-child input,
+.editor.column table.nbk_input tr:last-child input{
+	min-width: 150px;
+}
+.editor.column table.nbk_input tr:last-child input{
+	min-width: 100px;
+}
+.editor.column table.nbk_input tr:hover{
+	background-color: #EEEEEE;
+}
+.editor.column table.nbk_input tr:last-child:hover,
+.editor.column table.nbk_input tr:first-child:hover{
+	background-color: inherit;
+}
+.editor.column label{
+	display: block;
+	width: 100%;
+}
+
+.editor.column tr td{
+	padding: 0;
+}
+.editor.column label,
+.editor.column input{
+	padding: 8px;
+}
+.editor tr:last-child input{
+	padding: 5px;
+}
+.editor.column tr:last-child input{
+	margin: 8px 0;
+}
+
+.editor.edit{
+	margin: 0 auto;
+}
+
 table.nbk_input tr:last-child td{
 	border: 0;
 }
@@ -136,24 +176,36 @@ a.page_nav_control:hover{
 	position: absolute;
 	display: none;
 }
-.page_nav .filter h4, .page_nav .column h4{
+.editor h4{
 	margin: 0 auto 10px;
 	text-align: center;
 	text-decoration: underline;
 } 
-.page_nav .filter div div, .page_nav .column div div{
+.editor form{
 	position: relative;
 	top: -40px;
-	min-width: 512px;
-	min-height: 200px;
+	z-index: 12;
+}
+.editor form{
+	min-width: 50px;
+	min-height: 20px;
 	border: 2px solid #777777;
 	background: white;
 	padding: 10px;
 	border-radius: 0px 15px 15px 15px;
-	z-index: 12;
 }
-.page_nav .column div div{
+.editor.edit{
+	width: 550px;
+	margin: 0 auto;
+}
+.editor.edit form{
+	position: static;
+}
+.page_nav .editor.column form, .editor.edit form{
 	border-radius: 15px;
+}
+.editor.edit .nbk_input{
+	margin: 0 auto;
 }
 .page_nav img.div_logo{
 	position: relative;
@@ -180,3 +232,4 @@ a.page_nav_control:hover{
 	height: 1000px;
 	display: none;
 }
+
