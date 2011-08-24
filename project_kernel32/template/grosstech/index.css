@@ -163,8 +163,19 @@ div.img_preload{
 	padding: 0;
 }
 .footer p{
-	padding-top: 25px;
+	padding-top: 24px;
 	font-size: 0.7em;
+}
+.footer .kasperski{
+	display: block;
+	float: right;
+	background: url("/template/grosstech/images/kaspersky/32_bw.png") no-repeat;
+	width: 32px;
+	height: 32px;
+	margin-top: 14px;
+}
+.footer .kasperski:hover{
+	background-image: url("/template/grosstech/images/kaspersky/32.png");
 }
 
 /*content*/
