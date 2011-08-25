@@ -209,10 +209,11 @@ class app extends module{
 			$error['backtrace'] = $backtrace;
 		//TODO language
 		$error['text'] = $exception->getMessage();
-		if(!empty($this->error_cache[$error['method']][$error['text']]))
+		if(!empty($this->error_cache[$error['method']][$error['text']])){
 			$error['text'] = $this->error_cache[$error['method']][$error['text']];
+		}
 		if(isset($exception->text))
-			$error['text'].= ' - '.$exception->text;
+			$error['text'].= ' - '.((is_array($exception->text))?var_export($exception->text,true):$exception->text);
 		$error['err_type'] = $exception->getCode();
 		$error['time'] = $time->format();
 		$this->error[$error['class']][$error['method']][] = $error;

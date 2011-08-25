@@ -35,20 +35,25 @@ class site_nbk extends module{
 				$i++;
 			}
 		}
+		//$this->_query->echo_sql = true;
 		$this->_query->injection($select_str)->from($tablename);
+		$this->_query->injection(' WHERE 1=1');
 		if($search){
-			$this->_query->where('num',$search,'like');
-			$this->_query->_or('account',$search,'like');
-			$this->_query->_or('street',$search,'like');
-			$this->_query->_or('house',$search,'like');
-			$this->_query->_or('flat',$search,'like');
-			$this->_query->_or('owner',$search,'like');
-			$this->_query->_or('acc_comm',$search,'like');
-			$this->_query->_or('debt',$search,'like');
-			$this->_query->_or('balance',$search,'like');
-			$this->_query->_or('charges',$search,'like');
-			$this->_query->_or('control_summ',$search,'like');
-			$this->_query->_or('comment',$search,'like');
+			if(isset($_POST['search']))
+				//$redirect_params['search'] = iconv("cp1251", "utf-8", $search);//$search;
+				$redirect_params['search'] = $search;
+			else{
+				$i=0;
+				foreach($field as $field_name=>&$field_value){
+					if(!$i)
+						$this->_query->_and($field_name,$search,'like','`',true);
+					elseif(isset($field_value['type']) && $field_value['type']=='date'){}
+					else
+						$this->_query->_or($field_name,$search,'like');
+					$i++;
+				}
+				$this->_query->close_bracket();
+			}
 		}
 		if($filter && !$redirect_params){
 			if(is_array($filter))
@@ -62,16 +67,16 @@ class site_nbk extends module{
 			if($filter){
 				$date_pattern = $this->_config('date_pattern');
 				$replace_patterd = $this->_config('replace_patterd');
-				$this->_query->injection(' WHERE 1=1 ');
 				$field_conf = $this->_config('field');
 				foreach(array_keys($filter) as $field_name){
 					if(!isset($field_conf[$field_name]))
 						throw new my_exception('undefined field',array('name'=>$field_name));
 					switch($field_conf[$field_name]['type']){
 						case 'string':
+						case 'string_parted':
 						case 'text':{
 							if(strlen($filter[$field_name])){
-								$this->_query->_and($field_name,$filter[$field_name],'like');
+								$this->_query->_and($field_conf[$field_name]['type']=='string_parted'?"CONCAT($field_name,{$field_name}_str)":$field_name,$filter[$field_name],'like','');
 								$field[$field_name]['filter'] = $filter[$field_name];
 							}
 							else
@@ -138,11 +143,10 @@ class site_nbk extends module{
 		}
 		if($redirect_params)
 			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($order,$page,$count,$search,$filter,$column,$export,$redirect_params));
-		//$this->_query->echo_sql = true;
+		$this->_query->set_sql(str_replace('WHERE 1=1 AND', 'WHERE ', $this->_query->get_sql()));
 		$this->_query->order($order);
 		if($export){
 			$result = $this->_query->query();
-			//var_dump($result);die;
 			require_once ('extensions/PHPExcel/PHPExcel.php');
 			$objPHPExcel = new PHPExcel();
 			$objPHPExcel->setActiveSheetIndex(0);
@@ -171,19 +175,15 @@ class site_nbk extends module{
 			foreach($field as &$item)
 				if(isset($item['selected'])){
 					$sheet->setCellValueByColumnAndRow($col, 1, $item['title']);
-					$sheet->getStyleByColumnAndRow($col,1)->applyFromArray($headStyle);
+					//$sheet->getStyleByColumnAndRow($col,1)->applyFromArray($headStyle);
 					$col++;
 				}
 			foreach($result as $num=>&$item){
 				$col = 0;
 				foreach($item as $field_name=>&$value)
-					if($field_name!='id'){
-						/*switch($field[$field_name]['type']){
-							case 'date':
-								
-						}*/
+					if($field_name!='id' && substr($field_name,-5)!='__src'){
 						$sheet->setCellValueByColumnAndRow($col, $num+2, $value);
-						$sheet->getStyleByColumnAndRow($col,$num+2)->applyFromArray($cellStyle);
+						//$sheet->getStyleByColumnAndRow($col,$num+2)->applyFromArray($cellStyle);
 						$col++;
 					}
 			}
@@ -210,33 +210,35 @@ class site_nbk extends module{
 		if($page_select_html)
 			$this->_result['_page_select_html'] = &$page_select_html;
 		$this->_result['_default_page_count'] = &$this->_config('page_count');
-		//$field = $this->_config('field');
 		
 		foreach($field as $field_name=>&$field_value){
 			if($filter && isset($filter[$field_name]))
 				$field_value['value'] = $filter[$field_name];
-			if(isset($field_value['selected'])){
-				if(strpos($order,$field_name)!==false){
-					if(strpos($order,$field_name.' desc')!==false){
-						$to_replace = (strpos($order,$field_name.' desc,')!==false)?($field_name.' desc,'):($field_name.' desc');
-						$field_value['order'] = trim(str_replace($to_replace, '', $order));
-						$field_value['order'] = $field_name.($field_value['order']?',':'').$field_value['order'];
-						$field_value['desc'] = 'desc';
-					}
-					else{
-						$to_replace = (strpos($order,$field_name.',')!==false)?($field_name.','):$field_name;
-						$field_value['order'] = trim(str_replace($to_replace, '', $order));
-						$field_value['order'] = $field_name.' desc'.($field_value['order']?',':'').$field_value['order'];
-						$field_value['desc'] = 'asc';
-					}
-					if(substr($field_value['order'],-1)==',')
-						$field_value['order'] = substr($field_value['order'],0,-1);
-				}
-				else
-					$field_value['order'] = $field_name.($order?',':'').$order;
-			}
+			if(isset($field_value['selected']))
+				if(!$this->set_sort($field_name, $field_value, $order, true))
+					$this->set_sort($field_name, $field_value, $order, false);
 		}
 		$this->_result['_field'] = $field;
+	}
+	
+	private function set_sort($field_name, &$field_value, $order, $desc=false){
+		$result = false;
+		$search_name = 'order_'.($desc?'desc':'asc');
+		$search = (isset($field_value[$search_name])) ? $field_value[$search_name] : ($field_name.($desc?' desc':''));
+		if(strpos($order,$search)!==false){
+			if(strpos($order,$search.',')!==false)
+				$search.= ',';
+			$field_value['order'] = trim(str_replace($search, '', $order));
+			$field_value['desc'] = $desc?'desc':'asc';
+			$result = true;
+		}
+		else
+			$field_value['order'] = $order;
+		$replacement_name = 'order_'.($desc?'asc':'desc');
+		$replacement = (isset($field_value[$replacement_name])) ? $field_value[$replacement_name] : ($field_name.(($desc || !$result)?'':' desc'));
+		if($result || !$desc)
+			$field_value['order'] = $replacement.($field_value['order']?',':'').$field_value['order'];
+		return $result;
 	}
 	
 	private function get_redirect_params($order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $redirect_params=array()){
@@ -294,12 +296,16 @@ class site_nbk extends module{
 		$line = 2;
 		//$this->_query->echo_sql = true;
 		while($num = $sheet->getCell('A'.$line)->getValue()){
+			$house = $this->num_str2array($sheet->getCell('D'.$line)->getValue());
+			$flat = $this->num_str2array($sheet->getCell('E'.$line)->getValue());
 			$value = array(
 				'num' => $num+$default_num,
 				'account'  => $sheet->getCell('B'.$line)->getValue(),
 				'street'  => $sheet->getCell('C'.$line)->getValue(),
-				'house'  => $sheet->getCell('D'.$line)->getValue(),
-				'flat'  => $sheet->getCell('E'.$line)->getValue(),
+				'house'  => $house[1],
+				'house_str'  => $house[2],
+				'flat'  => $flat[1],
+				'flat_str'  => $flat[2],
 				'privatizated'  => ($sheet->getCell('F'.$line)->getValue()?1:0),
 				'owner'  => $sheet->getCell('G'.$line)->getValue(),
 				'acc_comm'  => $sheet->getCell('H'.$line)->getValue(),
@@ -327,18 +333,22 @@ class site_nbk extends module{
 		$output_index_error = true;
 	}
 	
+	private function num_str2array($str){
+		if(preg_match('%([0-9]*)(.*)%', $str, $result))
+			return $result;
+		else
+			throw new my_exception('wrong number format',array('number'=>$str));
+	}
+	
 	private function convert_date($str, $format='%([0-9]+)-([0-9]+)-([0-9]+)$%',$output_format='20$3-$1-$2'){
-		var_dump($str,$format,$output_format);
-		if(!preg_match($format,$str,$re)){
-			throw new my_exception('wrong data format',array('format'=>$format, 'date'=>$str));
+		if(!preg_match($format,$str,$re) || !($re[1] && $re[2] && $re[3])){
+			$output = "0000-00-00 00:00:00";
 		}
-		if($re[1] && $re[2] && $re[3]){
+		else{
 			$date_str = preg_replace($format, $output_format, $str);
 			$date = new DateTime($date_str);
 			$output = $date->format($this->_config('db_date_format'));
 		}
-		else
-			$output = "0000-00-00 00:00:00";
 		return $output;
 	}
 	
@@ -362,10 +372,16 @@ class site_nbk extends module{
 		$date_pattern = $this->_config('date_pattern');
 		$replace_pattern = $this->_config('replace_pattern');
 		$field = $this->_config('field');
-		foreach($value as $name=>&$val){
-			if(isset($field[$name]['type']) && $field[$name]['type']=='date')
-				$val=$this->convert_date($val,$date_pattern,$replace_pattern);
-		}
+		foreach($value as $name=>&$val)
+			if(isset($field[$name]['type'])){
+				if($field[$name]['type']=='date')
+					$val=$this->convert_date($val,$date_pattern,$replace_pattern);
+				elseif($field[$name]['type']=='string_parted'){
+					$val_temp = $this->num_str2array($val);
+					$val = $val_temp[1];
+					$value[$name.'_str'] = $val_temp[2];
+				}
+			}
 		$tablename = $this->_config('table');
 		if($id){
 			$this->_query->update($tablename)->set($value)->limit(1)->execute();
@@ -423,14 +439,17 @@ class site_nbk_config extends module_config{
 		),
 		'house'=>array(
 			'title'=>'Дом',
-			'type'=>'string',
-			//'field'=>'CONCAT(house,house_text) as house',
-			'sort'=>'house,house_text',
-			'sort_desc'=>'house desc,house_text desc',
+			'type'=>'string_parted',
+			'field'=>'CONCAT(house,house_str) as house, house as house__src, house_str as house_str__src',
+			'order_asc'=>'house__src,house_str__src',
+			'order_desc'=>'house__src desc,house_str__src desc',
 		),
 		'flat'=>array(
 			'title'=>'Квартира',
-			'type'=>'string',
+			'type'=>'string_parted',
+			'field'=>'CONCAT(flat,flat_str) as flat, flat as flat__src, flat_str as flat_str__src',
+			'order_asc'=>'flat__src,flat_str__src',
+			'order_desc'=>'flat__src desc,flat_str__src desc',
 		),
 		'privatizated'=>array(
 			'title'=>'Приватизация',

@@ -83,8 +83,8 @@ class object_sql_query{
 		return new object_sql_query(NULL, $this->parent);
 	}
 	
-	public function _and($name=NULL,$value=NULL,$operand='='){
-		$this->parent->add_sql($this->clause($name,$value,$operand));
+	public function _and($name=NULL,$value=NULL,$operand='=',$quot = '`',$open_bracket=false){
+		$this->parent->add_sql($this->clause($name,$value,$operand, 'AND', $open_bracket, $quot));
 		return new object_sql_query(NULL, $this->parent);
 	}
 	

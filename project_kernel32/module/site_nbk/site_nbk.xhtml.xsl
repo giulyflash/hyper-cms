@@ -46,7 +46,7 @@
 				<xsl:for-each select="item">
 					<tr>
 						<xsl:for-each select="*">
-							<xsl:if test="name()!='id'">
+							<xsl:if test="not(name()='id' or contains(name(),'__src'))">
 								<td>
 									<xsl:choose>
 										<xsl:when test="name()='num'">
@@ -263,7 +263,7 @@
 	</td>
 	<td>
 		<xsl:choose>
-			<xsl:when test="type='string' or type='text'">
+			<xsl:when test="type='string' or type='text' or type='string_parted'">
 				содержит: <input type="text" value="{filter}" name="filter[{name()}]"/>
 			</xsl:when>
 			<xsl:when test="type='bool'">
@@ -396,7 +396,7 @@
 					</td>
 				</tr>
 				<xsl:for-each select="_field/*">
-					<xsl:if test="name()!='id'">
+					<xsl:if test="not(name()='id' or contains(name(),'__src'))">
 						<tr>
 							<xsl:if test="type='date'"><xsl:attribute name="class">date</xsl:attribute></xsl:if>
 							<xsl:choose>
