@@ -60,6 +60,7 @@ $(function(){
 		}
 	});
 	$('.nbk_input .date input[type="text"]').datepicker();
+	$('#zero_debt_input').change(function(){ page_redirect($(this.form)); });
 });
 
 function hide_curtain(){
@@ -74,6 +75,8 @@ function page_redirect(form){
 		location = location+'&search='+form[0]['search'].value;
 	if(form[0]['page'].value && form[0]['page'].value!=1)
 		location = location+'&page='+form[0]['page'].value;
+	if(form[0]['zero_debt'].checked)
+		location = location+'&zero_debt=1';
 	if(location != location.href)
 		window.location = location;
 	else

@@ -25,6 +25,9 @@ table.nbk_admin td a.href, table.nbk_admin td a.remove{
 	color: blue;
 	text-decoration: none;
 }
+table.nbk_admin tr:hover td, th:hover{
+	background-color: #F3F3F3;
+}
 
 .pagenavigation{
 	margin: 0 0 0 10px;
@@ -56,20 +59,23 @@ div.pagenavigation .point{
 	text-decoration: none;
 }
 .page_nav form span{
-	padding-left: 4px;
+	padding-left: 10px;
 }
 .page_nav form span:FIRST-CHILD{
 	padding-left: 6px;
 }
 .page_nav form div{
-	padding: 6px 7px 5px 5px;
-	border: 1px solid #777;
-	border-radius: 10px;
+	padding: 6px 0px 5px 15px;
+	/*border: 1px solid #777;
+	border-radius: 10px;*/
 	display: inline;
-	margin-left: 10px;
+	border-left: 1px solid #999999;
 }
 .page_nav form div span:FIRST-CHILD{
 	padding-left: 0;
+}
+.page_nav form div span:FIRST-CHILD input{
+	margin-left: 5px;
 }
 .page_nav{
 	padding-bottom: 3px;
@@ -171,6 +177,9 @@ a.page_nav_control, a:visited.page_nav_control{
 a.page_nav_control:hover{
 	color: blue;
 }
+.page_select a:last-child{
+	margin-right: 5px;
+}
 
 .page_nav .filter>div, .page_nav .column>div{
 	position: absolute;
@@ -232,4 +241,3 @@ a.page_nav_control:hover{
 	height: 1000px;
 	display: none;
 }
-
