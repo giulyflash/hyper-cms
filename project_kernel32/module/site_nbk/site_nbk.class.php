@@ -5,7 +5,7 @@ class site_nbk extends module{
 	
 	public function _admin(){}
 	
-	public function get($order='num',$page=1,$count=NULL,$search=NULL,$filter=NULL, $column=NULL, $export=NULL){
+	public function get($order='num',$page=1,$count=NULL,$search=NULL,$filter=NULL, $column=NULL, $zero_debt=false, $export=NULL){
 		if(!$column)
 			$column = $this->_config('column');
 		if(!$count)
@@ -13,6 +13,8 @@ class site_nbk extends module{
 		$tablename = $this->_config('table');
 		$field = $this->_config('field');
 		$redirect_params = array();
+		$parted_string_src_posfix = $this->_config('parted_string_src_posfix');
+		$parted_string_str_posfix = $this->_config('parted_string_str_posfix');
 		if($column && is_array($column)){
 			$column_str = '';
 			foreach($field as $field_name=>&$field_value)
@@ -29,7 +31,11 @@ class site_nbk extends module{
 			$i = 0;
 			foreach(array_keys($field) as $field_name){
 				if((int)substr($column,$i,1)){
-					$select_str.= ', '.(isset($field[$field_name]['field'])?$field[$field_name]['field']:$field_name);
+					$select_str.= $this->_config('order_separator').(isset($field[$field_name]['field'])?$field[$field_name]['field']:(
+						(isset($field[$field_name]['type']) && $field[$field_name]['type']=='string_parted')?
+							"CONCAT($field_name,{$field_name}{$parted_string_str_posfix}) as $field_name, $field_name as {$field_name}{$parted_string_src_posfix}, {$field_name}{$parted_string_str_posfix} as {$field_name}{$parted_string_str_posfix}{$parted_string_src_posfix}":
+							$field_name
+					));
 					$field[$field_name]['selected'] = 1;
 				}
 				$i++;
@@ -38,6 +44,8 @@ class site_nbk extends module{
 		//$this->_query->echo_sql = true;
 		$this->_query->injection($select_str)->from($tablename);
 		$this->_query->injection(' WHERE 1=1');
+		if(!$zero_debt)
+			$this->_query->_and('debt',0,'>');
 		if($search){
 			if(isset($_POST['search']))
 				//$redirect_params['search'] = iconv("cp1251", "utf-8", $search);//$search;
@@ -56,6 +64,7 @@ class site_nbk extends module{
 			}
 		}
 		if($filter && !$redirect_params){
+			//var_dump($filter);die;
 			if(is_array($filter))
 				$filter_is_array = true;
 			else{
@@ -90,6 +99,19 @@ class site_nbk extends module{
 							}
 							else
 								unset($filter[$field_name]);
+							break;
+						}
+						case 'enum':{
+							if(!empty($filter[$field_name]) && is_array($filter[$field_name])){
+								foreach($field[$field_name]['val'] as &$enum_value){
+									$enum_value = array('value' => $enum_value);
+									foreach($filter[$field_name] as &$filter_temp_value)
+										if($enum_value['value']==$filter_temp_value)
+											$enum_value['selected'] = 1;
+								}
+								$field[$field_name]['filter']=implode($this->_config('enum_separator'), $filter[$field_name]);
+								$this->_query->_and($field_name,$filter[$field_name],'like');
+							}
 							break;
 						}
 						default:{
@@ -143,7 +165,7 @@ class site_nbk extends module{
 		}
 		if($redirect_params)
 			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($order,$page,$count,$search,$filter,$column,$export,$redirect_params));
-		$this->_query->set_sql(str_replace('WHERE 1=1 AND', 'WHERE ', $this->_query->get_sql()));
+		$this->_query->set_sql(str_replace(array('WHERE 1=1 AND', 'WHERE 1=1'), array('WHERE',''), $this->_query->get_sql()));
 		$this->_query->order($order);
 		if($export){
 			$result = $this->_query->query();
@@ -154,43 +176,35 @@ class site_nbk extends module{
 			//
 			$col = 0;
 			$cellStyle = new PHPExcel_Style();
-			$cellStyle = array('borders' => array(	
-				'top'	=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
-				'right'	=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
-				'bottom'=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
-				'left'	=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
-			));
-			$headStyle = array(
-				'borders' => array(
-					'top'	=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
-					'right'	=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
-					'bottom'=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
-					'left'	=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
-				),
-				'font' => array(
-					'italic' => true,
-					'bold' => true,
-				)
-			);
 			foreach($field as &$item)
 				if(isset($item['selected'])){
 					$sheet->setCellValueByColumnAndRow($col, 1, $item['title']);
-					//$sheet->getStyleByColumnAndRow($col,1)->applyFromArray($headStyle);
 					$col++;
 				}
 			foreach($result as $num=>&$item){
 				$col = 0;
 				foreach($item as $field_name=>&$value)
-					if($field_name!='id' && substr($field_name,-5)!='__src'){
+					if($field_name!='id' && substr($field_name,-5)!=$parted_string_src_posfix){
 						$sheet->setCellValueByColumnAndRow($col, $num+2, $value);
-						//$sheet->getStyleByColumnAndRow($col,$num+2)->applyFromArray($cellStyle);
 						$col++;
 					}
 			}
+			$cellStyle = array('borders' => array(
+				'allborders'	=> array('style' => PHPExcel_Style_Border::BORDER_THIN),
+			));
+			$headStyle = array(
+				'font' => array(
+					'italic' => true,
+					'bold' => true,
+				)
+			);
+			$sheet->getStyle('A1:'.chr(64+$col).'1')->applyFromArray($headStyle);
+			$sheet->getStyle('A1:'.chr(64+$col).($num+=2))->applyFromArray($cellStyle);
+			$cur_date = new DateTime();
+			$sheet->setCellValueByColumnAndRow(0, $num+2, $cur_date->format('d.m.Y H:i'));
 			//
 			$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
 			ob_end_clean();
-			$cur_date = new DateTime();
 			$file_name='Report_'.(($export==1)?$cur_date->format('Y-m-d_H-i-s'):translit::transliterate($export)).'.xls';
 			header('Content-Type: application/ms-excel');
 			header("Content-Disposition: attachment;filename=$file_name");
@@ -209,7 +223,7 @@ class site_nbk extends module{
 			$page_select_html.='<option value="'.$i.'" '.($i==$page?'selected="1"':'').'>'.$i.'</option>';
 		if($page_select_html)
 			$this->_result['_page_select_html'] = &$page_select_html;
-		$this->_result['_default_page_count'] = &$this->_config('page_count');
+		//$this->_result['_default_page_count'] = &$this->_config('page_count');
 		
 		foreach($field as $field_name=>&$field_value){
 			if($filter && isset($filter[$field_name]))
@@ -223,11 +237,16 @@ class site_nbk extends module{
 	
 	private function set_sort($field_name, &$field_value, $order, $desc=false){
 		$result = false;
-		$search_name = 'order_'.($desc?'desc':'asc');
-		$search = (isset($field_value[$search_name])) ? $field_value[$search_name] : ($field_name.($desc?' desc':''));
+		$desc_str = $desc?' desc':'';
+		$parted_string_src_posfix = $this->_config('parted_string_src_posfix');
+		$parted_string_str_posfix = $this->_config('parted_string_str_posfix');
+		$order_separator = $this->_config('order_separator');
+		$search = (isset($field_value['type']) && $field_value['type']=='string_parted') ?
+			($field_name.$parted_string_src_posfix.$desc_str.$order_separator.$field_name.$parted_string_str_posfix.$parted_string_src_posfix.$desc_str):
+			($field_name.$desc_str);
 		if(strpos($order,$search)!==false){
-			if(strpos($order,$search.',')!==false)
-				$search.= ',';
+			if(strpos($order,$search.$order_separator)!==false)
+				$search.= $order_separator;
 			$field_value['order'] = trim(str_replace($search, '', $order));
 			$field_value['desc'] = $desc?'desc':'asc';
 			$result = true;
@@ -235,9 +254,12 @@ class site_nbk extends module{
 		else
 			$field_value['order'] = $order;
 		$replacement_name = 'order_'.($desc?'asc':'desc');
-		$replacement = (isset($field_value[$replacement_name])) ? $field_value[$replacement_name] : ($field_name.(($desc || !$result)?'':' desc'));
+		$desc_str = ($desc || !$result)?'':' desc';
+		$replacement = (isset($field_value['type']) && $field_value['type']=='string_parted') ?
+			($field_name.$parted_string_src_posfix.$desc_str.$order_separator.$field_name.$parted_string_str_posfix.$parted_string_src_posfix.$desc_str):
+			($field_name.$desc_str); 
 		if($result || !$desc)
-			$field_value['order'] = $replacement.($field_value['order']?',':'').$field_value['order'];
+			$field_value['order'] = $replacement.($field_value['order']?$order_separator:'').$field_value['order'];
 		return $result;
 	}
 	
@@ -265,7 +287,7 @@ class site_nbk extends module{
 	}
 
 	
-	public function import($is_default=true){
+	public function import($is_default=true, $redirect=true){
 		if($is_default)
 			return;
 		if(empty($_FILES["path"]["name"])){
@@ -276,7 +298,7 @@ class site_nbk extends module{
 		$file->config->set('overwrite_if_exist',true);
 		$file_list = $file->get_files($this->module_name);
 		if(!$file_list){
-			$this->_message('Файл н был загружен.');
+			$this->_message('Файл не был загружен.');
 			return;
 		}
 		if($file_list[0]['extension']!='xls'){
@@ -286,7 +308,6 @@ class site_nbk extends module{
 		}
 		$doc_path = $file_list[0]['path'];
 		global $output_index_error;
-		$output_index_error = false;
 		require_once ('extensions/PHPExcel/PHPExcel.php');
 		$objPHPExcel = new PHPExcel();
 		$objPHPExcel = PHPExcel_IOFactory::load($doc_path);
@@ -323,14 +344,13 @@ class site_nbk extends module{
 				$default_num--;
 			}
 			else{
-				
 				$this->_query->insert($this->_config('table'))->values($value)->query();
 			}
 			$line++;
 		}
-		
-		$this->_message("Список должников сгенерирован, <a href='/?call=".$this->module_name."'>посмотреть</a>");
-		$output_index_error = true;
+		$this->_message("Список должников сгенерирован");
+		if($redirect)
+			$this->parent->redirect('/?call='.$this->module_name);
 	}
 	
 	private function num_str2array($str){
@@ -362,8 +382,21 @@ class site_nbk extends module{
 			if(!$field_value)
 				$this->_message('record not found by id',array('id'=>$id));
 			else
-				foreach($field_value as $name=>&$value)
+				foreach($field_value as $name=>&$value){
 					$this->_result['_field'][$name]['value'] = $value;
+					if(isset($this->_result['_field'][$name]['type']) && $this->_result['_field'][$name]['type']=='enum'){
+						$enum_separator = $this->_config('enum_separator');
+						foreach($this->_result['_field'][$name]['val'] as &$enum_value){
+							$enum_value = array('value' => $enum_value);
+							if($value){
+								$enum_temp = explode($enum_separator, $value);
+								foreach($enum_temp as &$filter_temp_value)
+									if($enum_value['value']==$filter_temp_value)
+										$enum_value['selected'] = 1;
+							}
+						}
+					}
+				}
 		}
 	}
 	
@@ -381,10 +414,12 @@ class site_nbk extends module{
 					$val = $val_temp[1];
 					$value[$name.'_str'] = $val_temp[2];
 				}
+				elseif($field[$name]['type']=='enum' && $val)
+					$val = implode($this->_config('enum_separator'), $val);
 			}
 		$tablename = $this->_config('table');
 		if($id){
-			$this->_query->update($tablename)->set($value)->limit(1)->execute();
+			$this->_query->update($tablename)->set($value)->where('id',$id)->limit(1)->execute();
 			$this->_message('record edited successfully');
 		}
 		else{
@@ -397,6 +432,8 @@ class site_nbk extends module{
 }
 
 class site_nbk_config extends module_config{
+	protected $output_config = true;
+	
 	protected $callable_method=array(
 		'import,_admin,edit,remove,get,save'=>array(
 			'__access__' => array(
@@ -440,16 +477,10 @@ class site_nbk_config extends module_config{
 		'house'=>array(
 			'title'=>'Дом',
 			'type'=>'string_parted',
-			'field'=>'CONCAT(house,house_str) as house, house as house__src, house_str as house_str__src',
-			'order_asc'=>'house__src,house_str__src',
-			'order_desc'=>'house__src desc,house_str__src desc',
 		),
 		'flat'=>array(
 			'title'=>'Квартира',
 			'type'=>'string_parted',
-			'field'=>'CONCAT(flat,flat_str) as flat, flat as flat__src, flat_str as flat_str__src',
-			'order_asc'=>'flat__src,flat_str__src',
-			'order_desc'=>'flat__src desc,flat_str__src desc',
 		),
 		'privatizated'=>array(
 			'title'=>'Приватизация',
@@ -489,16 +520,28 @@ class site_nbk_config extends module_config{
 			'type'=>'date',
 			'field'=>'DATE_FORMAT(pay_date,"%d.%m.%Y") as pay_date',
 		),
+		'type'=>array(
+			'title'=>'Тип должнника',
+			'type'=>'enum',
+			'val'=>array(
+				'алкоголик',
+				'наркоман',
+				'безработный',
+			)
+		),
 		'comment'=>array(
 			'title'=>'Комментарий',
 			'type'=>'text',
 		),
 	);
 	
-	protected $column = '111110101';
+	public $column = '111110101';
+	public $parted_string_src_posfix = '__src';
+	public $parted_string_str_posfix = '_str';
 	
-	//protected $default_method = '_admin';
-	protected $page_count = 25;
+	protected $enum_separator = ', ';
+	protected $order_separator = ', ';
+	public $page_count = 25;
 	protected $table = 'debtor_list';
 	protected $db_date_format = 'Y-m-d H:i:s';
 	

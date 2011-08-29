@@ -1,7 +1,40 @@
-body{
-	padding: 0;
+body, html {
 	margin: 0;
+	height: 100%;
 }
 .container{
 	padding: 5px;
+}
+
+.message_box{
+	color: #FF7A00;
+}
+
+.right .user_container{
+	position: relative;
+	margin: 0 auto;
+	top: 120px;
+}
+
+.right .user_container.logined{
+	width: auto;
+	margin: 5px;
+	float: right;
+	position: static;
+}
+
+.wrap {
+    border-collapse: collapse;
+    height: 100%;
+    width: 100%;
+    min-width: 1000px;
+}
+.wrap >tbody >tr >td{
+	vertical-align: top;
+	padding: 10px;
+}
+
+.footer {
+    height: 14px;
+    text-align: center;
 }

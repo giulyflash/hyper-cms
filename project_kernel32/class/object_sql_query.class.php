@@ -107,12 +107,15 @@ class object_sql_query{
 			case 'like':
 			{
 				$value_type = gettype($value);
-				if(in_array($value_type,array('array','object','resource','unknown type')))
+				if(in_array($value_type,array('object','resource','unknown type')) || $value_type=='array' && $operand!='like')
 					throw new my_exception('wrong value type');
 				if($operand == '=' && $value === NULL)
 					$sql = $quot.self::escstr($name).$quot.' IS NULL';
-				elseif($operand == 'like')
+				elseif($operand == 'like'){
+					if($value_type=='array')
+						$value = implode('%',$value);
 					$sql = $quot.self::escstr($name).$quot.' LIKE "%'.self::escstr($value).'%"';
+				}
 				else
 					$sql = $quot.self::escstr($name).$quot.$operand.'"'.self::escstr($value).'"';
 				break;
