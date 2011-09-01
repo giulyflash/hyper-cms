@@ -1,6 +1,8 @@
 $(function(){
-	CKeditor1 = new CKEDITOR.replace('acc_comm_editor');
-	CKeditor1.config.toolbarStartupExpanded = false;
-	CKeditor2 = new CKEDITOR.replace('comment_editor');
-	CKeditor2.config.toolbarStartupExpanded = false;
+	CKeditor_cont = {};
+	$('textarea').each(function(num,obj){
+		CKeditor_cont[num] = new CKEDITOR.replace($(obj).attr('id'));
+		CKeditor_cont[num].config.toolbarStartupExpanded = false;
+	});
+	$('.nbk_input .date input[type="text"]').datepicker();
 });

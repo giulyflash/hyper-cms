@@ -5,14 +5,9 @@ class site_nbk extends module{
 	
 	public function _admin(){}
 	
-	public function get($order='num',$page=1,$count=NULL,$search=NULL,$filter=NULL, $column=NULL, $zero_debt=false, $export=NULL){
-		if(!$column)
-			$column = $this->_config('column');
-		if(!$count)
-			$count = $this->_config('page_count');
-		$tablename = $this->_config('table');
-		$field = $this->_config('field');
-		$redirect_params = array();
+	public function get($order=NULL,$page=1,$count=NULL,$search=NULL,$filter=NULL, $column=NULL, $zero_debt=NULL, $export=NULL, $table_name=NULL){
+		//$this->_query->echo_sql = true;
+		$redirect_params = $this->check_table($table_name, $field, $count, $order, $column, true);
 		$parted_string_src_posfix = $this->_config('parted_string_src_posfix');
 		$parted_string_str_posfix = $this->_config('parted_string_str_posfix');
 		if($column && is_array($column)){
@@ -41,10 +36,9 @@ class site_nbk extends module{
 				$i++;
 			}
 		}
-		//$this->_query->echo_sql = true;
-		$this->_query->injection($select_str)->from($tablename);
+		$this->_query->injection($select_str)->from($table_name);
 		$this->_query->injection(' WHERE 1=1');
-		if(!$zero_debt)
+		if($table_name==$this->_config('default_table') && !$zero_debt)
 			$this->_query->_and('debt',0,'>');
 		if($search){
 			if(isset($_POST['search']))
@@ -64,7 +58,6 @@ class site_nbk extends module{
 			}
 		}
 		if($filter && !$redirect_params){
-			//var_dump($filter);die;
 			if(is_array($filter))
 				$filter_is_array = true;
 			else{
@@ -76,7 +69,7 @@ class site_nbk extends module{
 			if($filter){
 				$date_pattern = $this->_config('date_pattern');
 				$replace_patterd = $this->_config('replace_patterd');
-				$field_conf = $this->_config('field');
+				$field_conf = $field;//$this->_config('field');
 				foreach(array_keys($filter) as $field_name){
 					if(!isset($field_conf[$field_name]))
 						throw new my_exception('undefined field',array('name'=>$field_name));
@@ -164,7 +157,7 @@ class site_nbk extends module{
 			}
 		}
 		if($redirect_params)
-			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($order,$page,$count,$search,$filter,$column,$export,$redirect_params));
+			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$redirect_params));
 		$this->_query->set_sql(str_replace(array('WHERE 1=1 AND', 'WHERE 1=1'), array('WHERE',''), $this->_query->get_sql()));
 		$this->_query->order($order);
 		if($export){
@@ -212,18 +205,27 @@ class site_nbk extends module{
 			$objPHPExcel->disconnectWorksheets();
 			unset($sheet);
 			unset($objPHPExcel);
+			$this->log_event('export');
 			die;
 		}
 		else
 			$this->_result = $this->_query->query_page($page,$count);
+		if($page>$this->_result['__max_page']){
+			$redirect_params = $this->check_table($table_name, $field, $count, $order, $column);
+			$page=$this->_result['__max_page'];
+			//var_dump($this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$redirect_params));die;
+			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$redirect_params));
+		}
 		//impossible to do mor than 700 turns for loop in XSLT, have to do it there
-		$this->_result['__max_page'] = ceil($this->_result['__num_rows']/$count);
+		$this->_result['_default_count'] = $this->_default_count;
+		$this->_result['_count'] = $count;
 		$page_select_html = '';
 		for($i=1; $i<=$this->_result['__max_page']; $i++)
 			$page_select_html.='<option value="'.$i.'" '.($i==$page?'selected="1"':'').'>'.$i.'</option>';
 		if($page_select_html)
 			$this->_result['_page_select_html'] = &$page_select_html;
-		//$this->_result['_default_page_count'] = &$this->_config('page_count');
+		
+		$enum_separator = $this->_config('enum_separator');
 		
 		foreach($field as $field_name=>&$field_value){
 			if($filter && isset($filter[$field_name]))
@@ -231,8 +233,63 @@ class site_nbk extends module{
 			if(isset($field_value['selected']))
 				if(!$this->set_sort($field_name, $field_value, $order, true))
 					$this->set_sort($field_name, $field_value, $order, false);
+			if(isset($field_value['type']) && $field_value['type']=='enum')
+				foreach($field_value['val'] as &$enum_value)
+					if(!is_array($enum_value))
+						$enum_value = array('value' => $enum_value);
 		}
 		$this->_result['_field'] = $field;
+	}
+	
+	
+	private function check_table(&$table_name, &$field=NULL, &$count=NULL, &$order=NULL, &$column=NULL, $is_get = false){
+		$redirect_params=array();
+		//table_name
+		if($table_name){
+			if(!$is_get)
+				$redirect_params['table_name'] = $table_name;
+		}
+		else
+			$table_name = $this->_config('default_table');
+		//field
+		$field = $field?$field:$this->_config($table_name.'_field');
+		if(!$field)
+			throw new my_exception('unallowed table',array('table',$table_name));
+		//order
+		$default_order = $this->_config($table_name.'_order');
+		if(!$default_order)
+			$default_order = 'id';
+		if($order && $order!=$default_order){
+			if(!$is_get)
+				$redirect_params['order'] = $order;
+		}
+		else
+			$order = $default_order;
+		//column
+		$default_column = $this->_config($table_name.'_column');
+		if(!$default_column){
+			$default_column = '';
+			for($i = 0; $i<count($field); $i++)
+				$default_column.=1;
+		}
+		if($column && $column!=$default_column){
+			if(!$is_get)
+				$redirect_params['column'] = $column;
+		}
+		else
+			$column = $default_column;
+		//count
+		$this->_default_count = $this->_config($table_name.'_page_count');
+		if(!$this->_default_count)
+			$this->_default_count = $this->_config('default_page_count');
+		if($count && $count!=$this->_default_count){
+			if(!$is_get)
+				$redirect_params['count'] = $count;
+		}
+		else
+			$count = $this->_default_count;
+		//var_dump($redirect_params); die;
+		return $redirect_params;
 	}
 	
 	private function set_sort($field_name, &$field_value, $order, $desc=false){
@@ -263,21 +320,17 @@ class site_nbk extends module{
 		return $result;
 	}
 	
-	private function get_redirect_params($order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $redirect_params=array()){
-		if($order && $order!='num')
-			$redirect_params['order'] = $order;
+	private function get_redirect_params($page=NULL, $search=NULL, $filter=NULL, $export=NULL, $zero_debt=NULL, $redirect_params=array()){
 		if($page && $page!=1)
 			$redirect_params['page'] = $page;
-		if($count && $count!=$this->_config('page_count'))
-			$redirect_params['count'] = $count;
 		if($search)
 			$redirect_params['search'] = $search;
 		if($filter && !isset($redirect_params['filter']))
 			$redirect_params['filter'] = $filter;
-		if($column && !isset($redirect_params['column']) && $column!=$this->_config('column'))
-			$redirect_params['column'] = $column;
 		if($export)
 			$redirect_params['export'] = $export;
+		if($zero_debt)
+			$redirect_params['zero_debt'] = $zero_debt;
 		return $redirect_params;
 	}
 	
@@ -287,23 +340,24 @@ class site_nbk extends module{
 	}
 
 	
-	public function import($is_default=true, $redirect=true){
+	public function import($is_default=true, $redirect=true, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $zero_debt=NULL, $table_name=NULL){
 		if($is_default)
 			return;
 		if(empty($_FILES["path"]["name"])){
-			$this->_message('Файл не был загружен.');
+			$this->_message('file not uploaded');
 			return;
 		}
+		$this->check_table($table_name);
 		$file = new file($this->parent);
 		$file->config->set('overwrite_if_exist',true);
 		$file_list = $file->get_files($this->module_name);
 		if(!$file_list){
-			$this->_message('Файл не был загружен.');
+			$this->_message('file not uploaded');
 			return;
 		}
 		if($file_list[0]['extension']!='xls'){
 			$file->remove($file_list[0]['id'],false);
-			$this->_message('Неверный тип файла: .'.$file_list[0]['extension']);
+			$this->_message('wrong file type',array('ext'=>$file_list[0]['extension']));
 			return;
 		}
 		$doc_path = $file_list[0]['path'];
@@ -312,7 +366,7 @@ class site_nbk extends module{
 		$objPHPExcel = new PHPExcel();
 		$objPHPExcel = PHPExcel_IOFactory::load($doc_path);
 		$sheet = $objPHPExcel->getActiveSheet();
-		$default_num = $this->_query->injection('select max(num) as number from `'.$this->_config('table').'`')->query();
+		$default_num = $this->_query->injection('select max(num) as number from `'.$table_name.'`')->query();
 		$default_num = $default_num[0]['number'];
 		$line = 2;
 		//$this->_query->echo_sql = true;
@@ -338,17 +392,18 @@ class site_nbk extends module{
 				'pay_date'  => $this->convert_date($sheet->getCell('T'.$line)->getFormattedValue()),
 				'comment' => ''
 			);
-			if($this->_query->select('id')->from($this->_config('table'))->where('account',$value['account'])->query1()){
+			if($this->_query->select('id')->from($table_name)->where('account',$value['account'])->query1()){
 				unset($value['num'], $value['comment']);
-				$this->_query->update($this->_config('table'))->set($value)->where('account',$value['account'])->query1();
+				$this->_query->update($table_name)->set($value)->where('account',$value['account'])->query1();
 				$default_num--;
 			}
 			else{
-				$this->_query->insert($this->_config('table'))->values($value)->query();
+				$this->_query->insert($table_name)->values($value)->query();
 			}
 			$line++;
 		}
-		$this->_message("Список должников сгенерирован");
+		$this->_message('debtor list generated');
+		$this->log_event($this->method_name);
 		if($redirect)
 			$this->parent->redirect('/?call='.$this->module_name);
 	}
@@ -372,21 +427,35 @@ class site_nbk extends module{
 		return $output;
 	}
 	
-	public function edit($id=NULL, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL){
-		$this->_result['_field'] = $this->_config('field');
+	public function edit($id=NULL, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $zero_debt=NULL, $table_name=NULL){
+		$field=NULL;
+		$this->check_table($table_name, $field);
+		$parted_string_src_posfix = $this->_config('parted_string_src_posfix');
+		$parted_string_str_posfix = $this->_config('parted_string_str_posfix');
 		if($id){
 			$select_str = 'SELECT `id`';
-			foreach($this->_result['_field'] as $field_name=>&$field)
-				$select_str.= ', '.(isset($field['field'])?$field['field']:('`'.$field_name.'`'));
-			$field_value = $this->_query->injection($select_str)->from($tablename = $this->_config('table'))->where('id',$id)->query1();
+			//FIXME parted fields there
+			foreach($field as $field_name=>&$field_select){
+				$select_str.= ', ';
+				if(isset($field_select['field']))
+					$select_str.= $field_select['field'];
+				elseif(isset($field_select['type']) && $field_select['type']=='string_parted')
+					$select_str.= "CONCAT($field_name,{$field_name}{$parted_string_str_posfix}) as $field_name, $field_name as {$field_name}{$parted_string_src_posfix}, {$field_name}{$parted_string_str_posfix} as {$field_name}{$parted_string_str_posfix}{$parted_string_src_posfix}";
+				else
+					$select_str.= '`'.$field_name.'`';
+			}
+			$field_value = $this->_query->injection($select_str)->from($table_name)->where('id',$id)->query1();
 			if(!$field_value)
 				$this->_message('record not found by id',array('id'=>$id));
 			else
 				foreach($field_value as $name=>&$value){
-					$this->_result['_field'][$name]['value'] = $value;
-					if(isset($this->_result['_field'][$name]['type']) && $this->_result['_field'][$name]['type']=='enum'){
+					if($name=='id')
+						$field[$name] = $value;
+					else
+						$field[$name]['value'] = $value;
+					if(isset($field[$name]['type']) && $field[$name]['type']=='enum'){
 						$enum_separator = $this->_config('enum_separator');
-						foreach($this->_result['_field'][$name]['val'] as &$enum_value){
+						foreach($field[$name]['val'] as &$enum_value){
 							$enum_value = array('value' => $enum_value);
 							if($value){
 								$enum_temp = explode($enum_separator, $value);
@@ -398,36 +467,81 @@ class site_nbk extends module{
 					}
 				}
 		}
+		//var_dump($field);
+		//die;
+		$this->_result['_field'] = &$field;
 	}
 	
-	public function save($value=NULL, $id=NULL, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $redirect=true){
-		//var_dump($value);die;
+	public function save($value=NULL, $id=NULL, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $zero_debt=NULL, $table_name=NULL, $redirect=true){
 		$date_pattern = $this->_config('date_pattern');
 		$replace_pattern = $this->_config('replace_pattern');
-		$field = $this->_config('field');
+		$field=NULL;
+		$redirect_params = $this->check_table($table_name,$field);
+		$this->_query->echo_sql=true;
 		foreach($value as $name=>&$val)
 			if(isset($field[$name]['type'])){
 				if($field[$name]['type']=='date')
 					$val=$this->convert_date($val,$date_pattern,$replace_pattern);
 				elseif($field[$name]['type']=='string_parted'){
 					$val_temp = $this->num_str2array($val);
-					$val = $val_temp[1];
-					$value[$name.'_str'] = $val_temp[2];
+					$val = (int)$val_temp[1];
+					if(!$val)
+						unset($val);
+					else
+						$value[$name.'_str'] = $val_temp[2];
 				}
+				elseif($field[$name]['type']=='int')
+					$val = (int)$val;
+				elseif($field[$name]['type']=='float')
+					$val = (float)$val;
 				elseif($field[$name]['type']=='enum' && $val)
 					$val = implode($this->_config('enum_separator'), $val);
+				elseif($field[$name]['type']=='bool')
+					$val = $val?1:0;
 			}
-		$tablename = $this->_config('table');
+		if(empty($value['num']))
+			$value['num'] = $this->_query->injection('SELECT MAX(num) as num_max ')->from($this->_config('table'))->query1('num_max')+1;
 		if($id){
-			$this->_query->update($tablename)->set($value)->where('id',$id)->limit(1)->execute();
-			$this->_message('record edited successfully');
+			$this->_query->update($table_name)->set($value)->where('id',$id)->limit(1)->execute();
+			$this->_message('edited successfuly',array('num'=>$value['num']));
+			$this->log_event('edit', $id);
 		}
 		else{
-			$this->_query->insert($tablename)->values($value)->execute();
-			$this->_message('record added successfully');
+			$this->_query->insert($table_name)->values($value)->execute();
+			$this->_message('added successfully',array('num'=>$value['num']));
+			$this->log_event('add',$this->_query->insert_id());
 		}
 		if($redirect)
-			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($order,$page,$count,$search,$filter,$column,$export));
+			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$redirect_params));
+	}
+	
+	public function remove($id=NULL, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $zero_debt=NULL, $table_name=NULL, $redirect=true){
+		$redirect_params = $this->check_table($table_name);
+		if($id && $rec = $this->_query->select()->from($table_name)->where('id',$id)->query1()){
+			$this->_query->delete()->from($table_name)->where('id',$id)->query1();
+			$this->_query->update($table_name)->injection(' SET `num`=`num`-1 ')->where('num',$rec['num'],'>')->_and('num',1,'>')->query();
+			$this->_message('deleted successfully',array('num'=>$rec['num']));
+			$this->log_event($this->method_name, $id);
+		}
+		elseif($id)
+			$this->_message('record not found by id',array('id'=>$id));
+		if($redirect)
+			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$redirect_params));
+	}
+	
+	private function log_event($event,$id=NULL){
+		$date = new DateTime();
+		/*$file_name = str_replace(array('\\\\','\\'), array('/','/'), getcwd()).$this->_config('log_path');
+		if(!$file = fopen($file_name,'a'));
+			throw new my_exception('file open error',array('file'=>$file_name));
+		fwrite($file,$date->format('Y-m-d H-i-s').'; event: '.$event.'; id: '.$id.'; user:'.$this->parent->$_SESSION['user_info']['login']."\n");
+		fclose($file);*/
+		$this->_query->insert($this->_config('log_table'))->values(array(
+			'time'=>$date->format($this->_config('db_date_format')),
+			'event'=>$event,
+			'record_id'=>$id,
+			'user'=>$_SESSION['user_info']['login'],
+		))->execute();
 	}
 }
 
@@ -460,7 +574,7 @@ class site_nbk_config extends module_config{
 			<script src="/module/site_nbk/edit.js"></script>'
 	);
 	
-	protected $field = array(
+	protected $debtor_list_field = array(
 		'num'=>array(
 			'title'=>'№ п/п',
 			'type'=>'int',
@@ -535,14 +649,36 @@ class site_nbk_config extends module_config{
 		),
 	);
 	
-	public $column = '111110101';
+	protected $debtor_log_field = array(
+		'time'=>array(
+			'title'=>'Время',
+			'type'=>'date',
+		),
+		'event'=>array(
+			'title'=>'Событие',
+			'type'=>'string',
+		),
+		'record_id'=>array(
+			'title'=>'Номер записи',
+			'type'=>'id',
+		),
+		'user'=>array(
+			'title'=>'Пользователь',
+			'type'=>'float',
+		)
+	);
+	protected $debtor_list_column = '111110101';
+	public $default_page_count = 25;
+	protected $debtor_log_page_count = 100;
+	protected $debtor_list_order = 'num';
+	
 	public $parted_string_src_posfix = '__src';
 	public $parted_string_str_posfix = '_str';
 	
 	protected $enum_separator = ', ';
 	protected $order_separator = ', ';
-	public $page_count = 25;
-	protected $table = 'debtor_list';
+	public $default_table = 'debtor_list';
+	protected $log_table = 'debtor_log';
 	protected $db_date_format = 'Y-m-d H:i:s';
 	
 	protected $date_pattern = '%([0-9]+)\.([0-9]+)\.([0-9]+)$%';
