@@ -75,7 +75,7 @@ function page_redirect(form){
 		location = location+'&search='+form[0]['search'].value;
 	if(form[0]['page'].value && form[0]['page'].value!=1)
 		location = location+'&page='+form[0]['page'].value;
-	if(form[0]['zero_debt'].checked)
+	if(form[0]['zero_debt'] && form[0]['zero_debt'].checked)
 		location = location+'&zero_debt=1';
 	if(location != location.href)
 		window.location = location;

@@ -65,11 +65,11 @@ div.pagenavigation .point{
 	padding-left: 6px;
 }
 .page_nav form div{
-	padding: 6px 0px 5px 15px;
+	padding: 6px 0px 5px 5px;
 	/*border: 1px solid #777;
 	border-radius: 10px;*/
 	display: inline;
-	border-left: 1px solid #999999;
+	border-left: 1px dotted #999999;
 }
 .page_nav form div span:FIRST-CHILD{
 	padding-left: 0;
@@ -240,4 +240,13 @@ a.page_nav_control:hover{
 	width: 100%;
 	height: 1000px;
 	display: none;
+}
+
+.record_count{
+	padding: 0;
+	margin: 5px;
+	font-size: 80%;
+}
+.record_count span{
+	font-weight: bold;
 }

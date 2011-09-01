@@ -3,14 +3,15 @@
 <xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" />
 
 <xsl:template match="root/module/item[_module_name='site_nbk' and (_method_name='get' or _method_name='search')]">
-	<xsl:variable name="href_order"><xsl:if test="argument/order and argument/order!='num' and argument/order!=''">&amp;order=<xsl:value-of select="argument/order"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_page"><xsl:if test="argument/page and argument/page!=1 and argument/page!=''">&amp;page=<xsl:value-of select="argument/page"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_count"><xsl:if test="argument/count and argument/count!=_config/page_count and argument/count!=''">&amp;count=<xsl:value-of select="argument/count"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_order"><xsl:if test="argument/order!='num' and argument/order!=''">&amp;order=<xsl:value-of select="argument/order"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_page"><xsl:if test="argument/page!=1 and argument/page!=''">&amp;page=<xsl:value-of select="argument/page"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_count"><xsl:if test="_count!='' and _count!=_default_count">&amp;count=<xsl:value-of select="_count"/></xsl:if></xsl:variable>
 	<xsl:variable name="href_search"><xsl:if test="argument/search!=''">&amp;search=<xsl:value-of select="argument/search"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_filter"><xsl:if test="argument/filter and argument/filter!=''">&amp;filter=<xsl:value-of select="argument/filter"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_column"><xsl:if test="argument/column and argument/column!=''">&amp;column=<xsl:value-of select="argument/column"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_zero_debt"><xsl:if test="argument/zero_debt and argument/zero_debt!=''">&amp;zero_debt=1</xsl:if></xsl:variable>
-	<script type="text/javascript">_default_page_count = <xsl:value-of select="_config/page_count"/>;</script>
+	<xsl:variable name="href_filter"><xsl:if test="argument/filter!=''">&amp;filter=<xsl:value-of select="argument/filter"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_column"><xsl:if test="argument/column!=''">&amp;column=<xsl:value-of select="argument/column"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_zero_debt"><xsl:if test="argument/zero_debt!=''">&amp;zero_debt=1</xsl:if></xsl:variable>
+	<xsl:variable name="href_table_name"><xsl:if test="argument/table_name!=''">&amp;table_name=<xsl:value-of select="argument/table_name"/></xsl:if></xsl:variable>
+	<script type="text/javascript">_default_page_count = <xsl:value-of select="_default_count"/>;</script>
 	<div class="curtain"></div>
 	<xsl:call-template name="debt_nav">
 		<xsl:with-param name="href_order" select="$href_order"/>
@@ -20,6 +21,7 @@
 		<xsl:with-param name="href_filter" select="$href_filter"/>
 		<xsl:with-param name="href_column" select="$href_column"/>
 		<xsl:with-param name="href_zero_debt" select="$href_zero_debt"/>
+		<xsl:with-param name="href_table_name" select="$href_table_name"/>
 	</xsl:call-template>
 	<xsl:choose>
 		<xsl:when test="item">
@@ -30,7 +32,7 @@
 						<th>
 							<xsl:variable name="desc_name"><xsl:if test="desc='desc'"> наоборот</xsl:if></xsl:variable>
 							<xsl:variable name="anchor">order_<xsl:value-of select="name()"/></xsl:variable>
-							<a href="/?call={../../_module_name}{$href_count}{$href_zero_debt}{$href_filter}{$href_search}{$href_page}{$href_column}&amp;order={order}" alt='{$sort_base_text}"{title}"{$desc_name}' title='{$sort_base_text}"{title}"{$desc_name}'>
+							<a href="/?call={../../_module_name}{$href_count}{$href_zero_debt}{$href_table_name}{$href_filter}{$href_search}{$href_page}{$href_column}&amp;order={order}" alt='{$sort_base_text}"{title}"{$desc_name}' title='{$sort_base_text}"{title}"{$desc_name}'>
 								<xsl:value-of select="title"/>
 								<xsl:choose>
 									 <xsl:when test="desc='desc'">&#160;▴</xsl:when>
@@ -43,8 +45,8 @@
 						Удалить
 					</th>
 				</tr>
-				<xsl:variable name="edit_href">/?call=<xsl:value-of select="_module_name"/>.edit<xsl:value-of select="concat($href_order,$href_page,$href_count,$href_search,$href_filter,$href_column)"/>&amp;id=</xsl:variable>
-				<xsl:variable name="edit_popup">Редактировать должника № </xsl:variable>
+				<xsl:variable name="edit_href">/?call=<xsl:value-of select="_module_name"/>.edit<xsl:value-of select="concat($href_order,$href_page,$href_count,$href_search,$href_filter,$href_column,$href_zero_debt,$href_table_name)"/>&amp;id=</xsl:variable>
+				<xsl:variable name="edit_popup">Редактировать записи № </xsl:variable>
 				<xsl:for-each select="item">
 					<tr>
 						<xsl:for-each select="*">
@@ -90,11 +92,12 @@
 							</xsl:if>
 						</xsl:for-each>
 						<td>
-							<center><a class="remove" href="/?call={../_module_name}.remove&amp;id={id}"><xsl:value-of select="comment"/>Х</a></center>
+							<center><a class="remove" href="/?call={../_module_name}.remove&amp;id={id}{$href_order}{$href_page}{$href_count}{$href_search}{$href_filter}{$href_column}{$href_zero_debt}{$href_table_name}"><xsl:value-of select="comment"/>Х</a></center>
 						</td>
 					</tr>
 				</xsl:for-each>
 			</table>
+			<p class="record_count">Результатов: <span><xsl:value-of select="__num_rows"/></span></p>
 			<!-- <xsl:call-template name="debt_nav">
 			</xsl:call-template> -->
 		</xsl:when>
@@ -118,12 +121,13 @@
 	<xsl:param name="href_filter"/>
 	<xsl:param name="href_column"/>
 	<xsl:param name="href_zero_debt"/>
-	<xsl:variable name="nav_href" select="concat('/?call=',_module_name,$href_count,$href_filter,$href_order,$href_search)"/>
+	<xsl:param name="href_table_name"/>
+	<xsl:variable name="nav_href" select="concat('/?call=',_module_name,$href_count,$href_filter,$href_order,$href_search,$href_column,$href_zero_debt)"/>
 	<table class="page_nav">
 		<tr>
 			<td>
 				<span class="filter">
-					<img src="module/site_nbk/img/filter.png" alt="Фильтры" title="Фильтры"/>
+					<img src="module/{_module_name}/img/filter.png" alt="Фильтры" title="Фильтры"/>
 					<xsl:call-template name="nbk_edit">
 						<xsl:with-param name="href_order" select="$href_order"/>
 						<xsl:with-param name="href_page" select="$href_page"/>
@@ -132,14 +136,15 @@
 						<xsl:with-param name="href_filter" select="$href_filter"/>
 						<xsl:with-param name="href_column" select="$href_column"/>
 						<xsl:with-param name="href_zero_debt" select="$href_zero_debt"/>
+						<xsl:with-param name="href_table_name" select="$href_table_name"/>
 						<xsl:with-param name="type">filter</xsl:with-param>
 					</xsl:call-template>
 				</span>
-				<a href="/?call={_module_name}{$href_order}{$href_count}{$href_zero_debt}{$href_column}">
-					<img src="module/site_nbk/img/filter_delete.png" alt="Очистить фильтры и поиск" title="Очистить фильтры и поиск"/>
+				<a href="/?call={_module_name}{$href_order}{$href_count}{$href_zero_debt}{$href_table_name}{$href_column}">
+					<img src="module/{_module_name}/img/filter_delete.png" alt="Очистить фильтры и поиск" title="Очистить фильтры и поиск"/>
 				</a>
 				<span class="column">
-					<img src="module/site_nbk/img/column.png" alt="Выбрать колонки" title="Выбрать колонки"/>
+					<img src="module/{_module_name}/img/column.png" alt="Выбрать колонки" title="Выбрать колонки"/>
 					<xsl:call-template name="nbk_edit">
 						<xsl:with-param name="href_order" select="$href_order"/>
 						<xsl:with-param name="href_page" select="$href_page"/>
@@ -148,23 +153,24 @@
 						<xsl:with-param name="href_filter" select="$href_filter"/>
 						<xsl:with-param name="href_column" select="$href_column"/>
 						<xsl:with-param name="href_zero_debt" select="$href_zero_debt"/>
+						<xsl:with-param name="href_table_name" select="$href_table_name"/>
 						<xsl:with-param name="type">column</xsl:with-param>
 					</xsl:call-template>
 				</span>
-				<a href="/?call={_module_name}{$href_order}{$href_page}{$href_count}{$href_zero_debt}{$href_search}{$href_filter}">
-					<img src="module/site_nbk/img/column_delete.png" alt="Очистить выбор колонок" title="Очистить выбор колонок"/>
+				<a href="/?call={_module_name}{$href_order}{$href_page}{$href_count}{$href_zero_debt}{$href_table_name}{$href_search}{$href_filter}">
+					<img src="module/{_module_name}/img/column_delete.png" alt="Очистить выбор колонок" title="Очистить выбор колонок"/>
 				</a>
 				<a href="/?call={_module_name}.edit">
-					<img src="module/site_nbk/img/table_add.png" alt="добавить запись" title="добавить запись"/>
+					<img src="module/{_module_name}/img/table_add.png" alt="добавить запись" title="добавить запись"/>
 				</a>
-				<a href="/?call={_module_name}{$href_page}{$href_count}{$href_zero_debt}{$href_search}{$href_filter}{$href_column}">
-					<img src="module/site_nbk/img/sort_delete.png" alt="Отменить сортировку" title="Отменить сортировку"/>
+				<a href="/?call={_module_name}{$href_page}{$href_count}{$href_zero_debt}{$href_table_name}{$href_search}{$href_filter}{$href_column}">
+					<img src="module/{_module_name}/img/sort_delete.png" alt="Отменить сортировку" title="Отменить сортировку"/>
 				</a>
-				<a href="/?call={_module_name}.import">
-					<img src="module/site_nbk/img/excel_import.png" alt="Импорт" title="Импорт"/>
+				<a href="/?call={_module_name}.import{$href_order}{$href_page}{$href_count}{$href_search}{$href_filter}{$href_column}{$href_zero_debt}{$href_table_name}">
+					<img src="module/{_module_name}/img/excel_import.png" alt="Импорт" title="Импорт"/>
 				</a>
-				<a href="/?call={$href_order}{$href_page}{$href_count}{$href_zero_debt}{$href_search}{$href_filter}{$href_column}&amp;export=1">
-					<img src="module/site_nbk/img/excel_export.png" alt="Экспорт" title="Экспорт"/>
+				<a href="/?call={_module_name}{$href_order}{$href_page}{$href_count}{$href_zero_debt}{$href_table_name}{$href_search}{$href_filter}{$href_column}&amp;export=1">
+					<img src="module/{_module_name}/img/excel_export.png" alt="Экспорт" title="Экспорт"/>
 				</a>
 			</td>
 			<!-- 
@@ -178,13 +184,13 @@
 			</td>
 			 -->
 			<td>
-				<form method="post" action="/?call={_module_name}{$href_order}{$href_column}{$href_filter}" enctype="multipart/form-data">
+				<form method="post" action="/?call={_module_name}{$href_order}{$href_filter}{$href_column}{$href_table_name}" enctype="multipart/form-data">
 					<xsl:if test="_page_select_html">
 						<span class="page_select">
 							страница:
 							<xsl:choose>
 								<xsl:when test="__page &gt; 1">
-									<a rel="prev" class="page_nav_control" href="{$nav_href}&amp;page={-1+__page}" accesskey="["  alt="назад ALT+B" title="назад (стрелка влево, ALT+[ )">&#8678;</a>
+									<a rel="prev" class="page_nav_control" href="{$nav_href}&amp;page={-1+__page}" accesskey="["  alt="страница назад (стрелка влево, ALT+[ )" title="страница назад (стрелка влево, ALT+[ )">&#8678;</a>
 								</xsl:when>
 								<xsl:otherwise>
 									<a class="page_nav_control">&#160;&#160;&#160;</a>
@@ -195,7 +201,7 @@
 							</select>
 							<xsl:choose>
 								<xsl:when test="__page &lt; __max_page">
-									<a rel="next" class="page_nav_control" href="{$nav_href}&amp;page={__page+1}" accesskey="]"  alt="вперед ALT+F" title="вперед (стрелка вправо, ALT+] )">&#8680;</a>
+									<a rel="next" class="page_nav_control" href="{$nav_href}&amp;page={__page+1}" accesskey="]"  alt="страница вперед (стрелка вправо, ALT+] )" title="страница вперед (стрелка вправо, ALT+] )">&#8680;</a>
 								</xsl:when>
 								<xsl:otherwise>
 									<a class="page_nav_control">&#160;&#160;&#160;</a>
@@ -215,12 +221,14 @@
 						</span>
 						<input type="submit" value="Ok"/>
 					</div>
-					<input id="zero_debt_input" type="checkbox" name="zero_debt">
-						<xsl:if test="argument/zero_debt and argument/zero_debt!=''">
-							<xsl:attribute name="checked">checked</xsl:attribute>
-						</xsl:if>
-					</input>
-					<label for="zero_debt_input">плательщики без долга</label>
+					<xsl:if test="argument/table_name='' or argument/table_name=_config/default_table">
+						<input id="zero_debt_input" type="checkbox" name="zero_debt">
+							<xsl:if test="argument/zero_debt and argument/zero_debt!=''">
+								<xsl:attribute name="checked">checked</xsl:attribute>
+							</xsl:if>
+						</input>
+						<label for="zero_debt_input">плательщики без долга</label>
+					</xsl:if>
 				</form>
 			</td>
 		</tr>
@@ -251,11 +259,12 @@
 <xsl:template match="root/module/item[_module_name='site_nbk' and (_method_name='edit' or _method_name='save')]">
 	<xsl:variable name="href_order"><xsl:if test="argument/order and argument/order!='num' and argument/order!=''">&amp;order=<xsl:value-of select="argument/order"/></xsl:if></xsl:variable>
 	<xsl:variable name="href_page"><xsl:if test="argument/page and argument/page!=1 and argument/page!=''">&amp;page=<xsl:value-of select="argument/page"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_count"><xsl:if test="argument/count and argument/count!=_default_page_count and argument/count!=''">&amp;count=<xsl:value-of select="argument/count"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_count"><xsl:if test="argument/count!=''">&amp;count=<xsl:value-of select="argument/count"/></xsl:if></xsl:variable>
 	<xsl:variable name="href_search"><xsl:if test="argument/search!=''">&amp;search=<xsl:value-of select="argument/search"/></xsl:if></xsl:variable>
 	<xsl:variable name="href_filter"><xsl:if test="argument/filter and argument/filter!=''">&amp;filter=<xsl:value-of select="argument/filter"/></xsl:if></xsl:variable>
 	<xsl:variable name="href_column"><xsl:if test="argument/column and argument/column!=''">&amp;column=<xsl:value-of select="argument/column"/></xsl:if></xsl:variable>
 	<xsl:variable name="href_zero_debt"><xsl:if test="argument/zero_debt and argument/zero_debt!=''">&amp;zero_debt=1</xsl:if></xsl:variable>
+	<xsl:variable name="href_table_name"><xsl:if test="argument/table_name and argument/table_name!=''">&amp;table_name=<xsl:value-of select="argument/table_name"/></xsl:if></xsl:variable>
 	<xsl:call-template name="nbk_edit">
 		<xsl:with-param name="href_order" select="$href_order"/>
 		<xsl:with-param name="href_page" select="$href_page"/>
@@ -264,6 +273,7 @@
 		<xsl:with-param name="href_filter" select="$href_filter"/>
 		<xsl:with-param name="href_column" select="$href_column"/>
 		<xsl:with-param name="href_zero_debt" select="$href_zero_debt"/>
+		<xsl:with-param name="href_table_name" select="$href_table_name"/>
 	</xsl:call-template>
 </xsl:template>
 
@@ -405,14 +415,15 @@
 	<xsl:param name="href_filter"/>
 	<xsl:param name="href_column"/>
 	<xsl:param name="href_zero_debt"/>
+	<xsl:param name="href_table_name"/>
 	<xsl:param name="type">edit</xsl:param>
 	<div class="editor {$type}">
 		<xsl:choose>
 			<xsl:when test="$type='filter'">
-				<img class="div_logo" src="module/site_nbk/img/filter.png" alt="Фильтрация выборки" title="Фильтрация выборки"/>
+				<img class="div_logo" src="module/{_module_name}/img/filter.png" alt="Фильтрация выборки" title="Фильтрация выборки"/>
 			</xsl:when>
 			<xsl:when test="$type='column'">
-				<img class="div_logo column_logo" src="module/site_nbk/img/column.png" alt="Выбор колонок" title="Выбор колонок"/>
+				<img class="div_logo column_logo" src="module/{_module_name}/img/column.png" alt="Выбор колонок" title="Выбор колонок"/>
 			</xsl:when>
 		</xsl:choose>
 		<xsl:variable name="action"><xsl:choose>
@@ -421,8 +432,11 @@
 			<xsl:otherwise><xsl:value-of select="concat($href_column,$href_filter)"/></xsl:otherwise>
 		</xsl:choose></xsl:variable>
 		<xsl:variable name="method"><xsl:if test="$type='edit'">.save</xsl:if></xsl:variable>
-		<form action="/?call={_module_name}{$method}{$href_order}{$href_page}{$href_count}{$href_zero_debt}{$href_search}{$action}" enctype="multipart/form-data" method="post">
-			<xsl:if test="_field/id"><input type="hidden" name="id" value="{_field/id}"/></xsl:if>
+		<form action="/?call={_module_name}{$method}{$href_order}{$href_page}{$href_count}{$href_zero_debt}{$href_table_name}{$href_search}{$action}" enctype="multipart/form-data" method="post">
+			<xsl:if test="_field/id">
+				<input type="hidden" name="id" value="{_field/id}"/>
+				<input type="hidden" name="value[num]" value="{_field/num/value}"/>
+			</xsl:if>
 			<table class="nbk_input">
 				<tr>
 					<td colspan="2">
@@ -431,8 +445,8 @@
 								<xsl:when test="$type='filter'">Фильтрация выборки</xsl:when>
 								<xsl:when test="$type='column'">Выбор колонок</xsl:when>
 								<xsl:otherwise><xsl:choose>
-										<xsl:when test="_field/id/value">
-											Редактирование записи № <xsl:value-of select="_field/id/value"/>
+										<xsl:when test="_field/id">
+											Редактирование записи № <xsl:value-of select="_field/id"/>
 										</xsl:when>
 										<xsl:otherwise>
 											Добавление новой записи
@@ -466,7 +480,7 @@
 							<input type="submit" class="drop" value="сбросить"/>
 						</xsl:if>
 						<input type="submit" value="ок"/>
-						<xsl:variable name="cancel">window.location='/?call=<xsl:value-of select="concat(_module_name,$href_order,$href_page,$href_count,$href_search,$action)"/>'; return false;</xsl:variable>
+						<xsl:variable name="cancel">window.location='/?call=<xsl:value-of select="concat(_module_name,$href_order,$href_page,$href_count,$href_search,$action,$href_zero_debt,$href_table_name)"/>'; return false;</xsl:variable>
 						<input type="submit" class="cancel" onclick="{$cancel}" value="отмена"/>
 					</td>
 				</tr>
