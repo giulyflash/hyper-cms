@@ -1,7 +1,7 @@
 <?php
 
-class site_nbk extends module{
-	protected $config_class_name = 'site_nbk_config';
+class debtor_list extends module{
+	protected $config_class_name = 'debtor_list_config';
 	
 	public function _admin(){}
 	
@@ -467,8 +467,14 @@ class site_nbk extends module{
 					}
 				}
 		}
-		//var_dump($field);
-		//die;
+		else{
+			foreach($field as $name=>&$value)
+				if(isset($field[$name]['type']) && $field[$name]['type']=='enum'){
+					$enum_separator = $this->_config('enum_separator');
+					foreach($field[$name]['val'] as &$enum_value)
+						$enum_value = array('value' => $enum_value);
+				}
+		}
 		$this->_result['_field'] = &$field;
 	}
 	
@@ -545,7 +551,7 @@ class site_nbk extends module{
 	}
 }
 
-class site_nbk_config extends module_config{
+class debtor_list_config extends module_config{
 	protected $output_config = true;
 	
 	protected $callable_method=array(
@@ -562,16 +568,16 @@ class site_nbk_config extends module_config{
 	);
 	
 	protected $include=array(
-		'get,filter,edit,column'=>'<link href="/module/site_nbk/index.css" rel="stylesheet" type="text/css"/>',
-		'get,filter,edit'=>'<link href="/module/site_nbk/index.css" rel="stylesheet" type="text/css"/>
-			<script src="/module/site_nbk/list.js"></script>',
+		'get,filter,edit,column'=>'<link href="/module/debtor_list/index.css" rel="stylesheet" type="text/css"/>',
+		'get,filter,edit'=>'<link href="/module/debtor_list/index.css" rel="stylesheet" type="text/css"/>
+			<script src="/module/debtor_list/list.js"></script>',
 		'get,edit'=>'<link rel="stylesheet" href="/extensions/datapicker/jquery.ui.all.css">
 			<script src="/extensions/datapicker/jquery.ui.core.js"></script>
 			<script src="/extensions/datapicker/jquery.ui.widget.js"></script>
 			<script src="/extensions/datapicker/jquery.ui.datepicker.js"></script>
 			<script src="/extensions/datapicker/jquery.ui.datepicker-ru.js"></script>',
 		'edit'=>'<script type="text/javascript" src="extensions/ckeditor/ckeditor.js"></script>
-			<script src="/module/site_nbk/edit.js"></script>'
+			<script src="/module/debtor_list/edit.js"></script>'
 	);
 	
 	protected $debtor_list_field = array(

@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" />
 
-<xsl:template match="root/module/item[_module_name='site_nbk' and (_method_name='get' or _method_name='search')]">
+<xsl:template match="root/module/item[_module_name='debtor_list' and (_method_name='get' or _method_name='search')]">
 	<xsl:variable name="href_order"><xsl:if test="argument/order!='num' and argument/order!=''">&amp;order=<xsl:value-of select="argument/order"/></xsl:if></xsl:variable>
 	<xsl:variable name="href_page"><xsl:if test="argument/page!=1 and argument/page!=''">&amp;page=<xsl:value-of select="argument/page"/></xsl:if></xsl:variable>
 	<xsl:variable name="href_count"><xsl:if test="_count!='' and _count!=_default_count">&amp;count=<xsl:value-of select="_count"/></xsl:if></xsl:variable>
@@ -235,7 +235,7 @@
 	</table>
 </xsl:template>
 
-<xsl:template match="root/module/item[_module_name='site_nbk' and (_method_name='import')]">
+<xsl:template match="root/module/item[_module_name='debtor_list' and (_method_name='import')]">
 	<form method="post" action="/?call={_module_name}.{_method_name}&amp;is_default=0" enctype="multipart/form-data">
 		<table class="nbk_admin_file">
 			<tr>
@@ -256,7 +256,7 @@
 	</form>
 </xsl:template>
 
-<xsl:template match="root/module/item[_module_name='site_nbk' and (_method_name='edit' or _method_name='save')]">
+<xsl:template match="root/module/item[_module_name='debtor_list' and (_method_name='edit' or _method_name='save')]">
 	<xsl:variable name="href_order"><xsl:if test="argument/order and argument/order!='num' and argument/order!=''">&amp;order=<xsl:value-of select="argument/order"/></xsl:if></xsl:variable>
 	<xsl:variable name="href_page"><xsl:if test="argument/page and argument/page!=1 and argument/page!=''">&amp;page=<xsl:value-of select="argument/page"/></xsl:if></xsl:variable>
 	<xsl:variable name="href_count"><xsl:if test="argument/count!=''">&amp;count=<xsl:value-of select="argument/count"/></xsl:if></xsl:variable>
