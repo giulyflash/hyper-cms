@@ -235,19 +235,19 @@ class object_sql_query{
 		return new object_sql_query(NULL, $this->parent);
 	}
 	
-	public function insert($table=NULL, $name=NULL, $quot='`'){
+	public function insert($table=NULL, $field_name=NULL, $quot='`'){
 		$sql='';
 		$this->check_table_name($table);
 		$sql = ' INSERT INTO '.$quot.$table.$quot.' ';
-		if($name){
+		if($field_name){
 			$sql.='(';
-			if(!is_array($name)){
-				if(false!==strpos($name,','))
-					$name = explode(',', $name);
+			if(!is_array($field_name)){
+				if(false!==strpos($field_name,','))
+					$field_name = explode(',', $field_name);
 				else
-					$name = array($name);
+					$field_name = array($field_name);
 			}
-			foreach($name as $item)
+			foreach($field_name as $item)
 				$sql.=$quot.$this->escstr($item).$quot.',';
 			$sql = substr($sql, 0, strlen($sql)-1).')';
 		}
@@ -398,10 +398,12 @@ class object_sql_query{
 		return $this->sql_query_class->insert_id();
 	}
 	
-	public function query1($field=NULL){
-		$sql = $this->parent->get_sql1();
-		$sql = preg_replace('%^(.+) LIMIT[0-9 ]+,?[0-9 ]*$%', '\1',$sql);
-		$this->parent->set_sql($sql.' LIMIT 1');
+	public function query1($field=NULL,$limit=true){
+		if(!$limit){
+			$sql = $this->parent->get_sql1();
+			$sql = preg_replace('%^(.+) LIMIT[0-9 ]+,?[0-9 ]*$%', '\1',$sql);
+			$this->parent->set_sql($sql.' LIMIT 1');
+		}
 		$this->parent->execute();
 		if(isset($this->parent->query_result[0])){
 			if($field){
@@ -424,6 +426,7 @@ class object_sql_query{
 		$this->parent->execute(true);
 		$this->parent->query_result['__page_size'] = $count;
 		$this->parent->query_result['__page'] = $page;
+		$this->parent->query_result['__max_page'] = (int)ceil($this->parent->query_result['__num_rows']/$count);
 		return $this->parent->query_result;
 	}
 	
