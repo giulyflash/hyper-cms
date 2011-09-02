@@ -5,6 +5,10 @@ $(function(){
 		if(!confirm('Вы действительно хотите удалить запись?'))
 			return false;
 	});
+	$('a.clear').click(function(){
+		if(!confirm('Вы действительно хотите удалить все записи?'))
+		return false;
+	});
 	$('.page_nav select').change(function(){
 		page_redirect($(this).parent().parent());
 	});

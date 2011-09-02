@@ -97,7 +97,6 @@
 					</tr>
 				</xsl:for-each>
 			</table>
-			<p class="record_count">Результатов: <span><xsl:value-of select="__num_rows"/></span></p>
 			<!-- <xsl:call-template name="debt_nav">
 			</xsl:call-template> -->
 		</xsl:when>
@@ -105,12 +104,25 @@
 			<p class="message_box">Записей не найдено.</p>
 		</xsl:otherwise>
 	</xsl:choose>
-	<!-- <p>
-		<a href="/?call={_module_name}.edit">добавить должника</a>
+	<p class="record_count">
+		<xsl:if test="item">
+			Результатов: <span><xsl:value-of select="__num_rows"/></span>&#160;&#160;&#160;
+		</xsl:if>
+		<xsl:choose>
+			<xsl:when test="argument/table_name='debtor_log'">
+				<a href="/">Должники</a>
+			</xsl:when>
+			<xsl:otherwise>
+				<a href="/?table_name=debtor_log">История</a>
+			</xsl:otherwise>
+		</xsl:choose>
+		<!-- &#160;&#160;&#160;
+		<a href="/?call={_module_name}.statistics">Статистика</a> -->
+		<xsl:if test="item">
+			&#160;&#160;&#160;
+			<a class="clear" href="/?call={_module_name}.clear{$href_table_name}">Очистить</a>
+		</xsl:if>
 	</p>
-	<p>
-		<a href="/?call={_module_name}.generate">загрузить файл со списком должников</a>
-	</p> -->
 </xsl:template>
 
 <xsl:template name="debt_nav">
@@ -160,15 +172,19 @@
 				<a href="/?call={_module_name}{$href_order}{$href_page}{$href_count}{$href_zero_debt}{$href_table_name}{$href_search}{$href_filter}">
 					<img src="module/{_module_name}/img/column_delete.png" alt="Очистить выбор колонок" title="Очистить выбор колонок"/>
 				</a>
-				<a href="/?call={_module_name}.edit">
-					<img src="module/{_module_name}/img/table_add.png" alt="добавить запись" title="добавить запись"/>
-				</a>
+				<xsl:if test = "argument/table_name!=_config/log_table">
+					<a href="/?call={_module_name}.edit{$href_order}{$href_page}{$href_count}{$href_search}{$href_filter}{$href_column}{$href_zero_debt}{$href_table_name}">
+						<img src="module/{_module_name}/img/table_add.png" alt="добавить запись" title="добавить запись"/>
+					</a>
+				</xsl:if>
 				<a href="/?call={_module_name}{$href_page}{$href_count}{$href_zero_debt}{$href_table_name}{$href_search}{$href_filter}{$href_column}">
 					<img src="module/{_module_name}/img/sort_delete.png" alt="Отменить сортировку" title="Отменить сортировку"/>
 				</a>
-				<a href="/?call={_module_name}.import{$href_order}{$href_page}{$href_count}{$href_search}{$href_filter}{$href_column}{$href_zero_debt}{$href_table_name}">
-					<img src="module/{_module_name}/img/excel_import.png" alt="Импорт" title="Импорт"/>
-				</a>
+				<xsl:if test = "argument/table_name!=_config/log_table">
+					<a href="/?call={_module_name}.import{$href_order}{$href_page}{$href_count}{$href_search}{$href_filter}{$href_column}{$href_zero_debt}{$href_table_name}">
+						<img src="module/{_module_name}/img/excel_import.png" alt="Импорт" title="Импорт"/>
+					</a>
+				</xsl:if>
 				<a href="/?call={_module_name}{$href_order}{$href_page}{$href_count}{$href_zero_debt}{$href_table_name}{$href_search}{$href_filter}{$href_column}&amp;export=1">
 					<img src="module/{_module_name}/img/excel_export.png" alt="Экспорт" title="Экспорт"/>
 				</a>
@@ -487,6 +503,11 @@
 			</table>
 		</form>
 	</div>
+</xsl:template>
+
+<xsl:template match="root/module/item[_module_name='debtor_list' and (_method_name='statistics')]">
+	<p>В разработке.</p>
+	<p><a href = "{/root/session/call/item[position()=2]}">Назад</a></p>
 </xsl:template>
 
 </xsl:stylesheet>

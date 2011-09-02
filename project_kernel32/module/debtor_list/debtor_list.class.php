@@ -7,6 +7,8 @@ class debtor_list extends module{
 	
 	public function get($order=NULL,$page=1,$count=NULL,$search=NULL,$filter=NULL, $column=NULL, $zero_debt=NULL, $export=NULL, $table_name=NULL){
 		//$this->_query->echo_sql = true;
+		if($table_name=='debtor_log' && $_SESSION['user_info']['login']!='admin')
+			throw new my_exception('only for admin');
 		$redirect_params = $this->check_table($table_name, $field, $count, $order, $column, true);
 		$parted_string_src_posfix = $this->_config('parted_string_src_posfix');
 		$parted_string_str_posfix = $this->_config('parted_string_str_posfix');
@@ -42,7 +44,6 @@ class debtor_list extends module{
 			$this->_query->_and('debt',0,'>');
 		if($search){
 			if(isset($_POST['search']))
-				//$redirect_params['search'] = iconv("cp1251", "utf-8", $search);//$search;
 				$redirect_params['search'] = $search;
 			else{
 				$i=0;
@@ -210,7 +211,7 @@ class debtor_list extends module{
 		}
 		else
 			$this->_result = $this->_query->query_page($page,$count);
-		if($page>$this->_result['__max_page']){
+		if($this->_result['__max_page'] && $page>$this->_result['__max_page']){
 			$redirect_params = $this->check_table($table_name, $field, $count, $order, $column);
 			$page=$this->_result['__max_page'];
 			//var_dump($this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$redirect_params));die;
@@ -240,12 +241,11 @@ class debtor_list extends module{
 		}
 		$this->_result['_field'] = $field;
 	}
-	
-	
+
 	private function check_table(&$table_name, &$field=NULL, &$count=NULL, &$order=NULL, &$column=NULL, $is_get = false){
 		$redirect_params=array();
 		//table_name
-		if($table_name){
+		if($table_name && $table_name != $this->_config('default_table')){
 			if(!$is_get)
 				$redirect_params['table_name'] = $table_name;
 		}
@@ -283,7 +283,7 @@ class debtor_list extends module{
 		if(!$this->_default_count)
 			$this->_default_count = $this->_config('default_page_count');
 		if($count && $count!=$this->_default_count){
-			if(!$is_get)
+			if(!$is_get || isset($_POST['count']))
 				$redirect_params['count'] = $count;
 		}
 		else
@@ -323,7 +323,7 @@ class debtor_list extends module{
 	private function get_redirect_params($page=NULL, $search=NULL, $filter=NULL, $export=NULL, $zero_debt=NULL, $redirect_params=array()){
 		if($page && $page!=1)
 			$redirect_params['page'] = $page;
-		if($search)
+		if($search && ($this->method_name!='get' && !isset($redirect_params['search']) || $this->method_name=='get' && isset($_POST['search'])))
 			$redirect_params['search'] = $search;
 		if($filter && !isset($redirect_params['filter']))
 			$redirect_params['filter'] = $filter;
@@ -406,6 +406,7 @@ class debtor_list extends module{
 		$this->log_event($this->method_name);
 		if($redirect)
 			$this->parent->redirect('/?call='.$this->module_name);
+		$this->_title = $this->parent->_config('default_page_title').' - импорт';
 	}
 	
 	private function num_str2array($str){
@@ -476,6 +477,7 @@ class debtor_list extends module{
 				}
 		}
 		$this->_result['_field'] = &$field;
+		$this->_title = $this->parent->_config('default_page_title').' - редактирование';
 	}
 	
 	public function save($value=NULL, $id=NULL, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $zero_debt=NULL, $table_name=NULL, $redirect=true){
@@ -525,9 +527,13 @@ class debtor_list extends module{
 		$redirect_params = $this->check_table($table_name);
 		if($id && $rec = $this->_query->select()->from($table_name)->where('id',$id)->query1()){
 			$this->_query->delete()->from($table_name)->where('id',$id)->query1();
-			$this->_query->update($table_name)->injection(' SET `num`=`num`-1 ')->where('num',$rec['num'],'>')->_and('num',1,'>')->query();
-			$this->_message('deleted successfully',array('num'=>$rec['num']));
-			$this->log_event($this->method_name, $id);
+			if($table_name==$this->_config('log_table'))
+				$this->_message('deleted successfully',array('num'=>$id));
+			else{
+				$this->_query->update($table_name)->injection(' SET `num`=`num`-1 ')->where('num',$rec['num'],'>')->_and('num',1,'>')->query();
+				$this->_message('deleted successfully',array('num'=>$rec['num']));
+				$this->log_event($this->method_name, $id);
+			}
 		}
 		elseif($id)
 			$this->_message('record not found by id',array('id'=>$id));
@@ -535,13 +541,23 @@ class debtor_list extends module{
 			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$redirect_params));
 	}
 	
+	public function clear($table_name=NULL){
+		$this->check_table($table_name);
+		if($_SESSION['user_info']['login']=='admin'){
+			$this->_query->truncate($table_name)->execute();
+			$this->_message('table clear');
+		}
+		else
+			$this->_message('access denied');
+		$redirect_params = array();
+		if($table_name)
+			$redirect_params['table_name'] = $table_name;
+		$this->parent->redirect('/?call='.$this->module_name, $redirect_params);
+	}
+	
 	private function log_event($event,$id=NULL){
 		$date = new DateTime();
-		/*$file_name = str_replace(array('\\\\','\\'), array('/','/'), getcwd()).$this->_config('log_path');
-		if(!$file = fopen($file_name,'a'));
-			throw new my_exception('file open error',array('file'=>$file_name));
-		fwrite($file,$date->format('Y-m-d H-i-s').'; event: '.$event.'; id: '.$id.'; user:'.$this->parent->$_SESSION['user_info']['login']."\n");
-		fclose($file);*/
+		$this->_query->echo_sql = 1;
 		$this->_query->insert($this->_config('log_table'))->values(array(
 			'time'=>$date->format($this->_config('db_date_format')),
 			'event'=>$event,
@@ -549,13 +565,15 @@ class debtor_list extends module{
 			'user'=>$_SESSION['user_info']['login'],
 		))->execute();
 	}
+	
+	public function statistics($event,$id=NULL){}
 }
 
 class debtor_list_config extends module_config{
 	protected $output_config = true;
 	
 	protected $callable_method=array(
-		'import,_admin,edit,remove,get,save'=>array(
+		'import,_admin,edit,remove,get,save,statistics,clear'=>array(
 			'__access__' => array(
 				__CLASS__ => self::role_write,
 			),
@@ -684,7 +702,7 @@ class debtor_list_config extends module_config{
 	protected $enum_separator = ', ';
 	protected $order_separator = ', ';
 	public $default_table = 'debtor_list';
-	protected $log_table = 'debtor_log';
+	public $log_table = 'debtor_log';
 	protected $db_date_format = 'Y-m-d H:i:s';
 	
 	protected $date_pattern = '%([0-9]+)\.([0-9]+)\.([0-9]+)$%';
