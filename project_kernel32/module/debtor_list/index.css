@@ -25,7 +25,7 @@ table.nbk_admin td a.href, table.nbk_admin td a.remove{
 	color: blue;
 	text-decoration: none;
 }
-table.nbk_admin tr:hover td, th:hover{
+table.nbk_admin tr:hover td, table.nbk_admin th:hover{
 	background-color: #F3F3F3;
 }
 

@@ -273,15 +273,15 @@ class object_sql_query{
 					throw new my_exception('field list for multidimentional array of VALUES must be declared in INSERT');
 				$sql.= '(';
 				foreach($value as $val){
-					$sql.='"'.$this->escstr($val).'",';
+					$sql.=$this->value_insert_check($val);
 				}
 				$sql = substr($sql, 0, strlen($sql)-1).'),';
 			}
 			elseif($vars_declared)
-				$sql.='"'.$this->escstr($value).'",';
+				$sql.=$this->value_insert_check($value);
 			else{
 				$var_sql.= $quot.$this->escstr($name).$quot.',';
-				$sql.='"'.$this->escstr($value).'",';
+				$sql.=$this->value_insert_check($value);
 			}
 		}
 		$sql = substr($sql, 0, strlen($sql)-1);
@@ -297,6 +297,13 @@ class object_sql_query{
 			$sql = ' VALUES '.$sql;
 		$this->parent->add_sql($sql);
 		return new object_sql_query(NULL, $this->parent);
+	}
+	
+	private function value_insert_check($value){
+		if($value===NULL)
+			return 'NULL,';
+		else
+			return '"'.$this->escstr($value).'",';
 	}
 	
 	public function delete(){
@@ -339,6 +346,12 @@ class object_sql_query{
 	
 	public function unlock(){
 		$this->parent->add_sql(' UNLOCK TABLES ');
+		return new object_sql_query(NULL, $this->parent);
+	}
+	
+	public function truncate($table){
+		$this->check_table_name($table);
+		$this->parent->add_sql('TRUNCATE TABLE `'.$table.'`');
 		return new object_sql_query(NULL, $this->parent);
 	}
 	
