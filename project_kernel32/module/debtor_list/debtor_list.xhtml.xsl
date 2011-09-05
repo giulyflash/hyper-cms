@@ -110,14 +110,16 @@
 					</tr>
 				</xsl:if>
 			</table>
-			<form method="post" action="/?call={_module_name}{$href_order}{$href_filter}{$href_column}{$href_table_name}{$href_debug}{$href_page}{$href_count}{$href_search}{$href_zero_debt}" enctype="multipart/form-data">
-				<input type="checkbox" id="_show_sum" name="show_sum">
-					<xsl:if test="argument/show_sum=1">
-						<xsl:attribute name="checked">checked</xsl:attribute>
-					</xsl:if>
-				</input>
-				<label for="_show_sum">Показывать сумму</label>
-			</form>
+			<xsl:if test="argument/table_name='' or argument/table_name=_config/default_table">
+				<form method="post" action="/?call={_module_name}{$href_order}{$href_filter}{$href_column}{$href_table_name}{$href_debug}{$href_page}{$href_count}{$href_search}{$href_zero_debt}" enctype="multipart/form-data">
+					<input type="checkbox" id="_show_sum" name="show_sum">
+						<xsl:if test="argument/show_sum=1">
+							<xsl:attribute name="checked">checked</xsl:attribute>
+						</xsl:if>
+					</input>
+					<label for="_show_sum">Показывать сумму</label>
+				</form>
+			</xsl:if>
 		</xsl:when>
 		<xsl:otherwise>
 			<p class="message_box">Записей не найдено.</p>
@@ -499,7 +501,7 @@
 					</td>
 				</tr>
 				<xsl:for-each select="_field/*">
-					<xsl:if test="not(name()='id' or contains(name(),'__src'))">
+					<xsl:if test="not(name()='id' or contains(name(),'__src') or name()='num' and not(../id))">
 						<tr>
 							<xsl:if test="type='date'"><xsl:attribute name="class">date</xsl:attribute></xsl:if>
 							<xsl:choose>
