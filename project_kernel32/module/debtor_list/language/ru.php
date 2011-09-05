@@ -12,12 +12,13 @@ $error = array(
 	'debtor list generated'=>'Список должников сгенерирован.',
 	'record not found by id'=>'Запись №$id не найдена.',
 	'deleted successfully'=>'Запись №$num успешно удалена.',
-	'added successfully'=>'Запись №$num успешно добавлена.;',
+	'added successfully'=>'Запись №$num успешно добавлена.',
 	'edited successfuly'=>'Запись №$num успешно отредактирована.',
 	'file open error'=>'Ошибка открытия файла: "$file"',
 	'unallowed table'=>'Недопустимое имя таблицы: $table',
 	'only for admin'=>'Только администраторы могут просматривать историю.',
 	'table clear'=>'Таблица очищена.',
 	'access denied'=>'Недостаточно прав доступа.',
+	'memory_usage'=>'Использование памяти - до: $before байт; загрузка: $loaded байт; после: $after байт; пик: $peak',
 );
 ?>

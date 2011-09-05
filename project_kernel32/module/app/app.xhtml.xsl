@@ -14,6 +14,28 @@
 		<xsl:call-template name="_message"/>
 	</xsl:if>
 	<xsl:apply-templates select="root/module/item[_position=$position]"/>
+	<xsl:if test="/root/debug and $position = root/meta/app_config/main_position_name">
+		<xsl:call-template name="_debug"/>
+	</xsl:if>
+</xsl:template>
+
+<xsl:template name="_debug">
+	<div class="debug_container">
+		<!-- TODO recursive -->
+		<xsl:for-each select="/root/debug/*">
+			<xsl:choose>
+				<xsl:when test = "*">
+					<p><xsl:value-of select="name()"/></p>
+					<xsl:for-each select="*">
+						<xsl:value-of select="name()"/>: <span><xsl:value-of select="."/></span><br/>
+					</xsl:for-each>
+				</xsl:when>
+				<xsl:otherwise>
+					<p><xsl:value-of select="name()"/>: <span><xsl:value-of select="."/></span></p>
+				</xsl:otherwise>
+			</xsl:choose>
+		</xsl:for-each>
+	</div>
 </xsl:template>
 
 <xsl:template name="_word">
@@ -35,6 +57,7 @@
 </xsl:template>
 
 <xsl:template name="_head">
+	<link href="/module/app/index.css" rel="stylesheet" type="text/css"/>
 	<xsl:for-each select="root/include/item">
 		<xsl:value-of select="." disable-output-escaping="yes"/>
 	</xsl:for-each>
