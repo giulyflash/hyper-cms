@@ -267,10 +267,9 @@ class debtor_list extends module{
 			if($filter && isset($filter[$field_name])){
 				$field_value['value'] = $filter[$field_name];
 				if(isset($field_value['type'])){
-					if($field_value['type']=='int')
-						$field_value['value'] = number_format($field_value['value'], 0, '.', '');
-					elseif($field_value['type']=='float')
-						$field_value['value'] = number_format($field_value['value'], 2, '.', '');
+					if($field_value['type']=='int' || $field_value['type']=='float')
+						foreach($field_value['value'] as &$f_val) 
+							$f_val = number_format($f_val, ((int)($field_value['type']=='float'))*2, '.', '');
 				}
 			}
 			if(isset($field_value['selected']))
@@ -496,8 +495,14 @@ class debtor_list extends module{
 				$select_str.= ', ';
 				if(isset($field_select['field']))
 					$select_str.= $field_select['field'];
-				elseif(isset($field_select['type']) && $field_select['type']=='string_parted')
-					$select_str.= "CONCAT($field_name,{$field_name}{$parted_string_str_posfix}) as $field_name, $field_name as {$field_name}{$parted_string_src_posfix}, {$field_name}{$parted_string_str_posfix} as {$field_name}{$parted_string_str_posfix}{$parted_string_src_posfix}";
+				elseif(isset($field_select['type'])){
+					if($field_select['type']=='string_parted')
+						$select_str.= "CONCAT($field_name,{$field_name}{$parted_string_str_posfix}) as $field_name, $field_name as {$field_name}{$parted_string_src_posfix}, {$field_name}{$parted_string_str_posfix} as {$field_name}{$parted_string_str_posfix}{$parted_string_src_posfix}";
+					//elseif($field_select['type']=='int' || $field_select['type']=='float')
+						//$select_str.= "FORMAT($field_name,".(((int)($field_select['type']=='float'))*2).",'ru_RU') as $field_name";
+					else
+						$select_str.= '`'.$field_name.'`';
+				}
 				else
 					$select_str.= '`'.$field_name.'`';
 			}
@@ -510,17 +515,21 @@ class debtor_list extends module{
 						$field[$name] = $value;
 					else
 						$field[$name]['value'] = $value;
-					if(isset($field[$name]['type']) && $field[$name]['type']=='enum'){
-						$enum_separator = $this->_config('enum_separator');
-						foreach($field[$name]['val'] as &$enum_value){
-							$enum_value = array('value' => $enum_value);
-							if($value){
-								$enum_temp = explode($enum_separator, $value);
-								foreach($enum_temp as &$filter_temp_value)
-									if($enum_value['value']==$filter_temp_value)
-										$enum_value['selected'] = 1;
+					if(isset($field[$name]['type']) && $name!='num'){
+						if($field[$name]['type']=='enum'){
+							$enum_separator = $this->_config('enum_separator');
+							foreach($field[$name]['val'] as &$enum_value){
+								$enum_value = array('value' => $enum_value);
+								if($value){
+									$enum_temp = explode($enum_separator, $value);
+									foreach($enum_temp as &$filter_temp_value)
+										if($enum_value['value']==$filter_temp_value)
+											$enum_value['selected'] = 1;
+								}
 							}
 						}
+						elseif($field[$name]['type']=='int' || $field[$name]['type']=='float')
+							$field[$name]['value']=number_format($field[$name]['value'], ((int)($field[$name]['type']=='float'))*2, ',', '');
 					}
 				}
 		}
@@ -554,9 +563,9 @@ class debtor_list extends module{
 						$value[$name.'_str'] = $val_temp[2];
 				}
 				elseif($field[$name]['type']=='int')
-					$val = (int)$val;
+					$val = (int)preg_replace('%[^0-9,\.]%', '', $val);
 				elseif($field[$name]['type']=='float')
-					$val = (float)$val;
+					$val = (float)preg_replace('%[^0-9,\.]%', '', $val);
 				elseif($field[$name]['type']=='enum' && $val)
 					$val = implode($this->_config('enum_separator'), $val);
 				elseif($field[$name]['type']=='bool')
@@ -742,7 +751,7 @@ class debtor_list_config extends module_config{
 		),
 		'user'=>array(
 			'title'=>'Пользователь',
-			'type'=>'float',
+			'type'=>'string',
 		)
 	);
 	protected $debtor_list_column = '111110101';
