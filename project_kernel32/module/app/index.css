@@ -1,0 +1,13 @@
+.debug_container{
+	font-style: italic;
+	border-top: 1px dotted black;
+	margin-top: 2em;
+}
+.debug_container span{
+	font-style: normal;
+	font-weight: normal;
+}
+.debug_container p{
+	font-weight: bold;
+	margin: 3px 0;
+}

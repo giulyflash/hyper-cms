@@ -32,6 +32,7 @@ class app_config extends config{
 	protected $output_config = true;
 	protected $admin_method;
 	protected $output_session = true;
+	protected $debug = false;
 	protected $exclude_method_from_link_list = '_exclude';//exclude given methods or param from list in module_link admin
 	//path
 	protected $module_language_path = 'language';
@@ -76,6 +77,7 @@ class app_config extends config{
 
 class app extends module{
 	const call_list_count = 5;//max count of calls, reembered in $_SESSION
+	const debug_memory_real_usage = true;
 	public $admin_mode;
 	public $db;
 	public $call_string;
@@ -99,6 +101,7 @@ class app extends module{
 	public $output = array();
 	public $compiled_config_cache = array();
 	public $path = array();
+	public $_debug = array();
 	
 	public function __construct($admin_mode = NULL){
 		//set_error_handler("app::error_handler");
@@ -117,6 +120,8 @@ class app extends module{
 			$this->_query = new object_sql_query($this->db);
 			$this->get_call();
 			$this->get_request_params();
+			if($this->_config('debug'))
+				$this->_debug['memory']['before'] = number_format(memory_get_usage(self::debug_memory_real_usage),0 ,',',' ');
 			$this->get_module_link();
 			$this->get_db_config();
 			$this->config->set_vars($this->get_module_config());
@@ -137,6 +142,10 @@ class app extends module{
 		if($this->error && $this->echo_error){
 			header('Content-Type: text/plain; charset='.$this->_config('charset'));
 			return $this->echo_errors("\n");
+		}
+		if($this->_config('debug')){
+			$this->_debug['memory']['peak'] = number_format(memory_get_peak_usage(self::debug_memory_real_usage),0 ,',',' ');
+			$this->_debug['memory']['after'] = number_format(memory_get_usage(self::debug_memory_real_usage),0 ,',',' ');
 		}
 		try{
 			$this->output();
@@ -165,7 +174,7 @@ class app extends module{
 		$request_uri = (!empty($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/favicon.ico')?$_SERVER['REQUEST_URI']:'/';
 		if(!isset($_SESSION['call'][0]) || $request_uri!=$_SESSION['call'][0])
 			array_unshift($_SESSION['call'],$request_uri);
-		if(count($_SESSION['call'])>$this::call_list_count)
+		if(count($_SESSION['call'])>self::call_list_count)
 			array_splice($_SESSION['call'],-1);
 		//var_dump($_SESSION['call']);
 	}
@@ -644,13 +653,16 @@ class app extends module{
 			$this->echo_error = true;
 		if(!empty($_REQUEST['language']))
 			$this->config->set('language',$_REQUEST['language']);
-		if(!empty($_REQUEST['_no_link'])){
-			$this->config->set('module_link_from_config','');
-			$this->config->set('module_link_from_db','');
-		}
 		elseif(isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) &&
 			preg_match('%^(.+?)-(.+?),(.+?);q=([0-9\.]+)%', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $lang_arr)){
 			$this->config->set('language',$lang_arr[1]);
+		}
+		if(!empty($_REQUEST['_no_link'])){
+			$this->config->set('module_link_from_config',NULL);
+			$this->config->set('module_link_from_db',NULL);
+		}
+		if(!empty($_REQUEST['_debug'])){
+			$this->config->set('debug',true);
 		}
 	}
 	
@@ -939,6 +951,9 @@ class app extends module{
 			$this->output['session'] = $_SESSION;
 		if($this->_config('output_config'))
 			$this->output['meta']['app_config'] = get_object_vars($this->config);
+		if($this->_config('debug')){
+			$this->output['debug'] = $this->_debug;
+		}
 	}
 	
 	public function redirect($location,$params=array()){

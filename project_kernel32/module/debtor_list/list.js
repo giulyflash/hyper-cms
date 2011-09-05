@@ -65,6 +65,10 @@ $(function(){
 	});
 	$('.nbk_input .date input[type="text"]').datepicker();
 	$('#zero_debt_input').change(function(){ page_redirect($(this.form)); });
+	$('#_show_sum').change(function(){
+		var form = $(this.form);
+		window.location = form.attr('action')+((form[0]['show_sum'] && form[0]['show_sum'].checked)?'&show_sum=1':'');
+	});
 });
 
 function hide_curtain(){

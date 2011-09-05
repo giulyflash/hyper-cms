@@ -5,13 +5,14 @@ class debtor_list extends module{
 	
 	public function _admin(){}
 	
-	public function get($order=NULL,$page=1,$count=NULL,$search=NULL,$filter=NULL, $column=NULL, $zero_debt=NULL, $export=NULL, $table_name=NULL){
+	public function get($order=NULL, $page=1, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $zero_debt=NULL, $show_sum=NULL, $export=NULL, $table_name=NULL){
 		//$this->_query->echo_sql = true;
 		if($table_name=='debtor_log' && $_SESSION['user_info']['login']!='admin')
 			throw new my_exception('only for admin');
 		$redirect_params = $this->check_table($table_name, $field, $count, $order, $column, true);
 		$parted_string_src_posfix = $this->_config('parted_string_src_posfix');
 		$parted_string_str_posfix = $this->_config('parted_string_str_posfix');
+		$sum_select = '';
 		if($column && is_array($column)){
 			$column_str = '';
 			foreach($field as $field_name=>&$field_value)
@@ -28,11 +29,23 @@ class debtor_list extends module{
 			$i = 0;
 			foreach(array_keys($field) as $field_name){
 				if((int)substr($column,$i,1)){
-					$select_str.= $this->_config('order_separator').(isset($field[$field_name]['field'])?$field[$field_name]['field']:(
-						(isset($field[$field_name]['type']) && $field[$field_name]['type']=='string_parted')?
-							"CONCAT($field_name,{$field_name}{$parted_string_str_posfix}) as $field_name, $field_name as {$field_name}{$parted_string_src_posfix}, {$field_name}{$parted_string_str_posfix} as {$field_name}{$parted_string_str_posfix}{$parted_string_src_posfix}":
-							$field_name
-					));
+					$select_str.= $this->_config('order_separator');
+					if(isset($field[$field_name]['field']))
+						$select_str.=$field[$field_name]['field'];
+					elseif(isset($field[$field_name]['type'])){
+						if($field[$field_name]['type']=='string_parted')
+							$select_str.= "CONCAT($field_name,{$field_name}{$parted_string_str_posfix}) as $field_name, $field_name as {$field_name}{$parted_string_src_posfix}, {$field_name}{$parted_string_str_posfix} as {$field_name}{$parted_string_str_posfix}{$parted_string_src_posfix}";
+						elseif($field[$field_name]['type']=='int')
+							$select_str.= "CONCAT('<span class=\"{$field[$field_name]['type']}\">', FORMAT($field_name,0,'ru_RU'), '</span>') as $field_name";
+						elseif($field[$field_name]['type']=='float')
+							$select_str.= "CONCAT('<span class=\"{$field[$field_name]['type']}\">', FORMAT($field_name,2,'ru_RU'), '</span>') as $field_name";
+						else
+							$select_str.=$field_name;
+					}
+					else
+						$select_str.=$field_name;
+					if($show_sum && $field_name!='num' && isset($field[$field_name]['type']) && in_array($field[$field_name]['type'],array('int','float')))
+						$sum_select.= $this->_config('order_separator').' sum(`'.$field_name.'`) as '.$field_name;
 					$field[$field_name]['selected'] = 1;
 				}
 				$i++;
@@ -158,8 +171,16 @@ class debtor_list extends module{
 			}
 		}
 		if($redirect_params)
-			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$redirect_params));
+			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$show_sum,$redirect_params));
 		$this->_query->set_sql(str_replace(array('WHERE 1=1 AND', 'WHERE 1=1'), array('WHERE',''), $this->_query->get_sql()));
+		$temp_sql = $this->_query->sql;
+		if($sum_select){
+			$this->_query->set_sql();
+			$sum_value = $this->_query->injection(preg_replace('%SELECT .* FROM%', 'SELECT '.substr($sum_select, 2).' FROM', $temp_sql))->query();
+			foreach($sum_value[0] as $field_name=>$sum)
+				$field[$field_name]['sum'] = $field[$field_name]['type']=='float'?number_format($sum, 2, ',', ' '):number_format($sum, 0, ',', ' ');
+		}
+		$this->_query->set_sql($temp_sql);
 		$this->_query->order($order);
 		if($export){
 			$result = $this->_query->query();
@@ -179,7 +200,7 @@ class debtor_list extends module{
 				$col = 0;
 				foreach($item as $field_name=>&$value)
 					if($field_name!='id' && substr($field_name,-5)!=$parted_string_src_posfix){
-						$sheet->setCellValueByColumnAndRow($col, $num+2, $value);
+						$sheet->setCellValueByColumnAndRow($col, $num+2, strip_tags($value));
 						$col++;
 					}
 			}
@@ -192,8 +213,23 @@ class debtor_list extends module{
 					'bold' => true,
 				)
 			);
+			$sumStyle = array(
+				'font' => array(
+					'bold' => true,
+				)
+			);
 			$sheet->getStyle('A1:'.chr(64+$col).'1')->applyFromArray($headStyle);
 			$sheet->getStyle('A1:'.chr(64+$col).($num+=2))->applyFromArray($cellStyle);
+			if($show_sum){
+				$col_sum = 0;
+				foreach(array_keys($result[0]) as $key)
+					if(!empty($field[$key]['selected'])){
+						if(isset($field[$key]['sum']))
+							$sheet->setCellValueByColumnAndRow($col_sum, $num+1, $field[$key]['sum']);
+						$col_sum++;
+					}
+				$sheet->getStyle("A$num:".chr(64+$col).(++$num))->applyFromArray($sumStyle);
+			}
 			$cur_date = new DateTime();
 			$sheet->setCellValueByColumnAndRow(0, $num+2, $cur_date->format('d.m.Y H:i'));
 			//
@@ -204,8 +240,7 @@ class debtor_list extends module{
 			header("Content-Disposition: attachment;filename=$file_name");
 			$objWriter->save('php://output');
 			$objPHPExcel->disconnectWorksheets();
-			unset($sheet);
-			unset($objPHPExcel);
+			unset($sheet, $objPHPExcel);
 			$this->log_event('export');
 			die;
 		}
@@ -215,7 +250,7 @@ class debtor_list extends module{
 			$redirect_params = $this->check_table($table_name, $field, $count, $order, $column);
 			$page=$this->_result['__max_page'];
 			//var_dump($this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$redirect_params));die;
-			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$redirect_params));
+			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$show_sum,$redirect_params));
 		}
 		//impossible to do mor than 700 turns for loop in XSLT, have to do it there
 		$this->_result['_default_count'] = $this->_default_count;
@@ -229,8 +264,15 @@ class debtor_list extends module{
 		$enum_separator = $this->_config('enum_separator');
 		
 		foreach($field as $field_name=>&$field_value){
-			if($filter && isset($filter[$field_name]))
+			if($filter && isset($filter[$field_name])){
 				$field_value['value'] = $filter[$field_name];
+				if(isset($field_value['type'])){
+					if($field_value['type']=='int')
+						$field_value['value'] = number_format($field_value['value'], 0, '.', '');
+					elseif($field_value['type']=='float')
+						$field_value['value'] = number_format($field_value['value'], 2, '.', '');
+				}
+			}
 			if(isset($field_value['selected']))
 				if(!$this->set_sort($field_name, $field_value, $order, true))
 					$this->set_sort($field_name, $field_value, $order, false);
@@ -320,7 +362,7 @@ class debtor_list extends module{
 		return $result;
 	}
 	
-	private function get_redirect_params($page=NULL, $search=NULL, $filter=NULL, $export=NULL, $zero_debt=NULL, $redirect_params=array()){
+	private function get_redirect_params($page=NULL, $search=NULL, $filter=NULL, $export=NULL, $zero_debt=NULL, $show_sum=NULL, $redirect_params=array()){
 		if($page && $page!=1)
 			$redirect_params['page'] = $page;
 		if($search && ($this->method_name!='get' && !isset($redirect_params['search']) || $this->method_name=='get' && isset($_POST['search'])))
@@ -331,6 +373,8 @@ class debtor_list extends module{
 			$redirect_params['export'] = $export;
 		if($zero_debt)
 			$redirect_params['zero_debt'] = $zero_debt;
+		if($show_sum)
+			$redirect_params['show_sum'] = $show_sum;
 		return $redirect_params;
 	}
 	
@@ -340,14 +384,16 @@ class debtor_list extends module{
 	}
 
 	
-	public function import($is_default=true, $redirect=true, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $zero_debt=NULL, $table_name=NULL){
+	public function import($is_default=true, $redirect=true, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $zero_debt=NULL, $show_sum=NULL,  $table_name=NULL){
 		if($is_default)
 			return;
 		if(empty($_FILES["path"]["name"])){
 			$this->_message('file not uploaded');
 			return;
 		}
+		//$redirect_params = $this->check_table($table_name,$field,$count,$order,$column);
 		$this->check_table($table_name);
+		//var_dump($table_name);
 		$file = new file($this->parent);
 		$file->config->set('overwrite_if_exist',true);
 		$file_list = $file->get_files($this->module_name);
@@ -364,12 +410,18 @@ class debtor_list extends module{
 		global $output_index_error;
 		require_once ('extensions/PHPExcel/PHPExcel.php');
 		$objPHPExcel = new PHPExcel();
+		//
+		$cacheMethod = PHPExcel_CachedObjectStorageFactory:: cache_to_phpTemp;
+		$cacheSettings = array( 'memoryCacheSize ' => '1024MB');
+		PHPExcel_Settings::setCacheStorageMethod($cacheMethod, $cacheSettings);
+		if (!PHPExcel_Settings::setCacheStorageMethod($cacheMethod,$cacheSettings))
+			die('CACHEING ERROR');
+		//
 		$objPHPExcel = PHPExcel_IOFactory::load($doc_path);
 		$sheet = $objPHPExcel->getActiveSheet();
 		$default_num = $this->_query->injection('select max(num) as number from `'.$table_name.'`')->query();
 		$default_num = $default_num[0]['number'];
 		$line = 2;
-		//$this->_query->echo_sql = true;
 		while($num = $sheet->getCell('A'.$line)->getValue()){
 			$house = $this->num_str2array($sheet->getCell('D'.$line)->getValue());
 			$flat = $this->num_str2array($sheet->getCell('E'.$line)->getValue());
@@ -403,8 +455,12 @@ class debtor_list extends module{
 			$line++;
 		}
 		$this->_message('debtor list generated');
+		$objPHPExcel->disconnectWorksheets();
+		unset($sheet, $objPHPExcel);
 		$this->log_event($this->method_name);
-		if($redirect)
+		if($this->parent->_config('debug'))
+			$this->_message('<a href="/?call='.$this->module_name.($this->parent->_config('debug')?'&_debug=1':'').'">Назад</a>');
+		elseif($redirect)
 			$this->parent->redirect('/?call='.$this->module_name);
 		$this->_title = $this->parent->_config('default_page_title').' - импорт';
 	}
@@ -428,7 +484,7 @@ class debtor_list extends module{
 		return $output;
 	}
 	
-	public function edit($id=NULL, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $zero_debt=NULL, $table_name=NULL){
+	public function edit($id=NULL, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $zero_debt=NULL, $show_sum=NULL,  $table_name=NULL){
 		$field=NULL;
 		$this->check_table($table_name, $field);
 		$parted_string_src_posfix = $this->_config('parted_string_src_posfix');
@@ -480,12 +536,11 @@ class debtor_list extends module{
 		$this->_title = $this->parent->_config('default_page_title').' - редактирование';
 	}
 	
-	public function save($value=NULL, $id=NULL, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $zero_debt=NULL, $table_name=NULL, $redirect=true){
+	public function save($value=NULL, $id=NULL, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $zero_debt=NULL, $show_sum=NULL,  $table_name=NULL, $redirect=true){
 		$date_pattern = $this->_config('date_pattern');
 		$replace_pattern = $this->_config('replace_pattern');
 		$field=NULL;
-		$redirect_params = $this->check_table($table_name,$field);
-		$this->_query->echo_sql=true;
+		$redirect_params = $this->check_table($table_name,$field,$count,$order,$column);
 		foreach($value as $name=>&$val)
 			if(isset($field[$name]['type'])){
 				if($field[$name]['type']=='date')
@@ -508,7 +563,7 @@ class debtor_list extends module{
 					$val = $val?1:0;
 			}
 		if(empty($value['num']))
-			$value['num'] = $this->_query->injection('SELECT MAX(num) as num_max ')->from($this->_config('table'))->query1('num_max')+1;
+			$value['num'] = $this->_query->injection('SELECT MAX(num) as num_max ')->from($table_name)->query1('num_max')+1;
 		if($id){
 			$this->_query->update($table_name)->set($value)->where('id',$id)->limit(1)->execute();
 			$this->_message('edited successfuly',array('num'=>$value['num']));
@@ -520,10 +575,10 @@ class debtor_list extends module{
 			$this->log_event('add',$this->_query->insert_id());
 		}
 		if($redirect)
-			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$redirect_params));
+			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$show_sum,$redirect_params));
 	}
 	
-	public function remove($id=NULL, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $zero_debt=NULL, $table_name=NULL, $redirect=true){
+	public function remove($id=NULL, $order=NULL, $page=NULL, $count=NULL, $search=NULL, $filter=NULL, $column=NULL, $export=NULL, $zero_debt=NULL, $show_sum=NULL,  $table_name=NULL, $redirect=true){
 		$redirect_params = $this->check_table($table_name);
 		if($id && $rec = $this->_query->select()->from($table_name)->where('id',$id)->query1()){
 			$this->_query->delete()->from($table_name)->where('id',$id)->query1();
@@ -538,7 +593,7 @@ class debtor_list extends module{
 		elseif($id)
 			$this->_message('record not found by id',array('id'=>$id));
 		if($redirect)
-			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$redirect_params));
+			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$show_sum,$redirect_params));
 	}
 	
 	public function clear($table_name=NULL){
@@ -557,7 +612,6 @@ class debtor_list extends module{
 	
 	private function log_event($event,$id=NULL){
 		$date = new DateTime();
-		$this->_query->echo_sql = 1;
 		$this->_query->insert($this->_config('log_table'))->values(array(
 			'time'=>$date->format($this->_config('db_date_format')),
 			'event'=>$event,

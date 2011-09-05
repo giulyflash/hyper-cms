@@ -250,3 +250,10 @@ a.page_nav_control:hover{
 .record_count span{
 	font-weight: bold;
 }
+.nbk_admin td span{
+	float: right;
+}
+.nbk_admin tr.sum td{
+	text-align: right;
+	font-weight: bold;
+}
