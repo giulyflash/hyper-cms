@@ -257,3 +257,6 @@ a.page_nav_control:hover{
 	text-align: right;
 	font-weight: bold;
 }
+table.nbk_admin tr.sum td{
+	border-top: 2px solid black;
+}

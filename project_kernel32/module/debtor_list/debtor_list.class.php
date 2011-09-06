@@ -12,6 +12,7 @@ class debtor_list extends module{
 		$redirect_params = $this->check_table($table_name, $field, $count, $order, $column, true);
 		$parted_string_src_posfix = $this->_config('parted_string_src_posfix');
 		$parted_string_str_posfix = $this->_config('parted_string_str_posfix');
+		$db_num_locale = $this->_config('db_num_locale');
 		$sum_select = '';
 		if($column && is_array($column)){
 			$column_str = '';
@@ -35,10 +36,8 @@ class debtor_list extends module{
 					elseif(isset($field[$field_name]['type'])){
 						if($field[$field_name]['type']=='string_parted')
 							$select_str.= "CONCAT($field_name,{$field_name}{$parted_string_str_posfix}) as $field_name, $field_name as {$field_name}{$parted_string_src_posfix}, {$field_name}{$parted_string_str_posfix} as {$field_name}{$parted_string_str_posfix}{$parted_string_src_posfix}";
-						elseif($field[$field_name]['type']=='int')
-							$select_str.= "CONCAT('<span class=\"{$field[$field_name]['type']}\">', FORMAT($field_name,0,'ru_RU'), '</span>') as $field_name";
-						elseif($field[$field_name]['type']=='float')
-							$select_str.= "CONCAT('<span class=\"{$field[$field_name]['type']}\">', FORMAT($field_name,2,'ru_RU'), '</span>') as $field_name";
+						elseif($field[$field_name]['type']=='int' || $field[$field_name]['type']=='float')
+							$select_str.= "CONCAT('<span class=\"{$field[$field_name]['type']}\">', FORMAT($field_name,".(((int)($field[$field_name]['type']=='float'))*2).($db_num_locale?(",'$db_num_locale'"):'')."), '</span>') as $field_name";
 						else
 							$select_str.=$field_name;
 					}
@@ -234,13 +233,15 @@ class debtor_list extends module{
 			$sheet->setCellValueByColumnAndRow(0, $num+2, $cur_date->format('d.m.Y H:i'));
 			//
 			$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
-			ob_end_clean();
+			if($this->_config('clear_memory'))
+				ob_end_clean();
 			$file_name='Report_'.(($export==1)?$cur_date->format('Y-m-d_H-i-s'):translit::transliterate($export)).'.xls';
 			header('Content-Type: application/ms-excel');
 			header("Content-Disposition: attachment;filename=$file_name");
 			$objWriter->save('php://output');
 			$objPHPExcel->disconnectWorksheets();
-			unset($sheet, $objPHPExcel);
+			if($this->_config('clear_memory'))
+				unset($sheet, $objPHPExcel);
 			$this->log_event('export');
 			die;
 		}
@@ -454,8 +455,10 @@ class debtor_list extends module{
 			$line++;
 		}
 		$this->_message('debtor list generated');
-		$objPHPExcel->disconnectWorksheets();
-		unset($sheet, $objPHPExcel);
+		if($this->_config('clear_memory')){
+			ob_end_clean();
+			unset($sheet, $objPHPExcel);
+		}
 		$this->log_event($this->method_name);
 		if($this->parent->_config('debug'))
 			$this->_message('<a href="/?call='.$this->module_name.($this->parent->_config('debug')?'&_debug=1':'').'">Назад</a>');
@@ -489,6 +492,7 @@ class debtor_list extends module{
 		$parted_string_src_posfix = $this->_config('parted_string_src_posfix');
 		$parted_string_str_posfix = $this->_config('parted_string_str_posfix');
 		if($id){
+			$db_num_locale = $this->_config('db_num_locale');
 			$select_str = 'SELECT `id`';
 			//FIXME parted fields there
 			foreach($field as $field_name=>&$field_select){
@@ -498,8 +502,8 @@ class debtor_list extends module{
 				elseif(isset($field_select['type'])){
 					if($field_select['type']=='string_parted')
 						$select_str.= "CONCAT($field_name,{$field_name}{$parted_string_str_posfix}) as $field_name, $field_name as {$field_name}{$parted_string_src_posfix}, {$field_name}{$parted_string_str_posfix} as {$field_name}{$parted_string_str_posfix}{$parted_string_src_posfix}";
-					//elseif($field_select['type']=='int' || $field_select['type']=='float')
-						//$select_str.= "FORMAT($field_name,".(((int)($field_select['type']=='float'))*2).",'ru_RU') as $field_name";
+					elseif($field_select['type']=='int' || $field_select['type']=='float')
+						$select_str.= "FORMAT($field_name,".(((int)($field_select['type']=='float'))*2).($db_num_locale?(",'$db_num_locale'"):'').") as $field_name";
 					else
 						$select_str.= '`'.$field_name.'`';
 				}
@@ -758,6 +762,8 @@ class debtor_list_config extends module_config{
 	public $default_page_count = 25;
 	protected $debtor_log_page_count = 100;
 	protected $debtor_list_order = 'num';
+	protected $db_num_locale = 'ru_RU';
+	protected $clear_memory = true;
 	
 	public $parted_string_src_posfix = '__src';
 	public $parted_string_str_posfix = '_str';

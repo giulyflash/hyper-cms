@@ -501,7 +501,7 @@
 					</td>
 				</tr>
 				<xsl:for-each select="_field/*">
-					<xsl:if test="not(name()='id' or contains(name(),'__src') or name()='num' and not(../id))">
+					<xsl:if test="not(name()='id' or contains(name(),'__src') or $type='edit' and name()='num' and not(../id))">
 						<tr>
 							<xsl:if test="type='date'"><xsl:attribute name="class">date</xsl:attribute></xsl:if>
 							<xsl:choose>
