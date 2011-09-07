@@ -34,9 +34,20 @@ class db_mysql extends module implements db_interface{
 	}
 	
 	public function query($query, $error_lvl = 4){
+		/*if($this->parent->_config('debug')){
+			$date_start = new DateTime();
+		}*/
 		if(!$this->link)
 			$this->connect();
 		$queryResult = mysql_query($query, $this->link);
+		if($this->parent->_config('debug')){
+			$db_arr = array();
+			$db_arr['query'] = $query;
+			//$date_query_end = new DateTime();
+			//$date = $date_query_end->diff($date_start);
+			//$db_arr['date'] = $date_query_end->format('H:i:s');
+			$this->parent->_debug['db'][] = &$db_arr;
+		}
 		if($error = mysql_error()){
 			//TODO process error, dont output row
 			throw new my_exception('mysql error', $error);

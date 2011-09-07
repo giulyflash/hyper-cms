@@ -380,6 +380,7 @@ class app extends module{
 			$this->get_config_link($this->link_cache_row, $this->center_module, $this->center_method);
 		if($this->_config('module_link_from_db'))
 			$this->get_db_link();
+		//var_dump($this->_config('module_link_from_module_config'), $this->_config('module_link_from_db'), $this->call_list );
 		array_unshift($this->call_list,array(
 			'module_name' => $this->center_module,
 			'method_name' => $this->center_method, 
@@ -658,6 +659,7 @@ class app extends module{
 			$this->config->set('language',$lang_arr[1]);
 		}
 		if(!empty($_REQUEST['_no_link'])){
+			$this->config->set('module_link_from_module_config',NULL); //need or need not?
 			$this->config->set('module_link_from_config',NULL);
 			$this->config->set('module_link_from_db',NULL);
 		}
