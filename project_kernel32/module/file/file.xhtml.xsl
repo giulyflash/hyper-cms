@@ -19,7 +19,7 @@
 		no_files_msg="<xsl:call-template name="no_files_msg"/>";
 	</script>
 	<div id="_background" tabindex="-1"></div>
-	<form id="_wysiwyg_form">
+	<form id="_wysiwyg_form" method="post" onsubmit="return false;">
 		<div>
 			<p>
 				<span>Вставить в текстовый редактор:</span>

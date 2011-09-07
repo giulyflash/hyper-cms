@@ -202,11 +202,11 @@ function to_wisiwig(obj){
 			break;
 		};
 		case '_img2wisiwig':{
-			html = '<img src="'+form.attr('file_path');+'"/>';
+			html = '<img src="'+form.attr('file_path')+'"/>';
 			break;
 		};
 		case '_preview2wisiwig':{
-			html = '<a href="'+form.attr('file_path');+'"><img src="'+form.attr('thumb_path')+'"/></a>';
+			html = '<a href="'+form.attr('file_path')+'"><img src="'+form.attr('thumb_path')+'"/></a>';
 			break;
 		};
 		case '_video2wisiwig':{
@@ -222,7 +222,8 @@ function to_wisiwig(obj){
 	if(re.test(text))
 		CKeditor.setData(text.replace(re, html));
 	else if(html)
-		CKEDITOR.instances.article_text.insertHtml(html);
+		//CKEDITOR.instances.article_text.insertHtml(html);
+		CKeditor.insertHtml(html);
 	$('#_wysiwyg_form, #_background').css('display','none');
 	return false;
 }

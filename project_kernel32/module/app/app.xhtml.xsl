@@ -7,6 +7,11 @@
 	<a href="{/root/session/call/item[position()=2]}">Назад</a><br/>
 </xsl:template>
 
+<xsl:template match="/root/debug" priority="-0.9"></xsl:template>
+<xsl:template match="/root/meta" priority="-0.9"></xsl:template>
+<xsl:template match="/root/session" priority="-0.9"></xsl:template>
+<xsl:template match="/root/include" priority="-0.9"></xsl:template>
+
 <xsl:template name="_call">
 	<xsl:param name="position"><xsl:value-of select="root/meta/app_config/main_position_name"/></xsl:param>
 	<xsl:if test="$position = root/meta/app_config/main_position_name">
