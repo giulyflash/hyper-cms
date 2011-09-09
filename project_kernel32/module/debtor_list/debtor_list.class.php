@@ -36,7 +36,7 @@ class debtor_list extends module{
 					elseif(isset($field[$field_name]['type'])){
 						if($field[$field_name]['type']=='string_parted')
 							$select_str.= "CONCAT($field_name,{$field_name}{$parted_string_str_posfix}) as $field_name, $field_name as {$field_name}{$parted_string_src_posfix}, {$field_name}{$parted_string_str_posfix} as {$field_name}{$parted_string_str_posfix}{$parted_string_src_posfix}";
-						elseif($field[$field_name]['type']=='int' || $field[$field_name]['type']=='float')
+						elseif(!$export && ($field[$field_name]['type']=='int' || $field[$field_name]['type']=='float'))
 							$select_str.= "CONCAT('<span class=\"{$field[$field_name]['type']}\">', FORMAT($field_name,".(((int)($field[$field_name]['type']=='float'))*2).($db_num_locale?(",'$db_num_locale'"):'')."), '</span>') as $field_name";
 						else
 							$select_str.=$field_name;
@@ -173,12 +173,6 @@ class debtor_list extends module{
 			$this->parent->redirect('/?call='.$this->module_name,$this->get_redirect_params($page,$search,$filter,$export,$zero_debt,$show_sum,$redirect_params));
 		$this->_query->set_sql(str_replace(array('WHERE 1=1 AND', 'WHERE 1=1'), array('WHERE',''), $this->_query->get_sql()));
 		$temp_sql = $this->_query->sql;
-		if($sum_select){
-			$this->_query->set_sql();
-			$sum_value = $this->_query->injection(preg_replace('%SELECT .* FROM%', 'SELECT '.substr($sum_select, 2).' FROM', $temp_sql))->query();
-			foreach($sum_value[0] as $field_name=>$sum)
-				$field[$field_name]['sum'] = $field[$field_name]['type']=='float'?number_format($sum, 2, ',', ' '):number_format($sum, 0, ',', ' ');
-		}
 		$this->_query->set_sql($temp_sql);
 		$this->_query->order($order);
 		if($export){
@@ -190,9 +184,21 @@ class debtor_list extends module{
 			//
 			$col = 0;
 			$cellStyle = new PHPExcel_Style();
+			$result_count = count($result);
+			$headStyle = array(
+				
+			);
+			$headStyle = array(
+				
+			);
 			foreach($field as &$item)
 				if(isset($item['selected'])){
 					$sheet->setCellValueByColumnAndRow($col, 1, $item['title']);
+					if($item['type']){
+						$column_name = $this->getNameFromNumber($col);
+						if($item['type']=='int' || $item['type']=='float')
+							$sheet->getStyle("{$column_name}2:$column_name$result_count")->getNumberFormat()->setFormatCode($this->_config('xls_num_format').($item['type']=='float'?'.00':''));
+					}
 					$col++;
 				}
 			foreach($result as $num=>&$item){
@@ -220,15 +226,32 @@ class debtor_list extends module{
 			$sheet->getStyle('A1:'.chr(64+$col).'1')->applyFromArray($headStyle);
 			$sheet->getStyle('A1:'.chr(64+$col).($num+=2))->applyFromArray($cellStyle);
 			if($show_sum){
-				$col_sum = 0;
+				$col = 0;
+				foreach($field as $field_name=>&$item){
+					if(isset($item['selected'])){
+						if(isset($item['type']) && ($item['type']=='int' || $item['type']=='float') && $field_name!='num'){
+							$col_name = $this->getNameFromNumber($col);
+							$sheet->getCellByColumnAndRow($col, $num+1)->
+								setDataType(
+									PHPExcel_Cell_DataType::TYPE_FORMULA
+								)->setValue("=SUM({$col_name}2:{$col_name}$num)");
+							$style = $sheet->getStyle($col_name.($num+1));
+							$style->applyFromArray($sumStyle);
+							$style->getNumberFormat()->setFormatCode($this->_config('xls_num_format').($item['type']=='float'?'.00':''));
+						}
+						$col++;
+					}
+				}
+			}
+			/*	$col_sum = 0;
 				foreach(array_keys($result[0]) as $key)
 					if(!empty($field[$key]['selected'])){
 						if(isset($field[$key]['sum']))
 							$sheet->setCellValueByColumnAndRow($col_sum, $num+1, $field[$key]['sum']);
 						$col_sum++;
 					}
-				$sheet->getStyle("A$num:".chr(64+$col).(++$num))->applyFromArray($sumStyle);
-			}
+				$sheet->getStyle("A{$num}:".chr(64+$col).(++$num))->applyFromArray($sumStyle);
+			}*/
 			$cur_date = new DateTime();
 			$sheet->setCellValueByColumnAndRow(0, $num+2, $cur_date->format('d.m.Y H:i'));
 			//
@@ -247,6 +270,12 @@ class debtor_list extends module{
 		}
 		else
 			$this->_result = $this->_query->query_page($page,$count);
+		if($sum_select){
+			$this->_query->set_sql();
+			$sum_value = $this->_query->injection(preg_replace('%SELECT .* FROM%', 'SELECT '.substr($sum_select, 2).' FROM', $temp_sql))->query();
+			foreach($sum_value[0] as $field_name=>$sum)
+			$field[$field_name]['sum'] = $field[$field_name]['type']=='float'?number_format($sum, 2, ',', ' '):number_format($sum, 0, ',', ' ');
+		}
 		if($this->_result['__max_page'] && $page>$this->_result['__max_page']){
 			$redirect_params = $this->check_table($table_name, $field, $count, $order, $column);
 			$page=$this->_result['__max_page'];
@@ -502,8 +531,8 @@ class debtor_list extends module{
 				elseif(isset($field_select['type'])){
 					if($field_select['type']=='string_parted')
 						$select_str.= "CONCAT($field_name,{$field_name}{$parted_string_str_posfix}) as $field_name, $field_name as {$field_name}{$parted_string_src_posfix}, {$field_name}{$parted_string_str_posfix} as {$field_name}{$parted_string_str_posfix}{$parted_string_src_posfix}";
-					elseif($field_select['type']=='int' || $field_select['type']=='float')
-						$select_str.= "FORMAT($field_name,".(((int)($field_select['type']=='float'))*2).($db_num_locale?(",'$db_num_locale'"):'').") as $field_name";
+					//elseif($field_select['type']=='int' || $field_select['type']=='float')
+						//$select_str.= "FORMAT($field_name,".(((int)($field_select['type']=='float'))*2).($db_num_locale?(",'$db_num_locale'"):'').") as $field_name";
 					else
 						$select_str.= '`'.$field_name.'`';
 				}
@@ -532,8 +561,9 @@ class debtor_list extends module{
 								}
 							}
 						}
-						elseif($field[$name]['type']=='int' || $field[$name]['type']=='float')
+						elseif($field[$name]['type']=='int' || $field[$name]['type']=='float'){
 							$field[$name]['value']=number_format($field[$name]['value'], ((int)($field[$name]['type']=='float'))*2, ',', '');
+						}
 					}
 				}
 		}
@@ -632,6 +662,19 @@ class debtor_list extends module{
 			'user'=>$_SESSION['user_info']['login'],
 		))->execute();
 	}
+	
+	function getNameFromNumber($num) {
+		//http://stackoverflow.com/questions/3302857/algorithm-to-get-the-excel-like-column-name-of-a-number
+		$numeric = $num % 26;
+		$letter = chr(65 + $numeric);
+		$num2 = intval($num / 26);
+		if ($num2 > 0) {
+			return getNameFromNumber($num2 - 1) . $letter;
+		} else {
+			return $letter;
+		}
+	}
+	
 	
 	public function statistics($event,$id=NULL){}
 }
@@ -764,6 +807,7 @@ class debtor_list_config extends module_config{
 	protected $debtor_list_order = 'num';
 	protected $db_num_locale = 'ru_RU';
 	protected $clear_memory = true;
+	protected $xls_num_format = '# ##0';
 	
 	public $parted_string_src_posfix = '__src';
 	public $parted_string_str_posfix = '_str';
