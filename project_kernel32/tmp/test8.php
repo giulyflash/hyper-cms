@@ -1,6 +1,6 @@
 <?php
-//self destruct, for bad employers only lol
-$form_text = '
+//self destruct, for bad employers only, lol =)
+/*$form_text = '
 <form action="">
 	<input type="text" name="login"/>
 	<br/>
@@ -41,5 +41,5 @@ function delete_dir($dir){
 		unlink($dir);
 	    echo $dir.'<br/>';
 	}
-}
+}*/
 ?>
