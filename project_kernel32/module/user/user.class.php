@@ -35,6 +35,7 @@ class user extends module{
 	}
 	
 	public function login($login=NULL,$password=NULL){
+		var_dump($login,$password);
 		if($user_info = $this->_query->select('id,login,status,language')->from(__CLASS__)->where('login',$login)->_and('password',md5($password))->query1()){
 			$_SESSION['user_info'] = $user_info;
 			$this->redirect();
@@ -56,7 +57,6 @@ class user extends module{
 			$redirect = $this->parent->admin_mode?'/admin.php':'/';
 		if($unset)
 			session_unset();
-		//var_dump($_SESSION['call']);return;
 		$this->parent->redirect($redirect);
 	}
 	

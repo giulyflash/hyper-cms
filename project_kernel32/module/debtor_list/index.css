@@ -1,18 +1,25 @@
 .nbk_admin_file{
 	margin: 0 auto;
 }
-table.nbk_admin, table.nbk_admin td, table.nbk_admin th{
-	border-color: #999999;
-	border-style: solid;
-}
 table.nbk_admin{
-	border-width: 1px 0 0 1px;
 	border-collapse: collapse;
 	min-width: 1000px;
+	background: white;
 }
 table.nbk_admin td, table.nbk_admin th{
-	border-width: 0 1px 1px 0;
 	padding: 0px 8px;
+	border: 1px solid #CCCCCC;
+}
+table.nbk_admin th{
+	border-right-color: white;
+	background: url("/module/debtor_list/img/th_gradient.png") repeat-x;
+	height: 30px;
+}
+table.nbk_admin th:last-child{
+	border-right-color: #CCCCCC;
+}
+table.nbk_admin tr.style2{
+	background: #F3F3F3;
 }
 table.nbk_admin td a, table.nbk_admin th a{
 	color: black;
@@ -25,8 +32,8 @@ table.nbk_admin td a.href, table.nbk_admin td a.remove{
 	color: blue;
 	text-decoration: none;
 }
-table.nbk_admin tr:hover td, table.nbk_admin th:hover{
-	background-color: #F3F3F3;
+table.nbk_admin tr:hover td{
+	background-color: #E0E0E0;
 }
 
 .pagenavigation{
@@ -66,10 +73,13 @@ div.pagenavigation .point{
 }
 .page_nav form div{
 	padding: 6px 0px 5px 5px;
-	/*border: 1px solid #777;
-	border-radius: 10px;*/
 	display: inline;
+}
+.page_nav tr td:last-child, .page_nav form div{
 	border-left: 1px dotted #999999;
+}
+.page_nav tr td:first-child{
+	padding-right: 5px;
 }
 .page_nav form div span:FIRST-CHILD{
 	padding-left: 0;
@@ -250,6 +260,9 @@ a.page_nav_control:hover{
 .record_count span{
 	font-weight: bold;
 }
+.record_count a, .record_count a:visited{
+	color: blue;
+}
 .nbk_admin td span{
 	float: right;
 }
@@ -259,4 +272,10 @@ a.page_nav_control:hover{
 }
 table.nbk_admin tr.sum td{
 	border-top: 2px solid black;
+}
+.center_table_wrap{
+	background: #CCCCCC url("/module/debtor_list/img/table_bg_gradient.png") top repeat-x;
+	border-radius: 13px;
+	display: inline-block;
+	padding: 10px;
 }

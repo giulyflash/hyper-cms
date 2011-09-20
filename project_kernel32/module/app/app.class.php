@@ -135,6 +135,7 @@ class app extends module{
 				for($num=$call_count; $num<$new_call_count; $num++)
 					$this->try_call($this->call_list[$num], $num);
 			$this->get_include();
+			//var_dump($this->call_list);
 		}
 		catch(Exception $exception){
 			$this->_exception($exception);
@@ -498,7 +499,7 @@ class app extends module{
 			where('exclude',1,'!=')->_and('inactive',0)->_and('center_module',$center_module,'in')->_and('center_method',$center_method,'in')->_and('admin_mode',$this->admin_mode)->
 			order('order,id')->query();
 		//create array of link_id for query
-		//var_dump($call_db_list);
+		//var_dump($call_db_list);die;
 		$link_list = array();
 		if($call_db_list){
 			foreach($call_db_list as &$call)
@@ -506,6 +507,7 @@ class app extends module{
 					$link_list[$call['id']] = true;
 			$call['params'] = array();
 			$link_param = $this->_query->select()->from('module_link_param')->where('link_id',array_keys($link_list),'in')->query();
+			//var_dump($link_param); die;
 			//grouping params by link_id
 			$param_group = array();
 			foreach($link_param as $param){
@@ -517,7 +519,7 @@ class app extends module{
 					$param_group[$param['link_id']]['condition'][$param['param_name']] = $param['value'];
 			}
 			//applying params
-			foreach($call_db_list as $call){
+			foreach($call_db_list as &$call){
 				if(!empty($param_group[$call['id']])){
 					$call['params'] = $param_group[$call['id']]['param'];
 					$call['condition'] = $param_group[$call['id']]['condition'];
@@ -525,6 +527,7 @@ class app extends module{
 				$this->call_list[] = $call;
 			}
 		}
+		//var_dump($this->call_list);die;
 	}
 	
 	private function get_db_config(){
@@ -693,6 +696,7 @@ class app extends module{
 		$method_name = $this->get_call_method($module,$call);
 		if(!$call['method_name'])
 			$call['method_name'] = $method_name;
+		//!!!var_dump($call);
 		if($this->check_method_access($module, $method_name)){
 			$this->call_module_method($module, $method_name, $call);
 			//TODO module inner title like $this->_title;
@@ -773,9 +777,11 @@ class app extends module{
 			$this->message($module_name.'.'.$method_name.': недостаточно прав доступа. Укажите логин и пароль');
 			unset($this->module[count($this->module)-1]);
 			$this->add_user_module();
-			return;
 		}
-		return true;
+		else
+			$access = true;
+		//var_dump($module->module_name, $method_name, $access);
+		return $access;
 	}
 	
 	/*private function prepare_callable_method(&$module){
@@ -814,6 +820,8 @@ class app extends module{
 		if(!method_exists($module, $method_name))
 			throw new my_exception('method name not found for this module', $module_name.'.'.$method_name);
 		$args_new = array();
+		if(!isset($call['params']))
+			$call['params'] = NULL;
 		$args = $this->get_args($module,$method_name, $call['params'], $args_new);
 		$module->argument_all = &$args;
 		$module->argument_new = &$args_new;//list of arguments different from defaults
