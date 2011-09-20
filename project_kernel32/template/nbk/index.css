@@ -10,17 +10,11 @@ body, html {
 	color: #FF7A00;
 }
 
-.right .user_container{
-	position: relative;
-	margin: 0 auto;
-	top: 120px;
-}
-
-.right .user_container.logined{
+.top .user_container.logined{
 	width: auto;
-	margin: 5px;
+	margin: 0px;
 	float: right;
-	position: static;
+	padding-right: 10px;
 }
 
 .wrap {
@@ -31,10 +25,36 @@ body, html {
 }
 .wrap >tbody >tr >td{
 	vertical-align: top;
+	padding: 0 10px;
+}
+.wrap >tbody >tr >td.top{
+	height: 23px;
+}
+.wrap >tbody >tr:FIRST-CHILD >td{
+	padding-top: 10px;
+	padding-bottom: 7px;
+}
+.wrap >tbody >tr:LAST-CHILD >td{
 	padding: 10px;
 }
 
-.footer {
+.footer{
     height: 14px;
     text-align: center;
+}
+.footer a, .footer a:visited{
+	color: blue;
+}
+
+.menu.horysontal{
+	float: left;
+	padding-left: 10px;
+}
+
+.menu a, .menu a:visited{
+	color: blue;
+	text-decoration: none;
+}
+.menu a:HOVER {
+	text-decoration: underline;
 }

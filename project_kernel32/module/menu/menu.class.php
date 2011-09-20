@@ -10,10 +10,12 @@ class menu extends base_module{
 			$this->_message('menu list is empty');
 	}
 	
-	public function get($id = 1, $show_title=NULL){
+	public function get($id = 1, $show_title=NULL, $type=NULL){
 		parent::get_category(NULL,NULL,NULL,NULL,'id,title,depth,link',array('menu_id',$id));
 		if($show_title)
 			$this->_result['title'] = $this->_query->select('title')->from($this->module_name)->where('id',$id)->query1('title');
+		if($type)
+			$this->parent->include[] = '<link href="module/menu/'.$type.'.css" rel="stylesheet" type="text/css"/>';
 	}
 	
 	/*function build_menu(&$src, &$result_node, $parent_id=NULL){
@@ -107,7 +109,7 @@ class menu extends base_module{
 	
 	public function save($id, $title){
 		$value = array('title'=>$title);
-		parent::save($id, $value, 'edit', true, array('title'=>$title));
+		parent::save($id, $value, 'edit', true, array('name'=>$title));
 	}
 	
 	public function check_alias($link){

@@ -3,7 +3,7 @@
 <xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" />
 
 <xsl:template match="root/module/item[_module_name='menu' and _method_name='get']">
-	<div id="menu" class="menu">
+	<div id="menu" class="menu {argument/type}">
 		<ul>
 			<xsl:for-each select="item">
 				<xsl:call-template name="nested_tag_before"/>
@@ -38,57 +38,52 @@
 
 <xsl:template match="root/module/item[_module_name='menu' and _method_name='edit']">
 	<div class="menu nested_tree">
-		<xsl:choose>
-			<xsl:when test="argument/id and not(id)">
-				Меню не найдено
-			</xsl:when>
-			<xsl:otherwise>
-				<form method="post" action="admin.php?call=menu.save&amp;id={id}">
-					Заголовок: <input value="{title}" type="text" name="title"/>
-					<input type = "submit" value="ок"/>
-					<xsl:if test = "id">
-						<a class="remove_menu" href="admin.php?call=menu.remove&amp;id={id}">Удалить меню</a>
-					</xsl:if>
-				</form>
-				<br/>
-				<ul>
-					<xsl:for-each select="item">
-						<xsl:call-template name="nested_tag_before"/>
-						<div class="item_cont">
-							<img class="nested_item_img" src="template/admin/images/folder_opened.png"/>
-							<a href="#">
-								<xsl:value-of select="title"/>
-							</a>
-							<form class="controls" method="post" action="admin.php?call=menu.move_item&amp;menu_id={menu_id}&amp;id={id}">
-								<a href="/admin.php?call=menu.remove_item&amp;menu_id={menu_id}&amp;id={id}" class="remove">удалить</a>
-								<a href="/admin.php?call=menu.edit_item&amp;menu_id={menu_id}&amp;id={id}" class="edit">редактировать</a>
-								Вставить: 
-								<select name="insert_type" autocomplete='off'>
-									<option value="0" selected="1">-</option>
-									<option value="before">перед</option>
-									<option value="inside">в</option>
-								</select>
-								<select class="insert_place" name="insert_place" autocomplete='off'>
-									<option value="0" selected="1">-</option>
-									<xsl:variable name="current_id" select="id"/>
-									<xsl:for-each select="../item">
-										<xsl:if test="id!=$current_id">
-											<option value="{id}">
-												<xsl:call-template name="menu_print_level"/>
-												<xsl:value-of select="title"/>
-											</option>
-										</xsl:if>
-									</xsl:for-each>
-									<option value="last">-</option>
-								</select>
-								<a href="/admin.php?call=menu.edit_item&amp;menu_id={menu_id}&amp;insert_place={id}" class="subitem">добавить подпункт</a>
-							</form>
-						</div>
-					</xsl:for-each>
-					<xsl:call-template name="nested_tag_after"/>
-				</ul>
-			</xsl:otherwise>
-		</xsl:choose>
+		<xsl:if test="argument/id='' or id">
+			<form method="post" action="admin.php?call=menu.save&amp;id={id}">
+				Заголовок: <input value="{title}" type="text" name="title"/>
+				<input type = "submit" value="ок"/>
+				<xsl:if test = "id">
+					<a class="remove_menu" href="admin.php?call=menu.remove&amp;id={id}">Удалить меню</a>
+				</xsl:if>
+			</form>
+			<br/>
+			<ul>
+				<xsl:for-each select="item">
+					<xsl:call-template name="nested_tag_before"/>
+					<div class="item_cont">
+						<img class="nested_item_img" src="template/admin/images/folder_opened.png"/>
+						<a href="#">
+							<xsl:value-of select="title"/>
+						</a>
+						<form class="controls" method="post" action="admin.php?call=menu.move_item&amp;menu_id={menu_id}&amp;id={id}">
+							<a href="/admin.php?call=menu.remove_item&amp;menu_id={menu_id}&amp;id={id}" class="remove">удалить</a>
+							<a href="/admin.php?call=menu.edit_item&amp;menu_id={menu_id}&amp;id={id}" class="edit">редактировать</a>
+							Вставить: 
+							<select name="insert_type" autocomplete='off'>
+								<option value="0" selected="1">-</option>
+								<option value="before">перед</option>
+								<option value="inside">в</option>
+							</select>
+							<select class="insert_place" name="insert_place" autocomplete='off'>
+								<option value="0" selected="1">-</option>
+								<xsl:variable name="current_id" select="id"/>
+								<xsl:for-each select="../item">
+									<xsl:if test="id!=$current_id">
+										<option value="{id}">
+											<xsl:call-template name="menu_print_level"/>
+											<xsl:value-of select="title"/>
+										</option>
+									</xsl:if>
+								</xsl:for-each>
+								<option value="last">-</option>
+							</select>
+							<a href="/admin.php?call=menu.edit_item&amp;menu_id={menu_id}&amp;insert_place={id}" class="subitem">добавить подпункт</a>
+						</form>
+					</div>
+				</xsl:for-each>
+				<xsl:call-template name="nested_tag_after"/>
+			</ul>
+		</xsl:if>
 	</div>
 	<xsl:if test="id">
 		<a href="admin.php?call=menu.edit_item&amp;menu_id={id}">Новый пункт меню</a>

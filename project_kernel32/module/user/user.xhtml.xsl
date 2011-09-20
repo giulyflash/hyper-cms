@@ -17,7 +17,7 @@
 		</xsl:when>
 		<xsl:otherwise>
 			<form action="/{$admin_mode}?call=user.login" method="post">
-				<div class="user_container">
+				<div class="user_container unlogined">
 					<div class="input_container">
 						<p>
 							<input placeholder="логин" name="login"/>

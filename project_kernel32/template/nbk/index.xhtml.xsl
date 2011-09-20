@@ -8,24 +8,26 @@
 </head>
 <body>
 	<table class="wrap">
-		<tbody>
-			<tr class="top">
-				<xsl:comment>Главное меню тут</xsl:comment>
+			<tr>
+				<td class="top">
+					<xsl:call-template name="_call">
+						<xsl:with-param name="position">top</xsl:with-param>
+					</xsl:call-template>
+				</td>
 			</tr>
 			<tr class="container">
 				<td>
-					<div class="right">
+					<!-- <div class="right">
 						<xsl:call-template name="_call">
 							<xsl:with-param name="position">right</xsl:with-param>
 						</xsl:call-template>
-					</div>
+					</div>-->
 					<xsl:call-template name="_call"/>
 				</td>
 			</tr>
 			<tr class="footer">
 				<td>&#169; 2011 <a href="http://grosstech.ru">Grosstech</a>, <a href="mailto:kulakov.serg@gmail.com">Кулаков Сергей</a></td>
 			</tr>
-		</tbody>
 	</table>
 </body>
 </html>
