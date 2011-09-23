@@ -11,7 +11,7 @@ class menu extends base_module{
 	}
 	
 	public function get($id = 1, $show_title=NULL, $type=NULL){
-		parent::get_category(NULL,NULL,NULL,NULL,'id,title,depth,link',array('menu_id',$id));
+		parent::get_category(NULL,false,NULL, true, NULL,'id,title,depth,link',array('menu_id',$id));
 		if($show_title)
 			$this->_result['title'] = $this->_query->select('title')->from($this->module_name)->where('id',$id)->query1('title');
 		if($type)

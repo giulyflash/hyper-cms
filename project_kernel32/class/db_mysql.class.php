@@ -50,6 +50,7 @@ class db_mysql extends module implements db_interface{
 		}
 		if($error = mysql_error()){
 			//TODO process error, dont output row
+			$this->_message('sql: '.$query/*,array('sql'=>$query)*/);
 			throw new my_exception('mysql error', $error);
 		}
 		else{

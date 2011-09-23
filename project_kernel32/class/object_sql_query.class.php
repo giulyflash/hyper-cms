@@ -53,7 +53,7 @@ class object_sql_query{
 				$item = trim($item);
 				if($item == '*')
 					$sql.= $item.',';
-				elseif(preg_match('%^[a-zA-Z_\-\.]+$%', $item))
+				elseif(preg_match('%^[a-zA-Z0-9_\-\.]+$%', $item))
 					$sql.= $quot.$item.$quot.',';
 				else
 					throw new my_exception('wrong field');
@@ -323,9 +323,9 @@ class object_sql_query{
 	}
 	
 	public function _on($field1,$field2){
-		if(preg_match('%^[a-zA-Z_\-\.]+$%', field1))
+		if(preg_match('%^[a-zA-Z0-9_\-\.]+$%', field1))
 			throw new my_exception('Wrong field', field1);
-		if(preg_match('%^[a-zA-Z_\-\.]+$%', field2))
+		if(preg_match('%^[a-zA-Z0-9_\-\.]+$%', field2))
 			throw new my_exception('Wrong field', field2);
 		$sql = ' ON '.$this->escstr($field1).' = '.$this->escstr($field2);
 		$this->parent->add_sql($sql);

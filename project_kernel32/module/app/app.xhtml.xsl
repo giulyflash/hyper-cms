@@ -32,7 +32,9 @@
 				<xsl:when test = "*">
 					<p><xsl:value-of select="name()"/></p>
 					<xsl:for-each select="*">
-						<xsl:value-of select="name()"/>: <span><xsl:value-of select="."/></span><br/>
+						<p>
+							<xsl:value-of select="name()"/>: <span><xsl:value-of select="."/></span>
+						</p>
 					</xsl:for-each>
 				</xsl:when>
 				<xsl:otherwise>

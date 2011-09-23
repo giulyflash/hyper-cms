@@ -9,6 +9,9 @@
 		<xsl:when test="depth &gt; $prev_depth">
 			<xsl:value-of select="concat(../lt,'ul',../gt)" disable-output-escaping="yes"/>
 			<xsl:value-of select="concat(../lt,'li',../gt)" disable-output-escaping="yes"/>
+			<xsl:if test="items">
+				<xsl:apply-templates match="items"/>
+			</xsl:if>
 		</xsl:when>
 		<xsl:when test="depth &lt; $prev_depth">
 			<xsl:call-template name="nested_close_tag">
@@ -16,6 +19,9 @@
 			</xsl:call-template>
 			<xsl:value-of select="concat(../lt,'/li',../gt)" disable-output-escaping="yes"/>
 			<xsl:value-of select="concat(../lt,'li',../gt)" disable-output-escaping="yes"/>
+			<xsl:if test="items">
+				<xsl:apply-templates match="items"/>
+			</xsl:if>
 		</xsl:when>
 		<xsl:when test="position()=1">
 			<xsl:value-of select="concat(../lt,'li',../gt)" disable-output-escaping="yes"/>

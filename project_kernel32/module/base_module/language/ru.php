@@ -50,7 +50,7 @@ $language = array(
 
 $error = array(
 	'try to use not existing category' => 'попытка использовать несуществующую категорию: "$title"',
-	'category not found' => 'Категория "$title" не найдена',
+	'category not found' => 'Категория $field="$value" не найдена',
 	'module has not items' => 'Модуль "$name" не имеет объектов',
 	'condition is not an array' =>  'условие "$condition" не является массивом',
 	'condition field and value must be set' => 'поле и значение условия должны быть заданы',

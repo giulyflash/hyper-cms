@@ -54,7 +54,8 @@ class app_config extends config{
 	); //link for all admin modules
 	
 	protected $include = array(
-		'*'=>'<script type="text/javascript" src="extensions/jquery/jquery-1.5.2.min.js"></script>',
+		'*'=>'<script type="text/javascript" src="extensions/jquery/jquery-1.5.2.min.js"></script>
+			<script type="text/javascript" src="module/app/app.js"></script>',
 		'admin_mode.*'=>'<script type="text/javascript" src="extensions/jquery/jquery-1.5.2.min.js"></script>',
 	); //include for all modules
 	
@@ -73,6 +74,8 @@ class app_config extends config{
 	protected $role_delete = 'delete';
 	
 	protected $access_name = '__access__';
+	//$file_name = _module_path.$class_name.'/'.$class_name.$this->parent->_config('module_template_ext');
+	protected $json_html_template = 'json_html.xhtml.xsl';
 }
 
 class app extends module{
@@ -661,7 +664,7 @@ class app extends module{
 			preg_match('%^(.+?)-(.+?),(.+?);q=([0-9\.]+)%', $_SERVER['HTTP_ACCEPT_LANGUAGE'], $lang_arr)){
 			$this->config->set('language',$lang_arr[1]);
 		}
-		if(!empty($_REQUEST['_no_link'])){
+		if(!empty($_REQUEST['_no_link']) || $this->_config('content_type')=='json_html'){
 			$this->config->set('module_link_from_module_config',NULL); //need or need not?
 			$this->config->set('module_link_from_config',NULL);
 			$this->config->set('module_link_from_db',NULL);
@@ -951,6 +954,7 @@ class app extends module{
 		if($this->domain)
 			$this->output['meta']['domain'] = $this->domain;
 		$this->output['meta']['request'] = $_SERVER["REQUEST_URI"];
+		$this->output['meta']['content_type'] = $this->_config('content_type');
 		if($this->call_string)
 			$this->output['meta']['call_string'] = $this->call_string;
 		if($main_language = $this->_config('language'))

@@ -93,12 +93,16 @@ abstract class base_module extends module{
 		return $values;
 	}
 	
-	public function _admin($page=null, $count=null, $show='all', $category_field='*', $item_field = '*', $item_order = 'order'){
+	public function _admin($page=null, $count=null, $show='all', $category_field='*', $item_field = '*', $item_order = 'order', $category_condition=array(),$item_condition=array()){
 		//TODO $show: item, category
 		if($this->_config('has_category')){
-			$this->_result = $this->_query->select($category_field)->from($this->module_name.$this->_config('category_posfix'))->order('left')->query();
-			if($this->_config('has_item'))
-				if($items = $this->_query->select($item_field)->from($this->module_name)->order($item_order)->query()){
+			$this->_query->select($category_field)->from($this->_table_name.$this->_config('category_posfix'));
+			$this->parse_condition($category_condition,false);
+			$this->_result = $this->_query->order('left')->query();
+			if($this->_config('has_item')){
+				$this->_query->select($item_field)->from($this->_table_name);
+				$this->parse_condition($item_condition,false);
+				if($items = $this->_query->order($item_order)->query()){
 					foreach($this->_result as &$category)
 						foreach(array_keys($items) as $item_num)
 							if($category['id']==$items[$item_num]['category_id']){
@@ -110,44 +114,68 @@ abstract class base_module extends module{
 					if($items)
 						$this->_result['items'] = $items;
 				}
+			}
 		}
 		elseif($this->_config('has_item'))
-			$this->_result = $this->_query->select($item_field)->from($this->module_name)->order($item_order)->limit_page($page,$count)->query();
+			$this->_result = $this->_query->select($item_field)->from($this->_table_name)->order($item_order)->limit_page($page,$count)->query();
 		$this->_result['lt'] = '<';
 		$this->_result['gt'] = '>';
 	}
 	
-	public function get_category($field = 'title', $value=NULL, $need_item=true, $item_fields = '*', $category_fields='id,title,translit_title,depth',$category_condition=array(),$item_condition=array()){
+	public function get_category($field = 'translit_title', $value=false, $need_item=true, $all = false, $item_fields = '*', $category_fields='id,title,translit_title,depth',$category_condition=array(),$item_condition=array()){
 		//TODO common nested items: http://dev.mysql.com/tech-resources/articles/hierarchical-data.html
+		//var_dump("module: {$this->module_name}.{$this->method_name}; field: $field; value: $value; need_item: $need_item; all: $all; item_fields: $item_fields");
 		if(!$this->_config('has_category'))
 			throw new my_exception('try to use not existing category',array('title'=>$value)); 
-		$this->_query->select($category_fields)->from($this->module_name.$this->_config('category_posfix'));
+		$this->_query->select($category_fields)->from($this->_table_name.$this->_config('category_posfix'));
 		$where = false;
-		if($field){
+		if($field && $value!==false){
+			$temp_sql = $this->_query->sql;
+			$this->_query->set_sql();
+			//
+			$category_item = $this->_query->select('left,right,id')->from($this->_table_name.$this->_config('category_posfix'))->where($field,$value)->query1();
+			if(!$category_item){
+				$this->_message('category not found',array('field'=>$field,'value'=>$value));
+				return;
+			}
+			$edge = array($category_item['left']+1,$category_item['right']);
+			//
+			$this->_query->set_sql($temp_sql);
+			$this->_query->where('left', $edge, 'between');
 			$where = true;
-			$this->_query->where($field,$value);
+		}
+		elseif(!$all){
+			$this->_query->where('depth',0);
+			$where = true;
 		}
 		$this->parse_condition($category_condition,$where);
 		$this->_result = $this->_query->order('left')->query();
-		if(!$this->_result && $field)
-			$this->_message('category not found',array('title'=>$value));
 		if($need_item){
 			if(!$this->_config('has_item'))
 				throw new my_exception('module has not items',array('name'=>$this->module_name));
 			else{
-				$this->_query->select($item_fields)->from($this->module_name);
-				if($field){
+				$this->_query->select($item_fields)->from($this->_table_name);
+				if(isset($category_item,$category_item['id']))
+					$this->_query->where('category_id',$category_item['id']);
+				else
+					$this->_query->where('category_id',NULL);
+				/*if($field && $this->_result){
+					$category_list = array();
 					foreach ($this->_result as $category){
 						if(is_array($category))
 							$category_list[] = $category['id'];
 					}
-					$this->_query->where('category_id',$category_list,'in',true)->_or('category_id',NULL)->close_bracket();
+					if($category_list)
+						$this->_query->where('category_id',$category_list,'in',true);
+					else
+						$this->_query->where('category_id',NULL,'=',true);
+					$this->_query->close_bracket();
 					$where = true;
 				}
 				else
-					$where = false;
-				$this->parse_condition($item_condition,$where);
-				$this->_result['items'] = $this->_query->query();
+					$where = false;*/
+				$this->parse_condition($item_condition,true);
+				$this->_result['items'] = $this->_query->order('order')->query();
 			}
 		}
 		$this->_result['lt'] = '<';
@@ -181,7 +209,8 @@ abstract class base_module extends module{
 	}
 	
 	public function get($field = NULL, $value=NULL,$select = '*',$condition=array()){
-		$this->_result = $this->_query->select($select)->from($this->module_name);
+
+		$this->_result = $this->_query->select($select)->from($this->_table_name);
 		if($field){
 			$this->_query->where($field,$value);
 			$where = true;
@@ -196,7 +225,7 @@ abstract class base_module extends module{
 	
 	public function edit($id=NULL,$select='*'){
 		if($id){
-			$result = $this->_query->select($select)->from($this->module_name)->where('id',$id)->query1();
+			$result = $this->_query->select($select)->from($this->_table_name)->where('id',$id)->query1();
 			if(!$result)
 				throw new my_exception('object not found by id', array('id'=>$id));
 			$this->_result = $result;
@@ -206,12 +235,12 @@ abstract class base_module extends module{
 	public function save($id=NULL, $value = array(), $redirect = 'edit', $output_message = true, $params=array()){
 		//TODO unique translit_title
 		if($id){
-			$this->_query->update($this->module_name)->set($value)->where('id',$id)->limit(1)->execute();
+			$this->_query->update($this->_table_name)->set($value)->where('id',$id)->limit(1)->execute();
 			if($output_message)
 				$this->_message('edited seccessfully',$params);
 		}
 		else{
-			$this->_query->insert($this->module_name)->values($value)->execute();
+			$this->_query->insert($this->_table_name)->values($value)->execute();
 			$id = $this->parent->db->insert_id();
 			if($output_message)
 				$this->_message('added seccessfully',$params);
@@ -226,7 +255,7 @@ abstract class base_module extends module{
 			if($title)
 				$this->_message('deleted seccessfully',$param);
 			else
-				$this->_query->delete()->from($this->module_name)->where('id',$id)->query1();
+				$this->_query->delete()->from($this->_table_name)->where('id',$id)->query1();
 		}
 		else
 			$this->_message('id is empty');
@@ -234,13 +263,13 @@ abstract class base_module extends module{
 	
 	public function edit_category($id=NULL, $insert_place=NULL){
 		if($id)
-			$this->_result = $this->_query->select()->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1();
+			$this->_result = $this->_query->select()->from($this->_table_name.$this->_config('category_posfix'))->where('id',$id)->query1();
 		$this->_result['lt'] = '<';
 		$this->_result['gt'] = '>';
 	}
 
-	public function save_category($id=NULL,$value=array(),$insert_place=NULL,$condition = array(),$redirect = 'admin'){
-		$table_name = $this->module_name.$this->_config('category_posfix');
+	public function save_category($id=NULL,$value=array(),$insert_place=NULL,$condition = array(),$redirect = '_admin'){
+		$table_name = $this->_table_name.$this->_config('category_posfix');
 		if($id){
 			$title = $this->_query->select('title')->from($table_name)->where('id',$id)->query1('title');
 			$this->_query->update($table_name)->set($value)->where('id',$id)->limit(1)->execute();
@@ -276,8 +305,8 @@ abstract class base_module extends module{
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect);
 	}
 
-	public function move_category($id=NULL, $insert_type=NULL, $insert_place=NULL, $condition = array(),$redirect = 'admin'){
-		$table_name = $this->module_name.$this->_config('category_posfix');
+	public function move_category($id=NULL, $insert_type=NULL, $insert_place=NULL, $condition = array(),$redirect = '_admin'){
+		$table_name = $this->_table_name.$this->_config('category_posfix');
 		if(!$id)
 			throw new my_exception('id is empty');
 		if(!$insert_type)
@@ -348,8 +377,8 @@ abstract class base_module extends module{
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect);
 	}
 
-	public function remove_category($id=NULL,$condition = array(), $redirect = 'admin'){
-		$table_name = $this->module_name.$this->_config('category_posfix');
+	public function remove_category($id=NULL,$condition = array(), $redirect = '_admin'){
+		$table_name = $this->_table_name.$this->_config('category_posfix');
 		if(!$id)
 			throw new my_exception('id is empty');
 		$target = $this->_query->select('left,right,title')->from($table_name)->where('id',$id)->query1();
@@ -382,7 +411,7 @@ abstract class base_module extends module{
 			case 'get':{
 				switch($param_name){
 					case 'field':{
-						$this->_result = $this->_query->fetch_field_assoc($this->module_name);
+						$this->_result = $this->_query->fetch_field_assoc($this->_table_name);
 						break;
 					}
 					case 'value':break;
@@ -393,7 +422,7 @@ abstract class base_module extends module{
 			case 'get_category':{
 				switch($param_name){
 					case 'field':{
-						$this->_result = $this->_query->fetch_field($this->module_name.$this->_config('category_posfix'));
+						$this->_result = $this->_query->fetch_field($this->_table_name.$this->_config('category_posfix'));
 						break;
 					}
 					case 'value':break;
@@ -408,7 +437,7 @@ abstract class base_module extends module{
 			case 'get_category_by_title':{
 				switch($param_name){
 					case 'title':{
-						$this->_result = $this->_query->select('title,translit_title')->from($this->module_name.$this->_config('category_posfix'))->query2assoc_array('translit_title','title');
+						$this->_result = $this->_query->select('title,translit_title')->from($this->_table_name.$this->_config('category_posfix'))->query2assoc_array('translit_title','title');
 						break;
 					}
 					default: parent::_get_param_value($method_name,$param_name);
@@ -418,7 +447,7 @@ abstract class base_module extends module{
 			case 'edit':{
 				switch($param_name){
 					case 'id':{
-						$this->_result = $this->_query->select('id')->from($this->module_name)->query2assoc_array('id','id');
+						$this->_result = $this->_query->select('id')->from($this->_table_name)->query2assoc_array('id','id');
 						break;
 					}
 					default: parent::_get_param_value($method_name,$param_name);
@@ -428,7 +457,7 @@ abstract class base_module extends module{
 			case 'remove':{
 				switch($param_name){
 					case 'id':{
-						$this->_result = $this->_query->select('id,title')->from($this->module_name)->query2assoc_array('id','title');
+						$this->_result = $this->_query->select('id,title')->from($this->_table_name)->query2assoc_array('id','title');
 						break;
 					}
 					default: parent::_get_param_value($method_name,$param_name);
@@ -439,7 +468,7 @@ abstract class base_module extends module{
 				switch($param_name){
 					case 'id':
 					case 'insert_place':{
-						$this->_result = $this->_query->select('id,title')->from($this->module_name.$this->_config('category_posfix'))->query2assoc_array('id','title');
+						$this->_result = $this->_query->select('id,title')->from($this->_table_name.$this->_config('category_posfix'))->query2assoc_array('id','title');
 						break;
 					}
 					default: parent::_get_param_value($method_name,$param_name);
@@ -449,7 +478,7 @@ abstract class base_module extends module{
 			case 'remove_category':{
 				switch($param_name){
 					case 'id':{
-						$this->_result = $this->_query->select('id,title')->from($this->module_name.$this->_config('category_posfix'))->query2assoc_array('id','title');
+						$this->_result = $this->_query->select('id,title')->from($this->_table_name.$this->_config('category_posfix'))->query2assoc_array('id','title');
 						break;
 					}
 					default: parent::_get_param_value($method_name,$param_name);
