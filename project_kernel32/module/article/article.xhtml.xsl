@@ -103,20 +103,18 @@
 </xsl:template>
 
 <xsl:template match="item[_module_name='article' and _method_name='_admin']/item/items">
-	<ul class="nested_items_list">
-		<xsl:for-each select="item">
-			<li>
-				<a href="?call=article.edit&amp;id={id}">
-					<img src="template/admin/images/folder_document.png"/>
-					<xsl:value-of select="title"/>
-				</a>
-			</li>
-		</xsl:for-each>
-	</ul>
+	<xsl:call-template name="article_item"/>
 </xsl:template>
 
 <xsl:template match="item[_module_name='article' and _method_name='_admin']/items">
-	<ul class="nested_items_uncategorized">
+	<xsl:call-template name="article_item">
+		<xsl:with-param name="class">uncategorized</xsl:with-param>
+	</xsl:call-template>
+</xsl:template>
+
+<xsl:template name="article_item">
+	<xsl:param name="class">list</xsl:param>
+	<ul class="nested_items_{$class}">
 		<xsl:for-each select="item">
 			<li>
 				<a href="?call=article.edit&amp;id={id}">

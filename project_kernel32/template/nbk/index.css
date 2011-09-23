@@ -22,6 +22,10 @@ body, html {
     height: 100%;
     width: 100%;
     min-width: 1000px;
+    
+    /*temp*/
+    width: 1016px;
+    margin: 0 auto;
 }
 .wrap >tbody >tr >td{
 	vertical-align: top;

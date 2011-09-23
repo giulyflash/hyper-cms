@@ -25,6 +25,8 @@ class file_config extends module_config{
 	protected $thumb_path='thumb/';
 	protected $thumb_width=180;
 	protected $thumb_height=180;
+	protected $thumb2_width=60;
+	protected $thumb2_height=60;
 	protected $overwrite_if_exist = false;
 	
 	protected $callable_method=array(
@@ -110,6 +112,7 @@ class file extends module{
 		$date = new DateTime();
 		$file['create_date'] = $date->format('Y-m-d H:i:s');
 		$file['thumb_path'] = $this->create_thumb($file);
+		$file['thumb2_path'] = $this->create_thumb($file,true);
 		//echo "\n".$this->_query->insert('file')->values($file)->get_sql()."\n";
 		if($id=$this->_query->select('id')->from('file')->where('path',$file['path'])->query1('id'))
 			$this->_query->update('file')->set($file)->where('id',$id);
@@ -131,7 +134,7 @@ class file extends module{
 		//TODO output JSON
 	}
 	
-	private function create_thumb(&$file){
+	private function create_thumb(&$file,$thumb2=false){
 		if(!in_array($file['extension'], $this->_config('img_ext'))){
 			if(in_array($file['extension'], $this->_config('doc_ext'))){
 				$file['internal_type'] = 'document';
@@ -141,7 +144,7 @@ class file extends module{
 			return $this->_config('default_thumb');
 		}
 		$file['internal_type'] = 'image';
-		$img = new my_image($file['path'],$this->_config('thumb_path'),$this->_config('thumb_width'),$this->_config('thumb_height'));
+		$img = new my_image($file['path'],$this->_config('thumb_path'),$this->_config($thumb2?'thumb2_width':'thumb_width'),$this->_config($thumb2?'thumb2_height':'thumb_height'));
 		return $img->thumb();
 	}
 }

@@ -1,0 +1,76 @@
+.gallery{
+	clear: both;
+}
+.gallery .img{
+	width: 190px;
+	height: 220px;
+	padding: 5px;
+	display: inline-block;
+	text-align: center;
+}
+.gallery .img a{
+	margin: 0 auto;
+}
+.gallery .img div.border{
+	display: inline-block;
+	border: 1px solid #777;
+	padding: 2px;
+	margin-bottom: 5px;
+}
+.gallery ul{
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.gallery.nested_tree ul{
+	padding-left: 40px;
+}
+.gallery li span, .gallery li>a>img{
+	position: relative;
+	padding: 0 7px 0 0;
+}
+.gallery li>a>img{
+	position: relative;
+	top: 2px;
+}
+.gallery li a{
+	text-decoration: none;
+}
+.gallery .category_content{
+	display: none;
+	padding-left: 20px;
+	margin-left: 7px;
+	border-left: 1px solid #CCC;
+	background: url("/module/base_module/img/corner.png") no-repeat bottom left;
+}
+
+.gallery .nested_items li{
+	min-height: 64px;
+}
+.gallery .nested_items .img_cont{
+	width: 62px;
+	height: 62px;
+	float: left;
+	text-align: center;
+	margin-right: 10px;
+}
+.gallery .nested_items .img_cont div{
+	display: inline-block;
+	padding: 1px;
+	border: 1px solid #CCC;
+}
+.gallery .nested_items .img_cont img{
+	margin: 0;
+}
+.gallery.nested_tree .nested_items li{
+	border-top: 1px dotted #DDD;
+}
+.gallery .category_content .empty{
+	background: none;
+}
+.gallery .nested_items li:hover .controls{
+	display: block;
+}
+.gallery .nested_items .controls{
+	padding-left: 73px;
+}

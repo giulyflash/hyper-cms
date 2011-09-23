@@ -44,4 +44,4 @@ INSERT INTO `position` (`id`, `translit_title`, `title`) VALUES
 
 ALTER TABLE `file` CHANGE `inner_type` `internal_type` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT 'file';
 
-RENAME TABLE `grosstech`.`menu_category` TO `grosstech`.`menu_item` ;
+RENAME TABLE `menu_category` TO `menu_item` ;

@@ -65,6 +65,9 @@ abstract class module{
 			$this->_query = new object_sql_query($this->parent->db);
 		if($this->_config('need_language'))
 			$this->_get_module_language($this->module_name);
+		//FIXME temp, until the config engine update
+		if(!($this->_table_name = $this->_config('table_name')))
+			$this->_table_name = $this->module_name;
 	}
 	
 	private function _get_module_language($module){
