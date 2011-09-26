@@ -3,7 +3,7 @@ function _get_content(href,obj,add_event_callback){
 		alert('ajax target object not found');
 		return;
 	}
-	obj.prepend('<img src="module/module_link/img/loading1.gif" style="float: right;"/>');
+	//obj.prepend('<img src="module/module_link/img/loading1.gif" style="float: right;"/>');
 	href = href+'&_content=json_html'+(PHPSESSID?('&PHPSESSID='+PHPSESSID):'');
 	//alert(href);
 	$.ajax({

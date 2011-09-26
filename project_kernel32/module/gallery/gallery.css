@@ -29,7 +29,7 @@
 	position: relative;
 	padding: 0 7px 0 0;
 }
-.gallery li>a>img{
+.gallery li>a>img:FIRST-CHILD{
 	position: relative;
 	top: 2px;
 }
@@ -67,6 +67,8 @@
 }
 .gallery .category_content .empty{
 	background: none;
+	padding: 20px 0;
+	display: inline-block;
 }
 .gallery .nested_items li:hover .controls{
 	display: block;

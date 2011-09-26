@@ -15,6 +15,7 @@ class gallery extends base_module{
 	}*/
 	
 	public function get_category($title = false){
+		sleep(1);
 		parent::get_category('translit_title', $title, true, false, $this->_config('field_list'), 'id,title,translit_title,depth',array(),array(array('module',$this->module_name), array('internal_type','image')));
 	}
 	
