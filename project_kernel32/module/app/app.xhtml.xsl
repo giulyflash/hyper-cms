@@ -4,7 +4,9 @@
 
 <xsl:template match="/root/module/item" priority="-0.75">
 	<xsl:value-of select="_module_name"/>.<xsl:value-of select="_method_name"/>: шаблон не найден<br/>
-	<a href="{/root/session/call/item[position()=2]}">Назад</a><br/>
+	<xsl:if test="not(/root/error/*/*/item)">
+		<a href="{/root/session/call/item[position()=2]}">Назад</a><br/>
+	</xsl:if>
 </xsl:template>
 
 <xsl:template match="/root/debug" priority="-0.9"></xsl:template>
@@ -102,8 +104,8 @@
 			<xsl:value-of select="text" disable-output-escaping="yes"/>
 		</div>
 	</xsl:for-each>
-	<xsl:if test="root/error/*/*/item">
-		<a href="{/root/session/call/item[position()=2]}">Назад</a>
+	<xsl:if test="root/error/*/*/item and position()=last()">
+		<a href="{/root/session/call/item[position()=2]}">Назад</a><br/>
 	</xsl:if>
 </xsl:template>
 

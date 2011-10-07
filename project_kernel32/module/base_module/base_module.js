@@ -7,7 +7,7 @@ $(function(){
 			ul.css('display','block');
 	});
 	
-	$('.nested_item_img').click(function(){
+	/*$('.nested_item_img').click(function(){
 		$(this).parent().parent().find('>ul').toggle('normal');
 		change_nested_folder_img($(this));
 	});
@@ -16,12 +16,12 @@ $(function(){
 		$.each($('.nested_item_img'), function(key,ul){
 			change_nested_folder_img($(ul),1);
 		});
-	}
+	}*/
 });
 
-function change_nested_folder_img($obj,$hide){
+/*function change_nested_folder_img($obj,$hide){
 	if($hide)
 		$obj.parent().parent().find('>ul').hide();
 	var src  = $obj.attr('src')=='template/admin/images/folder_opened.png'?'template/admin/images/folder_closed.png':'template/admin/images/folder_opened.png';
 	$obj.attr('src',src);
-}
+}*/

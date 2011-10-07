@@ -15,8 +15,10 @@ class gallery extends base_module{
 	}*/
 	
 	public function get_category($title = false){
-		sleep(1);
-		parent::get_category('translit_title', $title, true, false, $this->_config('field_list'), 'id,title,translit_title,depth',array(),array(array('module',$this->module_name), array('internal_type','image')));
+///base_module::get_category($field, $value, $need_item, $show, $category_condition, $item_condition) 
+		//sleep(100);
+		parent::get_category('translit_title', $title, true, 'auto', NULL, array(array('module',$this->module_name), array('internal_type','image')));
+		//var_dump($this->_result);die;
 	}
 	
 	/*public function save($id=NULL, $title=NULL, $translit_title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL){
@@ -39,9 +41,10 @@ class gallery extends base_module{
 		parent::save($id, $value, 'edit',true,array('name'=>$title));
 	}*/
 	
-	public function _admin($page=null, $count=null, $show='all'){
+	/*public function _admin($page=null, $count=null, $show='all'){
+		die('!!!');
 		parent::_admin($page, $count, $show, 'id,title,translit_title,depth', $this->_config('field_list'),'order',array(),array(array('module',$this->module_name), array('internal_type','image')));
-	}
+	}*/
 
 	public function remove($id=NULL){
 		if($id){
@@ -149,7 +152,7 @@ class gallery_config extends base_module_config{
 	public $default_show_title = true;
 	
 	protected $table_name = 'file';
-	protected $field_list = 'id,translit_name,path,thumb_path,thumb2_path,name,category_id,';
+	protected $item_field = 'id,translit_title,path,thumb_path,thumb2_path,title,category_id';
 	protected $default_method = 'get_category';
 }
 ?>

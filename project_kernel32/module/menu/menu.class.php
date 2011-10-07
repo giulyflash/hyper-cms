@@ -11,7 +11,7 @@ class menu extends base_module{
 	}
 	
 	public function get($id = 1, $show_title=NULL, $type=NULL){
-		parent::get_category(NULL,false,NULL, true, NULL,'id,title,depth,link',array('menu_id',$id));
+		parent::get_category('link', $link = $_SESSION['call'][0]=='/'?false:$_SESSION['call'][0], NULL, 'all', NULL, array('menu_id',$id));
 		if($show_title)
 			$this->_result['title'] = $this->_query->select('title')->from($this->module_name)->where('id',$id)->query1('title');
 		if($type)
@@ -210,7 +210,9 @@ class menu_config extends base_module_config{
 	
 	protected $output_new_argument = true;
 	protected $default_link = '#';
-	protected $category_posfix = '_item';
+	//protected $category_posfix = '_item';
+	protected $category_table = 'menu_item';
+	protected $category_field='id,title,left,right,depth,link';
 	
 	public $has_item = false;
 	public $has_category = true;

@@ -19,7 +19,10 @@ $language = array(
 	'__object'=>array(
 		'article'=>'фото',
 		'article_category'=>'категория галереи',
-	)
+	),
+	'get_category'=>array(
+		'no_obj_msg'=>'Изображений не найдено',
+	),
 );
 
 $error = array(
