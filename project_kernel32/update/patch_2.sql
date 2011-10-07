@@ -17,3 +17,6 @@ ALTER TABLE `file` ADD `category_id` INT NULL DEFAULT NULL;
 ALTER TABLE `file` CHANGE `order` `order` INT( 11 ) NULL DEFAULT '1';
 UPDATE `grosstech`.`file` SET `order` = '1';
 ALTER TABLE `file` ADD `thumb2_path` VARCHAR( 255 ) NULL DEFAULT NULL AFTER `thumb_path`;
+
+ALTER TABLE `file` CHANGE `name` `title` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;
+ALTER TABLE `file` CHANGE `translit_name` `translit_title` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;

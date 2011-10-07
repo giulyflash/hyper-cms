@@ -19,7 +19,7 @@ class base_module_config extends module_config{
 		'get'=>array(
 			'condition'=>false,
 		),
-		'_admin,edit,save,remove,unlock_database,_get_param_value,edit_category,save_category,move_category,remove_category'=>array(
+		'_admin,edit,save,remove,unlock_database,_get_param_value,edit_category,save_category,move_category,remove_category,move_item,remove_item'=>array(
 			'__access__' => array(
 				__CLASS__ => self::role_write,
 			),
@@ -77,6 +77,10 @@ class base_module_config extends module_config{
 	protected $parent_module = array('base_module');
 	
 	protected $exclude_method_from_link_list = array('save','save_category','move_category');
+	
+	protected $category_field='id,title,translit_title,left,right,depth';
+	protected $item_field='id,title,category_id';
+	protected $item_order='order';
 }
 
 abstract class base_module extends module{
@@ -93,40 +97,136 @@ abstract class base_module extends module{
 		return $values;
 	}
 	
-	public function _admin($page=null, $count=null, $show='all', $category_field='*', $item_field = '*', $item_order = 'order', $category_condition=array(),$item_condition=array()){
-		//TODO $show: item, category
+	public function _admin(){
+		$this->get_category();
+	}
+	
+	public function get_category($field = 'translit_title', $value=false, $need_item=true, $show='auto', $category_condition=array(),$item_condition=array()){
+
+		//TODO pages?
+		//$show: all (all categories and subcategories), category (0lvl categories + tree to current category), current (current category content only), auto ('current' for json, 'category' for others)
+		if($value=='')
+			$value = false;
+		if($show=='auto')
+			$show = in_array($this->parent->_config('content_type'), array('json','json_html','xml'))?'current':'category';
+		if($show=='current'){
+			//var_dump($value);die;
+			//die($field.':'.$value);
+		}
+		$item_field = $this->_config('item_field');
+		$category_field = $this->_config('category_field');
+		$item_order = $this->_config('item_order');
+		$category_table = ($category_table = $this->_config('category_table'))?$category_table:($this->_table_name.'_category');
 		if($this->_config('has_category')){
-			$this->_query->select($category_field)->from($this->_table_name.$this->_config('category_posfix'));
-			$this->parse_condition($category_condition,false);
-			$this->_result = $this->_query->order('left')->query();
-			if($this->_config('has_item')){
+			$this->_query->select($category_field);
+			if($value!==false){
+				$bound_query = new object_sql_query($this->parent->db);
+				$bound = $bound_query->select('left,right,id,depth')->from($category_table)->where($field,$value)->query1();
+			}
+			else
+				$bound = array();
+			if($show=='category' || $show=='all'){
+				if($value!==false && $bound){
+					$this->_query->injection(', (`left` <= '.$bound['left'].' AND `right`>='.$bound['right'].') as `active`')->from($category_table);
+					if($show=='category'){
+						$this->_query->where('depth',0,'=',true)->_or('left',array($bound['left'], $bound['right']),'between')->_and('depth',$bound['depth']+2,'<');
+						if($bound['depth']!=0)
+							$this->_query->_or('left',$bound['left'],'<')->_and('right',$bound['left'],'>');
+						$this->_query->close_bracket();
+					}
+				}
+				else{
+					$this->_query->from($category_table);
+					if($show=='category'){
+						$this->_query->where('depth',0,'=',true);
+						if($value!==false && $bound)
+							$this->_query->_or('left', $bound, 'between');
+						$this->_query->close_bracket();
+					}
+				}
+			}
+			elseif($show=='current'){
+				$this->_query->from($category_table);
+				if($bound)
+					$this->_query->where('left', $bound['left'], '>')->_and('right', $bound['right'],'<');
+			}
+			if($bound || $show!='current'){
+				$this->parse_condition($category_condition,false);
+				$this->_result = $this->_query->order('left')->query2assoc_array('id',NULL,false);
+			}
+			else{
+				$this->_query->set_sql();
+				$this->_result = array();
+			}
+			//items
+			if($need_item && $this->_config('has_item')){
 				$this->_query->select($item_field)->from($this->_table_name);
-				$this->parse_condition($item_condition,false);
-				if($items = $this->_query->order($item_order)->query()){
-					foreach($this->_result as &$category)
-						foreach(array_keys($items) as $item_num)
-							if($category['id']==$items[$item_num]['category_id']){
-								if(!isset($category['items']))
-									$category['items'] = array();
-								$category['items'][] = $items[$item_num];
-								unset($items[$item_num]);
-							}
-					if($items)
-						$this->_result['items'] = $items;
+				$categories = array();
+				$null_categories = false;
+				if($show!='current')
+					$null_categories = true;
+				elseif($value)
+					$categories[] = $bound['id'];
+				if($this->_result){
+					if($bound)
+ 						foreach($this->_result as &$category){
+							if(!empty($category['active']))
+								$categories[] = $category['id'];
+							if($category['id']==$bound['id'])
+								$category['uncategorized'] = 1;
+						}
+				}
+				$where = false;
+				if($categories){
+					$this->_query->where('category_id',$categories,'in',true);
+					if($null_categories)
+						$this->_query->_or('category_id',NULL);
+					$this->_query->close_bracket();
+					$where = true;
+				}
+				elseif($null_categories){
+					$this->_query->where('category_id',NULL);
+					$where = true;
+				}
+				$this->parse_condition($item_condition,$where);
+				if($item_order)
+					$this->_query->order($item_order);
+				if($items = $this->_query->query()){
+					foreach(array_keys($items) as $item_num)
+						if($items[$item_num]['category_id'] && isset($this->_result[$items[$item_num]['category_id']])){
+							$this->_result[$items[$item_num]['category_id']]['items'] = $items[$item_num];
+							unset($items[$item_num]);
+						}
+					if($items){
+						$this->_result[-2] = array('items'=>$items, 'uncategorized'=>1);
+					}
 				}
 			}
 		}
-		elseif($this->_config('has_item'))
-			$this->_result = $this->_query->select($item_field)->from($this->_table_name)->order($item_order)->limit_page($page,$count)->query();
+		elseif($need_item && $this->_config('has_item')){
+			$this->_query->select($item_field)->from($this->_table_name);
+			if($value!==false){
+				$category_id = NULL;
+				if($field!='id'){
+					$bound_query = new object_sql_query($this->parent->db);
+					$category_id = $bound_query->select('id')->from($category_table)->where($field,$value)->query1('id');
+				}
+				$this->_query->where('category_id',$category_id);
+			}
+			if($item_order)
+				$this->_query->order($item_order);
+			$this->_result = $this->limit_page($page,$count)->_query->query();
+		}
+		$this->_result['_show'] = $show;
 		$this->_result['lt'] = '<';
 		$this->_result['gt'] = '>';
 	}
 	
-	public function get_category($field = 'translit_title', $value=false, $need_item=true, $all = false, $item_fields = '*', $category_fields='id,title,translit_title,depth',$category_condition=array(),$item_condition=array()){
+	/*public function get_category($field = 'translit_title', $value=false, $need_item=true, $all = false, $item_fields = '*', $category_fields='id,title,translit_title,depth',$category_condition=array(),$item_condition=array()){
 		//TODO common nested items: http://dev.mysql.com/tech-resources/articles/hierarchical-data.html
 		//var_dump("module: {$this->module_name}.{$this->method_name}; field: $field; value: $value; need_item: $need_item; all: $all; item_fields: $item_fields");
 		if(!$this->_config('has_category'))
-			throw new my_exception('try to use not existing category',array('title'=>$value)); 
+			throw new my_exception('try to use not existing category',array('title'=>$value));
 		$this->_query->select($category_fields)->from($this->_table_name.$this->_config('category_posfix'));
 		$where = false;
 		if($field && $value!==false){
@@ -159,28 +259,14 @@ abstract class base_module extends module{
 					$this->_query->where('category_id',$category_item['id']);
 				else
 					$this->_query->where('category_id',NULL);
-				/*if($field && $this->_result){
-					$category_list = array();
-					foreach ($this->_result as $category){
-						if(is_array($category))
-							$category_list[] = $category['id'];
-					}
-					if($category_list)
-						$this->_query->where('category_id',$category_list,'in',true);
-					else
-						$this->_query->where('category_id',NULL,'=',true);
-					$this->_query->close_bracket();
-					$where = true;
-				}
-				else
-					$where = false;*/
 				$this->parse_condition($item_condition,true);
 				$this->_result['items'] = $this->_query->order('order')->query();
+				//$this->_result[-2] = array('items'=>$items, 'uncategorized'=>1);
 			}
 		}
 		$this->_result['lt'] = '<';
 		$this->_result['gt'] = '>';
-	}
+	}*/
 	
 	public function get_category_by_title($title){
 		$this->get_category('translit_title', $title);
@@ -404,6 +490,62 @@ abstract class base_module extends module{
 	public function unlock_database(){
 		$this->_query->unlock()->execute();
 		$this->_message('database unlocked');
+	}
+	
+	public function move_item($id=NULL, $insert_after=NULL, $insert_category=NULL, $insert_item=NULL, $redirect='get_category'){
+		$this->_query->echo_sql=1;
+		if($id){
+			$match = $this->_query->select()->from($this->_table_name)->where('id',$id)->query1();
+			if(!$match)
+				throw new my_exception('item not found by id',array('id'=>$id));
+			if($insert_after!=$insert_item){
+				$place = NULL;
+				if($insert_item)
+					$place = $this->_query->select('order,category_id')->from($this->_table_name)->where('id',$insert_item)->query1();
+				if(!$place)
+					$place = array('order'=>'1', 'category_id'=>$match['category_id']);
+					//throw new my_exception('item not found by id',array('id'=>$insert_item));
+				$this->_query->update($this->_table_name)->injection(' SET `order`=`order`+1 ')->where('order',$place['order'],'>')->_and('category_id',$place['category_id'])->query();
+				$this->_query->update($this->_table_name)->set(array('order'=>$place['order']+1))->where('id',$id)->query1();
+				$order = $place['order'];
+			}else{
+				if(!$insert_category)
+					$insert_category = NULL;
+				$order = $this->_query->select('order')->from($this->_table_name)->where('category_id',$insert_category)->order('order desc')->query1('order');
+				if(!$order)
+					$order = 1;
+				else
+					$order+=1;
+				$this->_query->update($this->_table_name)->set(array('category_id'=>$insert_category, 'order'=>($order?$order:1)))->where('id',$id)->query1();
+			}
+			$this->_message('item moved',array('name'=>$match['title']));
+		}
+		if($redirect){
+			if($this->parent->admin_mode)
+				$redirect = $this->_config('admin_method');
+			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect);
+		}
+	}
+	
+	public function backtrace(){
+		$backtrace = debug_backtrace();
+		foreach($backtrace as $item){
+			foreach(array_keys($item['args']) as $key)
+				if("object"==gettype($item['args'][$key]))
+					unset($item['args'][$key]);
+				//$item['args'][$key] = gettype($item['args'][$key]);
+			$name = '';
+			if(isset($item['class']))
+				$name.=$item['class'];
+			if(isset($item['class']))
+				$name.=$item['type'];
+			if(isset($item['class']))
+				$name.=$item['function'];
+			var_dump($name, $item['args']);
+			//unset($item['object']);
+			//var_dump($item);
+		}
+		die;
 	}
 	
 	public function _get_param_value($method_name,$param_name){

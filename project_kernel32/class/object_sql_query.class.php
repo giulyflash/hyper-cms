@@ -88,8 +88,8 @@ class object_sql_query{
 		return new object_sql_query(NULL, $this->parent);
 	}
 	
-	public function _or($name=NULL,$value=NULL,$operand='='){
-		$this->parent->add_sql($this->clause($name,$value,$operand,'OR'));
+	public function _or($name=NULL,$value=NULL,$operand='=',$quot = '`',$open_bracket=false){
+		$this->parent->add_sql($this->clause($name,$value,$operand,'OR', $open_bracket, $quot));
 		return new object_sql_query(NULL, $this->parent);
 	}
 	
@@ -107,8 +107,8 @@ class object_sql_query{
 			case 'like':
 			{
 				$value_type = gettype($value);
-				if(in_array($value_type,array('object','resource','unknown type')) || $value_type=='array' && $operand!='like')
-					throw new my_exception('wrong value type');
+				if(in_array($value_type,array('object','resource','unknown type')) || $value_type=='array' && (!in_array($operand,array('like','in'))))
+					throw new my_exception('wrong value type',array('operation'=>$clause,'name'=>$name,'value'=>$value));
 				if($operand == '=' && $value === NULL)
 					$sql = $quot.self::escstr($name).$quot.' IS NULL';
 				elseif($operand == 'like'){
@@ -127,9 +127,13 @@ class object_sql_query{
 					else
 						$value = array($value);
 				}
-				foreach($value as $item)
-					$sql.='"'.self::escstr($item).'",';
-				$sql = $quot.self::escstr($name).$quot.' IN ('.substr($sql, 0, strlen($sql)-1).')';
+				if(!$value)
+					throw new my_exception('"IN" clause must have not-empty array');
+				else{
+					foreach($value as $item)
+						$sql.=($item===NULL?'NULL':('"'.self::escstr($item).'"')).',';
+					$sql = $quot.self::escstr($name).$quot.' IN ('.substr($sql, 0, strlen($sql)-1).')';
+				}
 				break;
 			}
 			case 'between':{
@@ -140,8 +144,9 @@ class object_sql_query{
 						throw new my_exception('value for between must be an array');
 				}
 				if(count($value)!=2)
-					throw new my_exception('count of values array for between must be 2');
-				$sql = $quot.self::escstr($name).$quot.' BETWEEN \''.$this->escstr($value[0]).'\' AND \''.$this->escstr($value[1]).'\'';
+					throw new my_exception('count of values array for between must be 2', array('operation'=>$clause,'name'=>$name,'value'=>$value));
+				$keys = array_keys($value);
+				$sql = $quot.self::escstr($name).$quot.' BETWEEN \''.$this->escstr($value[$keys[0]]).'\' AND \''.$this->escstr($value[$keys[1]]).'\'';
 				break;
 			}
 			default:{
@@ -356,6 +361,8 @@ class object_sql_query{
 	}
 	
 	public static function escstr($string){
+		if($string===NULL)
+			return $string;
 		if (function_exists('get_magic_quotes_gpc'))
 			if (get_magic_quotes_gpc())
 				$string = stripslashes($string);
@@ -411,12 +418,11 @@ class object_sql_query{
 		return $this->sql_query_class->insert_id();
 	}
 	
-	public function query1($field=NULL,$limit=true){
-		if(!$limit){
-			$sql = $this->parent->get_sql1();
-			$sql = preg_replace('%^(.+) LIMIT[0-9 ]+,?[0-9 ]*$%', '\1',$sql);
-			$this->parent->set_sql($sql.' LIMIT 1');
-		}
+	public function query1($field=NULL,$limit=true, $remove_existing_limit=false){
+		if($remove_existing_limit)
+			$this->parent->set_sql(preg_replace('%^(.+) LIMIT[0-9 ]+,?[0-9 ]*$%', '\1',$this->parent->sql));
+		if($limit)
+			$this->parent->set_sql($this->parent->sql.' LIMIT 1');
 		$this->parent->execute();
 		if(isset($this->parent->query_result[0])){
 			if($field){
