@@ -3,12 +3,14 @@
 }
 
 .nested_tree .controls{
+	min-height: 1.5em;
+}
+.nested_tree .controls>*{
 	display: none;
-	position: absolute;
 }
 
-.nested_tree .item_cont:hover .controls{
-	display: block;
+.nested_tree li:hover>.controls>*{
+	display: inline;
 }
 
 .nested_tree .controls select.insert_place{
@@ -60,7 +62,6 @@
 
 .nested_tree .item_cont img, .nested_items_list img, .nested_items_uncategorized img{
 	float: left;
-	margin-right: 5px;
 	cursor: pointer;
 }
 .nested_items_list li, .nested_items_uncategorized li{

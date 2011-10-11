@@ -1,21 +1,27 @@
 .gallery{
 	clear: both;
 }
-.gallery .img{
+.gallery .get_category .img{
 	width: 190px;
 	height: 220px;
 	padding: 5px;
 	display: inline-block;
 	text-align: center;
 }
-.gallery .img a{
-	margin: 0 auto;
-}
+
 .gallery .img div.border{
 	display: inline-block;
 	border: 1px solid #777;
 	padding: 2px;
 	margin-bottom: 5px;
+}
+
+.gallery ._admin li.img>a>div{
+	float: left;
+	display: inline;
+}
+.gallery .img a{
+	margin: 0 auto;
 }
 .gallery ul{
 	list-style: none;
@@ -43,10 +49,10 @@
 	background: url("/module/base_module/img/corner.png") no-repeat bottom left;
 }
 
-.gallery .nested_items li{
-	min-height: 64px;
-}
-.gallery .nested_items .img_cont{
+/*.gallery .nested_items li{
+	min-height: 68px;
+}*/
+.gallery .get_category .nested_items .img_cont{
 	width: 62px;
 	height: 62px;
 	float: left;
@@ -66,14 +72,15 @@
 }*/
 .gallery .category_content .empty{
 	background: none;
-	padding: 20px 0;
+	padding: 30px 0;
+	min-height: 0px;
 }
-.gallery .nested_items li:hover .controls{
+/*.gallery .nested_items li:hover .controls{
 	display: block;
 }
 .gallery .nested_items .controls{
 	padding-left: 73px;
-}
+}*/
 .gallery .category_content.uncategorized{
 	display: block;
 }

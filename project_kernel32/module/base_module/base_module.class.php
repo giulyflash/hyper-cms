@@ -64,6 +64,8 @@ class base_module_config extends module_config{
 		'*,admin_mode.*' =>
 			'<link href="module/base_module/base_module.css" rel="stylesheet" type="text/css"/>
 			<script type="text/javascript" src="/module/base_module/base_module.js"></script>',
+		'_admin' =>
+			'<script type="text/javascript" src="/module/base_module/category.js"></script>',
 	);
 	
 	protected $repair_hole = false;
@@ -108,7 +110,7 @@ abstract class base_module extends module{
 		if($value=='')
 			$value = false;
 		if($show=='auto')
-			$show = in_array($this->parent->_config('content_type'), array('json','json_html','xml'))?'current':'category';
+			$show = in_array($this->parent->_config('content_type'), array('json','json_html'/*,'xml'*/))?'current':'category';
 		if($show=='current'){
 			//var_dump($value);die;
 			//die($field.':'.$value);
@@ -172,8 +174,12 @@ abstract class base_module extends module{
  						foreach($this->_result as &$category){
 							if(!empty($category['active']))
 								$categories[] = $category['id'];
-							if($category['id']==$bound['id'])
-								$category['uncategorized'] = 1;
+							if($category['id']==$bound['id']){
+								if($show=='current')
+									$category['uncategorized'] = 1;
+								else
+									$category['is_current'] = 1;
+							}
 						}
 				}
 				$where = false;
@@ -194,7 +200,7 @@ abstract class base_module extends module{
 				if($items = $this->_query->query()){
 					foreach(array_keys($items) as $item_num)
 						if($items[$item_num]['category_id'] && isset($this->_result[$items[$item_num]['category_id']])){
-							$this->_result[$items[$item_num]['category_id']]['items'] = $items[$item_num];
+							$this->_result[$items[$item_num]['category_id']]['items'][] = $items[$item_num];
 							unset($items[$item_num]);
 						}
 					if($items){

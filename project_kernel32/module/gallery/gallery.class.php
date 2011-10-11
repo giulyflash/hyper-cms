@@ -141,7 +141,7 @@ class gallery_config extends base_module_config{
 		'get_category,edit'=>
 			'<link href="/extensions/jquery_lightbox/jquery_lightbox.css" rel="stylesheet" type="text/css"/>
 			<script type="text/javascript" src="/extensions/jquery_lightbox/jquery_lightbox.min.js"></script>
-			<script type="text/javascript" src="/module/gallery/gallery.js"></script>',
+			<script type="text/javascript" src="/module/base_module/category.js"></script>',
 		'get_category,_admin'=>
 			'<link href="/module/gallery/gallery.css" rel="stylesheet" type="text/css"/>',
 	);
