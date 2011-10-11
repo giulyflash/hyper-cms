@@ -1,8 +1,8 @@
-/*$(function(){
-	gallery_add_event();
+$(function(){
+	category_add_event();
 });
 
-function gallery_add_event(obj){
+function category_add_event(obj){
 	if(obj){
 		if(obj.css('display')=='none'){
 			//obj.toggle('slow');
@@ -19,16 +19,18 @@ function gallery_add_event(obj){
 		imageBtnNext: 'extensions/jquery_lightbox/images/ru/next.gif',
 		imageBlank: 'extensions/jquery_lightbox/images/lightbox-blank.gif',
 		txtImage: 'Изображение',
-		txtOf: 'из'
+		txtOf: 'из',
 	});
 	obj.find('li a').click(function(){
 		var obj_a = $(this);
 		if(obj_a.parent().parent().hasClass('nested_items'))
 			return;
-		obj_a[0].opened = obj_a[0].opened?0:1;
-		obj_a.parent().attr('class',obj_a[0].opened?'active':'');
+		//obj_a[0].opened = obj_a[0].opened?0:1;
+		//obj_a.parent().attr('class',obj_a[0].opened?'active':'');
 		//module/base_module/img/category_up.png':'module/base_module/img/category_down.png
 		var content = obj_a.parent().find('>.category_content:first');
+		//alert(content.css('display')=='block');
+		obj_a.parent().attr('class',content.css('display')!='block'?'active':'');
 		if(content.css('display')!='block'){
 			if(content.html().length){
 				content.find('.category_content').css('display','none');
@@ -41,11 +43,11 @@ function gallery_add_event(obj){
 				loading.css('display','inline');
 			else
 				obj_a.append('<img class="loading" src="module/module_link/img/loading1.gif"/>');
-			_get_content(obj_a.attr('href'),content,'gallery_add_event');
+			_get_content(obj_a.attr('href'),content,'category_add_event');
 		}
 		else{
 			content.toggle('slow');
 		}
 		return false;
 	});
-}*/
+}
