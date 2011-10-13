@@ -4,36 +4,26 @@
 
 <xsl:template match="root/module/item[_module_name='menu' and _method_name='get']">
 	<div id="menu" class="menu {argument/type}">
-		<ul>
-			<xsl:for-each select="item">
-				<xsl:call-template name="nested_tag_before"/>
-				<a href="{link}">
-					<xsl:value-of select="title"/>
-				</a>
-			</xsl:for-each>
-			<xsl:call-template name="nested_tag_after"/>
-		</ul>
+		<xsl:call-template name="menu_items"/>
 	</div>
 </xsl:template>
 
-<xsl:template match="root/module/item[_module_name='menu' and _method_name='_admin']">
-	<ul>
-		<xsl:for-each select="item">
-			<li>
-				<a href="admin.php?call=menu.edit&amp;id={id}">
-					<xsl:choose>
-						<xsl:when test="title and title!=''">
-							<xsl:value-of select="title"/>
-						</xsl:when>
-						<xsl:otherwise>
-							<xsl:value-of select="id"/>
-						</xsl:otherwise>
-					</xsl:choose>
-				</a>
-			</li>			
-		</xsl:for-each>
-	</ul>
-	<a href="admin.php?call=menu.edit">Новое меню</a>
+<xsl:template name="menu_items">
+	<xsl:if test="item">
+		<ul>
+			<xsl:for-each select="item">
+				<li>
+					<xsl:if test="active=1">
+						<xsl:attribute name="class">active</xsl:attribute>
+					</xsl:if>
+					<a href="{link}">
+						<xsl:value-of select="title"/>
+					</a>
+					<xsl:call-template name="menu_items"/>
+				</li>
+			</xsl:for-each>
+		</ul>
+	</xsl:if>
 </xsl:template>
 
 <xsl:template match="root/module/item[_module_name='menu' and _method_name='edit']">

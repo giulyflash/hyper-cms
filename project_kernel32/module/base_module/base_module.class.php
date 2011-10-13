@@ -83,6 +83,7 @@ class base_module_config extends module_config{
 	protected $category_field='id,title,translit_title,left,right,depth';
 	protected $item_field='id,title,category_id';
 	protected $item_order='order';
+	public $category_type = 'dropdown';
 }
 
 abstract class base_module extends module{
@@ -175,9 +176,9 @@ abstract class base_module extends module{
 							if(!empty($category['active']))
 								$categories[] = $category['id'];
 							if($category['id']==$bound['id']){
-								if($show=='current')
+								/*if($show=='current')
 									$category['uncategorized'] = 1;
-								else
+								else*/
 									$category['is_current'] = 1;
 							}
 						}
@@ -204,10 +205,11 @@ abstract class base_module extends module{
 							unset($items[$item_num]);
 						}
 					if($items){
-						$this->_result[-2] = array('items'=>$items, 'uncategorized'=>1);
+						$this->_result['items'] = $items;
 					}
 				}
 			}
+			$this->create_tree();
 		}
 		elseif($need_item && $this->_config('has_item')){
 			$this->_query->select($item_field)->from($this->_table_name);
@@ -223,9 +225,53 @@ abstract class base_module extends module{
 				$this->_query->order($item_order);
 			$this->_result = $this->limit_page($page,$count)->_query->query();
 		}
-		$this->_result['_show'] = $show;
-		$this->_result['lt'] = '<';
-		$this->_result['gt'] = '>';
+	}
+	
+	private function create_tree(&$parent=NULL, &$prev=NULL){
+		if(!$this->_result)
+			return;
+		$prev = NULL;
+		$parents = array();
+		$result = array();
+		foreach($this->_result as $key=>&$curr){
+			if($key=='items')
+				$result['items'] = &$curr;
+			else{
+				if($prev){
+					if($curr['depth'] > $prev['depth']){
+						//echo "$key.{$curr['title']} - <b>1</b> - {$prev['title']};<br/>";
+						$prev[$key] = &$curr;
+						$parents[] = &$prev;
+						$prev = &$prev[$key];
+					}
+					else{
+						if($curr['depth'] != $prev['depth']){
+							for($i=($prev['depth']-$curr['depth']);$i>0; $i--)
+								array_pop($parents);
+							//echo "$key.{$curr['title']} - <b>3";
+						}
+						//else
+							//echo "$key.{$curr['title']} - <b>2";
+						$parent_key_last = end(array_keys($parents));
+						if($parent_key_last!==false && $parent = &$parents[$parent_key_last]){
+							//echo ".1</b> - {$prev['title']};<br/>";
+							$parent[$key] = &$curr;
+							$prev = &$parent[$key];
+						}
+						else{
+							//echo ".2</b> - {$prev['title']};<br/>";
+							$result[$key] = &$curr;
+							$prev = &$result[$key];
+						}
+					}
+				}
+				else{
+					$result[$key] = &$curr;
+					$prev = &$result[$key];
+				}
+			}
+		}
+		$this->_result = &$result;
 	}
 	
 	/*public function get_category($field = 'translit_title', $value=false, $need_item=true, $all = false, $item_fields = '*', $category_fields='id,title,translit_title,depth',$category_condition=array(),$item_condition=array()){
