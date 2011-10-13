@@ -2,219 +2,113 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" />
 
-<xsl:template match="root/module/item[_method_name='get_category']" priority="0.5">
+<xsl:template match="root/module/item[_method_name='get_category']" priority="0.3">
+	<xsl:call-template name="nested_items_category"/>
+</xsl:template>
+
+<xsl:template name="nested_items_category">
 	<xsl:choose>
 		<xsl:when test="/root/meta/content_type='json_html'">
-			<xsl:call-template name="nested_tree_core"/>
+			<xsl:call-template name="nested_items_category_base">
+				<xsl:with-param name="need_ul">0</xsl:with-param>
+			</xsl:call-template>
 		</xsl:when>
 		<xsl:otherwise>
-			<xsl:call-template name="nested_tree"/>
+			<div class="nested_items {_module_name} {_method_name} {_config/category_type}">
+				<xsl:call-template name="nested_items_category_base"/>
+			</div>
 		</xsl:otherwise>
 	</xsl:choose>
 </xsl:template>
 
-<xsl:template match="items" priority="0.5">
-	<xsl:variable name="class"><xsl:choose>
-		<xsl:when test="../uncategorized">uncategorized</xsl:when>
-		<xsl:otherwise>list</xsl:otherwise>
-	</xsl:choose></xsl:variable>
-	<!-- <xsl:for-each select="item">{<xsl:value-of select="id"/>}</xsl:for-each> -->
-	<!-- <ul class="nested_items_{$class} nested_items {../../_method_name}"> -->
-	<xsl:for-each select="item">
-		<li class="img">
-			<a href="{path}" alt="{title}" title="{title}">
-				<div>
-					<div class="border">
-						<xsl:variable name="thumb_path"><xsl:choose>
-							<xsl:when test="../../_method_name='_admin' and thumb2_path and thumb2_path!=''"><xsl:value-of select="thumb2_path"/></xsl:when>
-							<xsl:otherwise><xsl:value-of select="thumb_path"/></xsl:otherwise>
-						</xsl:choose></xsl:variable>
-						<img src="{$thumb_path}" alt="{title}" title="{title}"/>
-					</div>
-				</div>
-				<span class="item_text"><xsl:value-of select="title"/></span>
-			</a>
-			<xsl:call-template name="controls_item"/>
-		</li>
-	</xsl:for-each>
-	<xsl:if test="not(../uncategorized) and not(item)">
-		<xsl:call-template name="_base_obj_not_found"/>
-		<!-- 01 -->
-	</xsl:if>
-</xsl:template>
-
-<xsl:template match="item/item/title" priority="0.5">
-	<a href="/?call=gallery&amp;title={../translit_title}">
-		<span class="folder_img"/>
-		<span><xsl:value-of select="."/></span>
-	</a>
-	<!-- <xsl:variable name="ul">ul class="nested_items <xsl:value-of select="../../_method_name"/>" <xsl:if test="../is_current">style="display: block"</xsl:if></xsl:variable>
-	<xsl:value-of select="concat(../../lt,$ul,../../gt)" disable-output-escaping="yes"/> -->
-	<ul class="nested_items {../../_method_name} category_content">
-		<xsl:choose>
-			<xsl:when test="../is_current">
-				<!-- <xsl:attribute name="style">display: block</xsl:attribute> -->
-				<xsl:choose>
-					<xsl:when test="not(../items/item)">
-						<xsl:call-template name="_base_obj_not_found"/>
-						<!-- 02 -->
-					</xsl:when>
-					<xsl:otherwise>
-						<xsl:for-each select="../items">
-							<xsl:apply-templates select="."/>
-						</xsl:for-each>
-					</xsl:otherwise>
-				</xsl:choose>
-			</xsl:when>
-			<xsl:when test="not(../items or ../../item[uncategorized]) and ../../_show='current'">
-				<xsl:call-template name="_base_obj_not_found"/>
-				<!-- 04 -->
-			</xsl:when>
-		</xsl:choose>
-	</ul>
-</xsl:template>
-
-<!--
-<xsl:template match="text()[../../../_module_name='gallery' and not(../items) and not(../../item/items) and ../../../_show='current']" priority="0.3">
-	<xsl:call-template name="_base_obj_not_found">
-		<xsl:with-param name="text" select="/root/language/gallery/get_category/no_obj_msg"/>
-	</xsl:call-template>
-</xsl:template>
-
-<xsl:template match="title[../../../_module_name='gallery' and not(../uncategorized) and not(items)]" priority="0.3">
-	<xsl:call-template name="_base_obj_not_found">
-		<xsl:with-param name="text" select="/root/language/gallery/get_category/no_obj_msg"/>
-	</xsl:call-template>
-</xsl:template>
-
-<xsl:template match="_module_name[.='gallery' and not(item)]" priority="0.3">
-	<xsl:call-template name="_base_obj_not_found">
-		<xsl:with-param name="text" select="/root/language/gallery/get_category/no_obj_msg"/>
-	</xsl:call-template>
-</xsl:template> 
- -->
-
-<xsl:template name="_base_obj_not_found">
-	<!-- <xsl:param name = "text">Object not found</xsl:param>
-	<div class="empty">
-		<xsl:value-of select="$text"/>
-	</div> -->
-	<li class="empty">EMPTY</li>
-</xsl:template>
-
-<xsl:template name="nested_tree">
-	<xsl:param name="class">nested_tree</xsl:param>
-	<div class="{_module_name} {$class}">
-		<xsl:call-template name="nested_tree_core"/>
-	</div>
-</xsl:template>
-
-<xsl:template name="nested_tree_core">
-	<ul class="nested_items {_method_name}">
-		<xsl:if test="item[not(uncategorized)]">
-			<xsl:for-each select="item[not(uncategorized)]">
-				<xsl:call-template name="nested_tag_before">
-					<xsl:with-param name="ul_class" select="concat('nested_items ',_method_name)"/>
-				</xsl:call-template>
-				<xsl:apply-templates select="title"/>
-				<xsl:call-template name="controls_category"/>
-				<xsl:if test="position() = last()">
-					<xsl:call-template name="nested_close_tag">
-						<xsl:with-param name="num" select="depth"/>
-					</xsl:call-template>
-				</xsl:if>
-			</xsl:for-each>
-		</xsl:if>
-		<xsl:for-each select="item[uncategorized]">
-			<xsl:apply-templates select="items"/>
-		</xsl:for-each>
-		<xsl:if test="not(item)">
-			<xsl:call-template name="_base_obj_not_found"/>
-			<!-- 03 -->
-		</xsl:if>
-		<xsl:call-template name="nested_tag_after"/>
-	</ul>
-</xsl:template>
-
-<xsl:template name="nested_tag_before">
-	<xsl:param name="ul_class"/>
-	<xsl:variable name="prev_pos"><xsl:value-of select="position()-1"/></xsl:variable>
-	<xsl:variable name="prev_depth"><xsl:value-of select="../item[position()=$prev_pos]/depth"/></xsl:variable>
-	<xsl:variable name="li">li<xsl:if test="active=1"> class="active"</xsl:if></xsl:variable>
+<xsl:template name="nested_items_category_base">
+	<xsl:param name="need_ul">1</xsl:param>
+	<xsl:param name="module" select="_module_name"/>
 	<xsl:choose>
-		<xsl:when test="depth &gt; $prev_depth">
-			<xsl:variable name="ul">ul<xsl:if test="$ul_class!=''"> class="<xsl:value-of select="$ul_class"/>"</xsl:if></xsl:variable>
-			<xsl:value-of select="concat(../lt,$ul,../gt)" disable-output-escaping="yes"/>
-			<xsl:value-of select="concat(../lt,$li,../gt)" disable-output-escaping="yes"/>
-		</xsl:when>
-		<xsl:when test="depth &lt; $prev_depth">
-			<xsl:call-template name="nested_close_tag">
-				<xsl:with-param name="num" select="$prev_depth - depth"/>
-			</xsl:call-template>
-			<xsl:value-of select="concat(../lt,'/li',../gt)" disable-output-escaping="yes"/>
-			<xsl:value-of select="concat(../lt,$li,../gt)" disable-output-escaping="yes"/>
-		</xsl:when>
-		<xsl:when test="position()=1">
-			<xsl:value-of select="concat(../lt,$li,../gt)" disable-output-escaping="yes"/>
+		<xsl:when test="item or items">
+			<xsl:choose>
+				<xsl:when test="$need_ul=1">
+					<ul>
+						<xsl:call-template name="nested_items_category_core">
+							<xsl:with-param name="module" select="$module"/>
+						</xsl:call-template>
+						<xsl:if test="active=1 and not(items)">
+							<xsl:call-template name="base_no_items"/>
+						</xsl:if>
+					</ul>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:call-template name="nested_items_category_core">
+						<xsl:with-param name="module" select="$module"/>
+					</xsl:call-template>
+					<xsl:if test="not(items)">
+						<xsl:call-template name="base_no_items"/>
+					</xsl:if>
+				</xsl:otherwise>
+			</xsl:choose>
 		</xsl:when>
 		<xsl:otherwise>
-			<xsl:value-of select="concat(../lt,'/li',../gt)" disable-output-escaping="yes"/>
-			<xsl:value-of select="concat(../lt,$li,../gt)" disable-output-escaping="yes"/>
-		</xsl:otherwise> 
+			<xsl:if test="active=1 or _module_name">
+				<xsl:choose>
+					<xsl:when test="$need_ul=1">
+						<ul>
+							<xsl:call-template name="base_no_items"/>
+						</ul>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:call-template name="base_no_items"/>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:if>
+		</xsl:otherwise>
 	</xsl:choose>
 </xsl:template>
 
-<xsl:template match="*" priority="-2">
+<xsl:template name="base_no_items">
+	<li class="empty">
+		<xsl:value-of select="/root/language/*/no_obj_msg"/>
+	</li>
 </xsl:template>
 
-<xsl:template name="nested_tag_after">
-	<xsl:if test="item">
-		<xsl:value-of select="concat(lt,'/li',gt)" disable-output-escaping="yes"/>
-	</xsl:if>
-	<xsl:if test="_config/close_nested_folder='1'">
-		<script type="text/javascript">
-			document.close_nested_folder = 1;
-		</script>
-	</xsl:if>
-</xsl:template>
-
-<xsl:template name="nested_close_tag">
-	<xsl:param name="num">1</xsl:param>
-	<xsl:if test="$num &gt; 0">
-		<xsl:value-of select="concat(../lt,'/ul',../gt)" disable-output-escaping="yes"/>
-		<xsl:value-of select="concat(../lt,'/li',../gt)" disable-output-escaping="yes"/>
-		<xsl:call-template name="nested_close_tag">
-			<xsl:with-param name="num" select="$num+(-1)"/>
-		</xsl:call-template>
-	</xsl:if>
-</xsl:template>
-
-<!-- <xsl:template match="root/module/item[_method_name='get']" priority="0">
-	<div id="_module_name">
-		<ul>
-			<xsl:for-each select="item">
-				<xsl:call-template name="nested_tag_before"/>
-				<a href="{link}">
-					<xsl:value-of select="title"/>
-				</a>
+<xsl:template name="nested_items_category_core">
+	<xsl:param name="module" select="_module_name"/>
+	<xsl:for-each select="item">
+		<li>
+			<xsl:if test="active=1">
+				<xsl:attribute name="class">active</xsl:attribute>
+			</xsl:if>
+			<a class="_ajax" href="/?call={$module}.get_category&amp;title={translit_title}" alt="{title}" title="{title}">
+				<span class="folder_icon"></span>
+				<span class="text"><xsl:value-of select="title"/></span>
+			</a>
+			<xsl:call-template name="controls_category"/>
+			<xsl:call-template name="nested_items_category_base">
+				<xsl:with-param name="module" select="$module"/>
+			</xsl:call-template>
+		</li>
+	</xsl:for-each>
+	<xsl:if test="items">
+		<li class="items">
+			<xsl:for-each select="items/item">
+				<div class="item">
+					<a href="{path}" alt="{title}" title="{title}">
+						<div>
+							<div>
+								<img src="{thumb_path}" alt="{title}" title="{title}"/>
+							</div>
+						</div>
+						<span class="text"><xsl:value-of select="title"/></span>
+					</a>
+					<xsl:call-template name="controls_item"/>
+				</div>
 			</xsl:for-each>
-			<xsl:call-template name="nested_tag_after"/>
-		</ul>
-	</div>
-</xsl:template> -->
+			<div style="clear:both"></div>
+		</li>
+	</xsl:if>
+</xsl:template>
 
 <xsl:template match="root/module/item[_method_name='_admin']" priority="0">
-	<xsl:call-template name="nested_tree"/>
-	<xsl:if test="_config/has_category='1'">
-		<p>
-			<a href="admin.php?call={_module_name}.edit_category">Новая категория</a>
-		</p>
-	</xsl:if>
-	<xsl:if test="_config/has_item='1'">
-		<p>
-			<a href="admin.php?call={_module_name}.edit">Новая статья</a>
-		</p>
-	</xsl:if>
+	<xsl:call-template name="nested_items_category"/>
 </xsl:template>
 
 <xsl:template name="menu_print_level">

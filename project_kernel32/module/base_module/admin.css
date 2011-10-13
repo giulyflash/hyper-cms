@@ -37,37 +37,6 @@
 	color: red;
 }
 
-.nested_tree ul{
-	margin: 0px;
-}
-
-.menu_editor .input_text{
-	display: none;
-}
-.menu_editor .edit_item td{
-	vertical-align: top;
-}
-.menu_editor .edit_item .first{
-	width: 60px;
-}
-.menu_editor .input_text, .menu_editor .input_article{
-	padding: 10px 0 10px 68px;
-}
-.menu_editor #href_input{
-	min-width: 450px;
-}
-.nested_tree ul{
-	list-style-type: none;
-}
-
-.nested_tree .item_cont img, .nested_items_list img, .nested_items_uncategorized img{
-	float: left;
-	cursor: pointer;
-}
-.nested_items_list li, .nested_items_uncategorized li{
-	min-height: 24px;
-	padding: 2px;
-}
 .nested_tree .controls{
 	padding-left: 30px;
 }

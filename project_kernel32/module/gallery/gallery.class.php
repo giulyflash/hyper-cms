@@ -16,7 +16,7 @@ class gallery extends base_module{
 	
 	public function get_category($title = false){
 ///base_module::get_category($field, $value, $need_item, $show, $category_condition, $item_condition) 
-		//sleep(100);
+		//sleep(100500);
 		parent::get_category('translit_title', $title, true, 'auto', NULL, array(array('module',$this->module_name), array('internal_type','image')));
 		//var_dump($this->_result);die;
 	}
