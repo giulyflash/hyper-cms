@@ -1,42 +1,58 @@
-.nested_tree .item_cont{
+.nested_items .item_cont{
 	min-height: 3.3em;
 }
 
-.nested_tree .controls{
+.nested_items .controls{
 	min-height: 1.5em;
 }
-.nested_tree .controls>*{
+.nested_items .controls>*{
 	display: none;
 }
 
-.nested_tree li:hover>.controls>*{
+.nested_items li:hover>.controls>*, .nested_items .item:hover>.controls>*{
 	display: inline;
 }
 
-.nested_tree .controls select.insert_place{
+.nested_items .controls select.insert_place{
 	width: 100px;
 }
 
-.nested_tree .controls a{
+.nested_items .controls a{
 	margin-right: 10px;
 }
 
-.nested_tree .subitem{
+.nested_items .controls a:hover{
+	text-decoration: underline;
+}
+
+.nested_items .subitem{
 	margin-left: 10px;
 }
 
-.nested_tree .remove_menu{
+.nested_items .remove_menu{
 	margin-left: 20px;
 }
 
-.nested_tree .controls .remove, .nested_tree .remove_menu{
+.nested_items .controls .remove, .nested_tree .remove_menu{
 	color: #993333;
 }
 
-.nested_tree .controls .remove:hover, .nested_tree .remove_menu:hover{
+.nested_items .controls .remove:hover, .nested_tree .remove_menu:hover{
 	color: red;
 }
 
-.nested_tree .controls{
-	padding-left: 30px;
+.nested_items .controls{
+	padding-left: 50px;
+	position: absolute;
+}
+
+.nested_items .item .controls{
+	padding-left: 90px;
+}
+
+.nested_items .controls select{
+	margin-right: 7px;
+}
+.nested_items .controls select:last-child{
+	margin-right: 0px;
 }

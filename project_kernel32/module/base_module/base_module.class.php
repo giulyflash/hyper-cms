@@ -100,12 +100,11 @@ abstract class base_module extends module{
 		return $values;
 	}
 	
-	public function _admin(){
-		$this->get_category();
+	public function _admin($title=NULL){
+		$this->get_category('translit_title', $title);
 	}
 	
 	public function get_category($field = 'translit_title', $value=false, $need_item=true, $show='auto', $category_condition=array(),$item_condition=array()){
-
 		//TODO pages?
 		//$show: all (all categories and subcategories), category (0lvl categories + tree to current category), current (current category content only), auto ('current' for json, 'category' for others)
 		if($value=='')
@@ -224,6 +223,12 @@ abstract class base_module extends module{
 			if($item_order)
 				$this->_query->order($item_order);
 			$this->_result = $this->limit_page($page,$count)->_query->query();
+		}
+		//TODO remove this temp code below
+		if($this->parent->admin_mode){
+			$this->_query->select('id,title,translit_title')->from($category_table);
+			$this->parse_condition($category_condition,false);
+			$this->_result['_category_list'] = $this->_query->order('left')->query();
 		}
 	}
 	

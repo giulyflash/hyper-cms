@@ -11,7 +11,7 @@ function category_add_event(obj){
 	}
 	if(!obj)
 		obj = $('.nested_items.dropdown');
-	obj.find('.item a').lightBox({
+	/*obj.find('.item a').lightBox({
 		imageLoading: 'extensions/jquery_lightbox/images/ru/loading.gif',
 		imageBtnClose: 'extensions/jquery_lightbox/images/ru/closelabel.gif',
 		imageBtnPrev: 'extensions/jquery_lightbox/images/ru/prev.gif',
@@ -19,7 +19,7 @@ function category_add_event(obj){
 		imageBlank: 'extensions/jquery_lightbox/images/lightbox-blank.gif',
 		txtImage: 'Изображение',
 		txtOf: 'из',
-	});
+	});*/
 	obj.find('li a').click(function(){
 		var obj_a = $(this);
 		if(obj_a.parent()[0].tagName!='LI')
