@@ -64,9 +64,11 @@ class base_module_config extends module_config{
 		'*,admin_mode.*' =>
 			'<link href="module/base_module/base_module.css" rel="stylesheet" type="text/css"/>
 			<script type="text/javascript" src="/module/base_module/base_module.js"></script>',
-		'_admin' =>
+		'get_category,_admin' =>
 			'<script type="text/javascript" src="/module/base_module/category.js"></script>',
 	);
+	
+	//<script type="text/javascript" src="/module/base_module/category.js"></script>
 	
 	protected $repair_hole = false;
 	
@@ -226,7 +228,7 @@ abstract class base_module extends module{
 		}
 		//TODO remove this temp code below
 		if($this->parent->admin_mode){
-			$this->_query->select('id,title,translit_title')->from($category_table);
+			$this->_query->select('id,title,translit_title,depth')->from($category_table);
 			$this->parse_condition($category_condition,false);
 			$this->_result['_category_list'] = $this->_query->order('left')->query();
 		}

@@ -138,12 +138,10 @@ class gallery_config extends base_module_config{
 	);
 	
 	protected $include = array(
-		'get_category,edit'=>
+		'get_category,edit,_admin'=>
 			'<link href="/extensions/jquery_lightbox/jquery_lightbox.css" rel="stylesheet" type="text/css"/>
 			<script type="text/javascript" src="/extensions/jquery_lightbox/jquery_lightbox.min.js"></script>
-			<script type="text/javascript" src="/module/base_module/category.js"></script>',
-		'get_category,_admin'=>
-			'<link href="/module/gallery/gallery.css" rel="stylesheet" type="text/css"/>',
+			<link href="/module/gallery/gallery.css" rel="stylesheet" type="text/css"/>',
 	);
 	
 	public $has_item = true;

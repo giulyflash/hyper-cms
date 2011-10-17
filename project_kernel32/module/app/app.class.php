@@ -56,7 +56,8 @@ class app_config extends config{
 	protected $include = array(
 		'*'=>'<script type="text/javascript" src="extensions/jquery/jquery-1.5.2.min.js"></script>
 			<script type="text/javascript" src="module/app/app.js"></script>',
-		'admin_mode.*'=>'<script type="text/javascript" src="extensions/jquery/jquery-1.5.2.min.js"></script>',
+		'admin_mode.*'=>'<script type="text/javascript" src="extensions/jquery/jquery-1.5.2.min.js"></script>
+			<script type="text/javascript" src="module/app/app.js"></script>',
 	); //include for all modules
 	
 	protected $admin_exclude = array(
@@ -483,7 +484,7 @@ class app extends module{
 							$include_src[$new_name] = $include_src[$name];
 					}
 					else
-						$include_src[$new_name] = (isset($include_src[$new_name])?$include_src[$new_name]:'').$include_src[$name];
+						$include_src[$new_name] = (isset($include_src[$new_name])?($include_src[$new_name]."\n"):'').$include_src[$name];
 				}
 				unset($include_src[$name]);
 			}
@@ -586,6 +587,7 @@ class app extends module{
 			$this->add_module_include($admin_mode.'*.*', $include_cache, $module->module_name, $this->loaded_module_include);
 			$this->add_module_include($admin_mode.($module->module_name).'.*', $include_cache, $module->module_name, $this->loaded_module_include);
 			if($module->method_name){
+				//var_dump($module->module_name.'->'.$module->method_name, $include_cache);
 				$this->add_module_include($admin_mode.$module->module_name.$module->method_name, $include_cache, $module->module_name, $this->loaded_module_include);
 				//if($this->admin_mode)
 					$this->add_module_include($module->method_name, $include_cache, $module->module_name, $this->loaded_module_include);

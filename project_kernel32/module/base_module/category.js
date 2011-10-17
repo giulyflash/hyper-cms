@@ -9,17 +9,18 @@ function category_add_event(obj){
 		}
 		$('.nested_items.dropdown .loading').css('display','none');
 	}
-	if(!obj)
+	else
 		obj = $('.nested_items.dropdown');
-	/*obj.find('.item a').lightBox({
-		imageLoading: 'extensions/jquery_lightbox/images/ru/loading.gif',
-		imageBtnClose: 'extensions/jquery_lightbox/images/ru/closelabel.gif',
-		imageBtnPrev: 'extensions/jquery_lightbox/images/ru/prev.gif',
-		imageBtnNext: 'extensions/jquery_lightbox/images/ru/next.gif',
-		imageBlank: 'extensions/jquery_lightbox/images/lightbox-blank.gif',
-		txtImage: 'Изображение',
-		txtOf: 'из',
-	});*/
+	if(obj.lightBox)
+		obj.find('.item a').lightBox({
+			imageLoading: 'extensions/jquery_lightbox/images/ru/loading.gif',
+			imageBtnClose: 'extensions/jquery_lightbox/images/ru/closelabel.gif',
+			imageBtnPrev: 'extensions/jquery_lightbox/images/ru/prev.gif',
+			imageBtnNext: 'extensions/jquery_lightbox/images/ru/next.gif',
+			imageBlank: 'extensions/jquery_lightbox/images/lightbox-blank.gif',
+			txtImage: 'Изображение',
+			txtOf: 'из'
+		});
 	obj.find('li a').click(function(){
 		var obj_a = $(this);
 		if(obj_a.parent()[0].tagName!='LI')
@@ -41,12 +42,14 @@ function category_add_event(obj){
 				content.toggle('slow');
 			}
 			var loading = obj_a.parent().find('.loading:first');
-			//TODO check on a lot of categories
 			if(loading.size())
 				loading.css('display','inline');
 			else
 				content.before('<img class="loading" src="module/module_link/img/loading1.gif"/>');
-			_get_content(obj_a.attr('href'),content,'category_add_event');
+			if(typeof _get_content == 'function')
+				_get_content(obj_a.attr('href'),content,'category_add_event');
+			else
+				alert('error: function "_get_content" not found');
 		}
 		else{
 			content.toggle('slow');
