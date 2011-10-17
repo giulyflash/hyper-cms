@@ -21,19 +21,19 @@ function category_add_event(obj){
 			txtImage: 'Изображение',
 			txtOf: 'из'
 		});
-	obj.find('li a').click(function(){
+	obj.find('li>.item_cont>a').click(function(){
 		var obj_a = $(this);
-		if(obj_a.parent()[0].tagName!='LI')
+		if(obj_a.parent().parent()[0].tagName!='LI')
 			return false;
-		var content = obj_a.parent().find('>ul:first');
+		var content = obj_a.parent().parent().find('>ul:first');
 		if(!content.size()){
-			obj_a.parent().append('<ul></ul>');
-			content = obj_a.parent().find('>ul:first');
+			obj_a.parent().parent().append('<ul></ul>');
+			content = obj_a.parent().parent().find('>ul:first');
 			obj_a[0].opened = 0;
 		}
 		else
 			obj_a[0].opened = content.css('display')=='block';
-		obj_a.parent().attr('class',obj_a[0].opened?'':'active');
+		obj_a.parent().parent().attr('class',obj_a[0].opened?'':'active');
 		if(!obj_a[0].opened){
 			content.css('display','none');
 			if(content.html().length){
@@ -41,7 +41,7 @@ function category_add_event(obj){
 				content.find('ul').css('display','none');
 				content.toggle('slow');
 			}
-			var loading = obj_a.parent().find('.loading:first');
+			var loading = obj_a.parent().parent().find('.loading:first');
 			if(loading.size())
 				loading.css('display','inline');
 			else
@@ -55,5 +55,35 @@ function category_add_event(obj){
 			content.toggle('slow');
 		}
 		return false;
+	});
+	
+	/**/
+	
+	$('.nested_items .controls .remove').click(function(){
+		var container = $(this).parent().parent();
+		var text = container.find('.text:first');
+		var obj_text=text.size()?('объект "'+text.html()+'"'):'этот объект';
+		var text = container.find('.nested_item_img:first');
+		if(text.size()){
+			text = container.find('.text:first');
+			obj_text=text.size()?('категорию "'+text.html()+'"'):'эту категорию';
+		}
+		if(!confirm('Вы действительно хотите безвозвратно удалить '+obj_text+'?'));
+			return false;
+	});
+	
+	$('.nested_items .remove_menu').click(function(){
+		if(!confirm('Вы действительно хотите безвозвратно удалить это меню и все его пункты?'))
+			return false;
+	});
+	
+	$('.nested_items .controls .insert_place').change(function(){
+		if(this.form.elements['insert_type'].value!='0' && this.form.elements['insert_place'].value!='0')
+			this.form.submit();
+	});
+	
+	$('.nested_items .controls .insert_category, .nested_items .controls .insert_item').change(function(){
+		this.form.submit();
+		//TODO ajax
 	});
 }

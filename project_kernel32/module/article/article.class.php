@@ -23,7 +23,7 @@ class article extends base_module{
 		parent::get_category($field, $value, $need_item, false, 'id,title,translit_title,text,preview,category_id');
 	}
 	
-	public function save($id=NULL, $title=NULL, $translit_title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL){
+	public function save($id=NULL, $title=NULL, $translit_title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $category_id=NULL){
 		if(!$title)
 			throw new my_exception('title must not be empty');
 		$value = array(
@@ -33,6 +33,7 @@ class article extends base_module{
 			'keyword'=>$keyword,
 			'description'=>$description,
 			'draft'=>($draft)?1:0,
+			'category_id'=>$category_id,
 		);
 		$date = new DateTime();
 		$date = $date->format('Y-m-d H:i:s');
