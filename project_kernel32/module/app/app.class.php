@@ -176,11 +176,14 @@ class app extends module{
 		//
 		if(!isset($_SESSION['call']))
 			$_SESSION['call'] = array();
-		$request_uri = (!empty($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/favicon.ico')?$_SERVER['REQUEST_URI']:'/';
-		if(!isset($_SESSION['call'][0]) || $request_uri!=$_SESSION['call'][0])
-			array_unshift($_SESSION['call'],$request_uri);
-		if(count($_SESSION['call'])>self::call_list_count)
-			array_splice($_SESSION['call'],-1);
+		if(!(isset($_REQUEST['_content']) && (($content_type = strtolower(substr($_REQUEST['_content'],0,4)) )=='json' || $content_type=='xml') || 
+			!empty($_SERVER['REQUEST_URI']) && preg_match('%.*\.[a-zA-Z]+$%', $_SERVER['REQUEST_URI']) ) ){
+			$request_uri = (!empty($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/favicon.ico')?$_SERVER['REQUEST_URI']:'/';
+			if(!isset($_SESSION['call'][0]) || $request_uri!=$_SESSION['call'][0])
+				array_unshift($_SESSION['call'],$request_uri);
+			if(count($_SESSION['call'])>self::call_list_count)
+				array_splice($_SESSION['call'],-1);
+		}
 		//var_dump($_SESSION['call']);
 	}
 	

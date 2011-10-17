@@ -1,15 +1,17 @@
 /*dropdown list*/
 
-.nested_items.dropdown li>a>span.folder_icon{
+.nested_items.dropdown li>.item_cont>a>span.folder_icon{
 	background: url("/module/base_module/img/category_down.png") no-repeat;
 	display: inline-block;
 	width: 15px;
 	height: 15px;
 	margin-top: 3px;
 }
-.nested_items.dropdown li.active>a>span.folder_icon{
+
+.nested_items.dropdown li.active>.item_cont>a>span.folder_icon{
 	background: url("/module/base_module/img/category_up.png") no-repeat;
 }
+
 .nested_items.dropdown .loading{
 	float:right;
 }
@@ -28,27 +30,25 @@
 .nested_items.dropdown .img a{
 	margin: 0 auto;
 }
-.nested_items.dropdown ul ul{
-	list-style: none;
-	padding: 0 0 1px 20px;
-	margin: 0 0 10px 0;
-}
 .nested_items.dropdown li a{
 	text-decoration: none;
 }
 .nested_items.dropdown ul ul{
-	margin-left: 7px;
+	list-style: none;
+	padding: 0em 0 7px 5px;
+	margin: 0px 0 10px 7px;
 	border-left: 1px solid #CCC;
 	background: url("/module/base_module/img/corner.png") no-repeat bottom left;
-	padding-top: 1.5em;	
 }
+
+/*.nested_items.dropdown._admin ul ul{
+	position: relative;
+	top: -20px;
+	padding-top: 20px;
+}*/
 
 .nested_items.dropdown .empty{
 	padding: 30px 0;
-}
-
-.nested_items.dropdown._admin .empty{
-	padding-top: 0;
 }
 
 .nested_items .items{
@@ -81,11 +81,4 @@
 .nested_items.dropdown._admin .items .item img{
 	height: 60px;
 	float: left;
-}
-
-.nested_items.dropdown._admin li{
-	min-height: 3em;
-}
-.nested_items.dropdown._admin li:hover>a>span.text, .nested_items.dropdown._admin .item:hover>a>span.text{
-	text-decoration: underline;
 }

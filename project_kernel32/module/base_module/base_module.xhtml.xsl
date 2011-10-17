@@ -78,13 +78,15 @@
 			<xsl:if test="active=1">
 				<xsl:attribute name="class">active</xsl:attribute>
 			</xsl:if>
-			<a class="_ajax" href="/{$admin_mode}?call={$module_name}.get_category&amp;title={translit_title}" alt="{title}" title="{title}">
-				<span class="folder_icon"></span>
-				<span class="text"><xsl:value-of select="title"/></span>
-			</a>
-			<xsl:call-template name="controls_category">
-				<xsl:with-param name="module_name" select="$module_name"/>
-			</xsl:call-template>
+			<div class="item_cont">
+				<a class="_ajax" href="/{$admin_mode}?call={$module_name}.get_category&amp;title={translit_title}" alt="{title}" title="{title}">
+					<span class="folder_icon"></span>
+					<span class="text"><xsl:value-of select="title"/></span>
+				</a>
+				<xsl:call-template name="controls_category">
+					<xsl:with-param name="module_name" select="$module_name"/>
+				</xsl:call-template>
+			</div>
 			<xsl:call-template name="nested_items_category_base">
 				<xsl:with-param name="module_name" select="$module_name"/>
 			</xsl:call-template>
@@ -152,25 +154,30 @@
 
 <xsl:template name="controls_category">
 	<xsl:param name="module_name" select="../_module_name"/>
+	<xsl:param name="edit_module_name"><xsl:choose>
+		<xsl:when test="$module_name='gallery'">file</xsl:when>
+		<xsl:otherwise><xsl:value-of select="$module_name"/></xsl:otherwise>
+	</xsl:choose></xsl:param>
 	<xsl:if test="/root/meta/admin_mode=1">
-		<form class="controls" method="post" action="admin.php?call={../_module_name}.move_category">
-			<div>
-				<input type="hidden" value="{id}" name="id"/>
-				<a href="/admin.php?call={../_module_name}.edit_category&amp;id={id}" class="edit">редактировать</a>
-				<a href="/admin.php?call={../_module_name}.remove_category&amp;id={id}" class="remove">удалить</a>
-				<span>Вставить:</span> 
-				<select name="insert_type" autocomplete='off'>
-					<option value="0" selected="1">&#8212;</option>
-					<option value="before">перед</option>
-					<option value="inside">в</option>
-				</select>
-				<select class="insert_place" name="insert_place" autocomplete='off'>
-					<option value="0" selected="1">&#8212;</option>
-					<xsl:call-template name="_get_category_list"/>
-					<option value="last">&#8212;</option>
-				</select>
-				<a href="/admin.php?call={../_module_name}.edit_category&amp;insert_place={id}" class="subitem">добавить подпункт</a>
-			</div>
+		<form class="controls" method="post" action="admin.php?call={$module_name}.move_category">
+			<input type="hidden" value="{id}" name="id"/>
+			<a href="/admin.php?call={$module_name}.edit_category&amp;id={id}" class="edit">редактировать</a>
+			<a href="/admin.php?call={$module_name}.remove_category&amp;id={id}" class="remove">удалить</a>
+			<span>Вставить:</span> 
+			<select name="insert_type" autocomplete='off'>
+				<option value="0" selected="1">&#8212;</option>
+				<option value="before">перед</option>
+				<option value="inside">в</option>
+			</select>
+			<select class="insert_place" name="insert_place" autocomplete='off'>
+				<option value="0" selected="1">&#8212;</option>
+				<xsl:call-template name="_get_category_list"/>
+				<option value="last">&#8212;</option>
+			</select>
+			<a href="/admin.php?call={$module_name}.edit_category&amp;insert_place={id}" class="subitem">добавить подпункт</a>
+			<xsl:if test="/root/module/item[_module_name=$module_name]/_config/has_item">
+				<a href="/admin.php?call={$edit_module_name}.edit&amp;category_id={id}" class="subitem">добавить объект</a>
+			</xsl:if>
 		</form>
 	</xsl:if>
 </xsl:template>
@@ -182,51 +189,60 @@
 		<xsl:otherwise><xsl:value-of select="$module_name"/></xsl:otherwise>
 	</xsl:choose></xsl:param>
 	<xsl:if test="/root/meta/admin_mode=1">
-		<form class="controls" method="post" action="admin.php?call={$module_name}.move_item">
-			<div>
-				<xsl:variable name="current_position" select="position()"/>
-				<input type="hidden" name="insert_after" value="{../item[position()=-1+$current_position]/id}"/>
-				<input type="hidden" value="{id}" name="id"/>
-				<a href="/admin.php?call={$edit_module_name}.edit&amp;id={id}" class="edit">редактировать</a>
-				<a href="/admin.php?call={$module_name}.remove&amp;id={id}" class="remove">удалить</a>
-				<xsl:variable name="category_id" select="category_id"/>
-				<xsl:variable name="current_id" select="id"/>
-				<span>Категория:</span>
-				<select class="insert_category" name="insert_category" autocomplete='off'>
-					<option value="">&#8212;</option>
-					<xsl:choose>
-						<xsl:when test="../../_module_name">
-							<xsl:for-each select="../../item[position()=1]">
-								<xsl:call-template name="_get_category_list">
-									<xsl:with-param name="id" select="$category_id"/>
-								</xsl:call-template>
-							</xsl:for-each>
-						</xsl:when>
-						<xsl:otherwise>
-							<xsl:for-each select="../..">
-								<xsl:call-template name="_get_category_list">
-									<xsl:with-param name="id" select="$category_id"/>
-								</xsl:call-template>
-							</xsl:for-each>
-						</xsl:otherwise>
-					</xsl:choose>
-				</select>
-				<span>Вставить после:</span>
-				<select class="insert_item" name="insert_item" autocomplete='off'>
-					<option value="">&#8212;</option>
-					<xsl:for-each select="../item">
-						<xsl:if test="id!=$current_id">
-							<option value="{id}">
-								<xsl:variable name="position" select="position()"/>
-								<xsl:if test="../item[position()=1+$position]/id=$current_id">
-									<xsl:attribute name="selected">selected</xsl:attribute>
-								</xsl:if>
-								<xsl:value-of select="title"/>
-							</option>
-						</xsl:if>
-					</xsl:for-each>
-				</select>
-			</div>
+		<form class="controls" method="post" action="admin.php?call={$edit_module_name}.move_item">
+			<xsl:variable name="current_position" select="position()"/>
+			<input type="hidden" name="insert_after" value="{../item[position()=-1+$current_position]/id}"/>
+			<input type="hidden" value="{id}" name="id"/>
+			<a href="/admin.php?call={$edit_module_name}.edit&amp;id={id}" class="edit">редактировать</a>
+			<a href="/admin.php?call={$edit_module_name}.remove&amp;id={id}" class="remove">удалить</a>
+			<xsl:variable name="category_id" select="category_id"/>
+			<xsl:variable name="current_id" select="id"/>
+			<span>Категория:</span>
+			<select class="insert_category" name="insert_category" autocomplete='off'>
+				<option value="">&#8212;</option>
+				<xsl:choose>
+					<xsl:when test="../../_module_name">
+						<xsl:choose>
+							<xsl:when test="../../item">
+								<xsl:for-each select="../../item[position()=1]">
+									<xsl:call-template name="_get_category_list">
+										<xsl:with-param name="id" select="$category_id"/>
+									</xsl:call-template>
+								</xsl:for-each>
+							</xsl:when>
+							<xsl:otherwise>
+								<xsl:for-each select="../../items">
+									<xsl:call-template name="_get_category_list">
+										<xsl:with-param name="id" select="$category_id"/>
+									</xsl:call-template>
+								</xsl:for-each>
+							</xsl:otherwise>
+						</xsl:choose>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:for-each select="../..">
+							<xsl:call-template name="_get_category_list">
+								<xsl:with-param name="id" select="$category_id"/>
+							</xsl:call-template>
+						</xsl:for-each>
+					</xsl:otherwise>
+				</xsl:choose>
+			</select>
+			<span>Вставить после:</span>
+			<select class="insert_item" name="insert_item" autocomplete='off'>
+				<option value="">&#8212;</option>
+				<xsl:for-each select="../item">
+					<xsl:if test="id!=$current_id">
+						<option value="{id}">
+							<xsl:variable name="position" select="position()"/>
+							<xsl:if test="../item[position()=1+$position]/id=$current_id">
+								<xsl:attribute name="selected">selected</xsl:attribute>
+							</xsl:if>
+							<xsl:value-of select="title"/>
+						</option>
+					</xsl:if>
+				</xsl:for-each>
+			</select>
 		</form>
 	</xsl:if>
 </xsl:template>

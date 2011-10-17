@@ -1,16 +1,19 @@
-.nested_items .item_cont{
-	min-height: 3.3em;
-}
-
 .nested_items .controls{
-	min-height: 1.5em;
-}
-.nested_items .controls>*{
+	position: absolute;
 	display: none;
+	padding: 3px 0 0 10px;
 }
 
-.nested_items li:hover>.controls>div, .nested_items .item:hover>.controls>div{
+.nested_items .item .controls{
+	padding: 0 0 0 80px;
+}
+
+.nested_items .item_cont:hover>.controls,
+.nested_items .controls:hover{
 	display: inline;
+}
+.nested_items .item:hover>.controls{
+	display: block;
 }
 
 .nested_items .controls select.insert_place{
@@ -41,13 +44,8 @@
 	color: red;
 }
 
-.nested_items .controls{
-	padding-left: 50px;
-	position: absolute;
-}
-
 .nested_items .item .controls{
-	padding-left: 90px;
+
 }
 
 .nested_items .controls select{
@@ -55,4 +53,9 @@
 }
 .nested_items .controls select:last-child{
 	margin-right: 0px;
+}
+
+.nested_items.dropdown._admin .item_cont:hover>a>span.text,
+.nested_items.dropdown._admin .item:hover>a>span.text{
+	text-decoration: underline;
 }

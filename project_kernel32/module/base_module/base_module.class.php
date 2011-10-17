@@ -227,6 +227,7 @@ abstract class base_module extends module{
 			$this->_result = $this->limit_page($page,$count)->_query->query();
 		}
 		//TODO remove this temp code below
+		//var_dump($_SERVER['REQUEST_URI'],$this->parent->admin_mode); die;
 		if($this->parent->admin_mode){
 			$this->_query->select('id,title,translit_title,depth')->from($category_table);
 			$this->parse_condition($category_condition,false);
@@ -461,6 +462,8 @@ abstract class base_module extends module{
 		$target = $this->_query->select('left,right,depth,title')->from($table_name)->where('id',$id)->query1();
 		if(!$target)
 			throw new my_exception('not found category to movу',array('id'=>$id));
+		elseif($id==$insert_place)
+			throw new my_exception('can not paste category into itselve',array('id'=>$id));
 		$width = $target['right'] - $target['left'] + 1;
 		$this->_query->lock($table_name)->execute();
 		if($insert_place=='last'){
