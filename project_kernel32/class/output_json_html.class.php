@@ -14,7 +14,14 @@ class output_json_html extends output implements output_interface{
 		$this->parent->output['html'] = $output->get();
 		if($error)
 			$this->parent->output['error'] = $error;
-		unset($this->parent->output['module'], $this->parent->output['language'], $this->parent->output['meta']);
+		unset(
+			$this->parent->output['module'],
+			$this->parent->output['language'],
+			$this->parent->output['meta'],
+			$this->parent->output['include'],
+			$this->parent->output['session']
+		);
+		//var_dump($this->parent->output); die;
 		return json_encode($this->parent->output);
 	}
 }

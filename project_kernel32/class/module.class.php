@@ -68,7 +68,7 @@ abstract class module{
 		//FIXME temp, until the config engine update
 		if(!($this->_table_name = $this->_config('table_name')))
 			$this->_table_name = $this->module_name;
-	}
+	} 
 	
 	private function _get_module_language($module){
 		if(!isset($this->parent->language_cache[$module])){
@@ -217,9 +217,10 @@ abstract class module{
 	private function _merge_config_array($param_name, &$parent_config,$mode = 'add'){
 		if($parent_value = $parent_config->get_ref($param_name)){
 			if($src_include = $this->config->get_ref($param_name)){
-				if($mode=='add')
+				if($mode=='add'){
 					foreach($parent_value as $name=>$value)
 						$src_include[$name] = ((isset($src_include[$name]) && $src_include[$name]!=$value)?$src_include[$name]:'').$value;
+				}
 				elseif($mode=='inherit'){
 					$access_name = $this->parent->_config('access_name');
 					foreach($parent_value as $name=>$value){

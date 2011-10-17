@@ -9,7 +9,7 @@
 	display: none;
 }
 
-.nested_items li:hover>.controls>*, .nested_items .item:hover>.controls>*{
+.nested_items li:hover>.controls>div, .nested_items .item:hover>.controls>div{
 	display: inline;
 }
 
