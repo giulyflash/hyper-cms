@@ -57,7 +57,7 @@
 	<br/>
 	<form id="article_upload_file" action="index.php" method="post" enctype="multipart/form-data">
 		<div class="fieldset flash" id="fsUploadProgress">
-		<span class="legend">Очередь загрузки</span>
+			<span class="legend">Очередь загрузки</span>
 		</div>
 	<div id="divStatus">0 файлов загружено</div>
 		<div>

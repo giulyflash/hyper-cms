@@ -2,69 +2,109 @@
 class gallery extends base_module{
 	protected $config_class_name = 'gallery_config';
 
-/*	public function get($field = 'id', $value='1'){
-		if(parent::get($field,$value,$this->_config('field_list'),array('module',$this->module_name)) )
-			$this->_title = $this->_result['title'];
-	}
-	
-	public function get_by_title($title = NULL, $show_title=false){
-		if(!$title)
-			$this->_message('title not found');
-		else
-			$this->get('translit_title',$title,$show_title);
-	}*/
-	
-	public function get_category($title = false){
-///base_module::get_category($field, $value, $need_item, $show, $category_condition, $item_condition) 
+	public function get_category($title = false){ 
 		//sleep(100500);
 		parent::get_category('translit_title', $title, true, 'auto', NULL, array(array('module',$this->module_name), array('internal_type','image')));
-		//var_dump($this->_result);die;
 	}
 	
-	/*public function save($id=NULL, $title=NULL, $translit_title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL){
-		if(!$title)
-			throw new my_exception('title must not be empty');
-		$value = array(
-			'title'=>$title,
-			'translit_title'=>($translit_title?$translit_title:translit::transliterate($title)),
-			'text'=>$text,
-			'keyword'=>$keyword,
-			'description'=>$description,
-			'draft'=>($draft)?1:0,
-		);
-		$date = new DateTime();
-		$date = $date->format('Y-m-d H:i:s');
-		if($id)
-			$value['edit_date'] = $date;
-		else
-			$value['create_date'] = $date;
-		parent::save($id, $value, 'edit',true,array('name'=>$title));
-	}*/
-	
-	/*public function _admin($page=null, $count=null, $show='all'){
-		die('!!!');
-		parent::_admin($page, $count, $show, 'id,title,translit_title,depth', $this->_config('field_list'),'order',array(),array(array('module',$this->module_name), array('internal_type','image')));
-	}*/
-
 	public function remove($id=NULL){
+		$redirect_params = array();
 		if($id){
-			$param['title'] = $this->_query->select('name')->from($this->_table_name)->where('id',$id)->query1('name');
+			$data = $this->_query->select('title,category_id')->from($this->_table_name)->where('id',$id)->query1();
 			file::remove($id,false);
+			$this->_message('deleted seccessfully',array('title'=>$data['title']));
+			if($data['category_id'])
+				$redirect_params['title'] = $this->_query->select('translit_title')->from('file_category')->where('id',$data['category_id'])->query1('translit_title');
 		}
-		$this->parent->redirect('/?call='.$this->module_name);	
+		$this->parent->redirect('/'.($this->parent->admin_mode?'admin.php':'').'?call='.$this->module_name.($this->parent->admin_mode?'._admin':''),$redirect_params);
+	}
+	
+	public function _admin($title=NULL){
+		$this->get_category($title);
+	}
+	
+	public function save($id=NULL, $title=NULL, $category_id=NULL){
+		$file = new file($this->parent);
+		if($files = $file->get_files($this->module_name, $id, $title, $category_id)){
+			$count = count($files);
+			$file_name = '';
+			foreach($files as $num=>&$match)
+				$file_name.='"'.$match['title'].'"'.(($num+1)!=$count?', ':'');
+			if(!$id)
+				$this->_message('file edited successfully', array('file'=>&$file_name));
+			else{
+				if($count==1)
+					$this->_message('file loaded successfully', array('file'=>&$file_name));
+				else
+					$this->_message('files loaded successfully', array('files'=>&$file_name));
+			}
+		}
+		elseif($id){
+			$file_info = array('category_id' => $category_id?$category_id:NULL);
+			if($title)
+				$file_info['title'] = $title;
+			$this->_query->update('file')->set($file_info)->where('id',$id)->execute();
+			$this->_message('file edited successfully', array('file'=>'"'.$this->_query->select('title')->from('file')->where('id',$id)->query1('title').'"'));
+		}
+		if($id)
+		$redirect_params = array();
+		if($category_id)
+			$redirect_params['title'] = $this->_query->select('translit_title')->from('file_category')->where('id',$category_id)->query1('translit_title');
+		$this->parent->redirect('/'.($this->parent->admin_mode?'admin.php':'').'?call='.$this->module_name.($this->parent->admin_mode?'._admin':''),$redirect_params);
 	}
 	
 	/*
-	//category
-	public function save_category($id=NULL,$title=NULL,$insert_place=NULL,$condition = array()){
-		if(!$title){
-			$this->_message('category name must not be empty');
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.edit_category&id='.$id.'&insert_place='.$insert_place);
-			return;
-		}
-		$value = array('title'=>$title);
-		parent::save_category($id,$value,$insert_place);
-	}*/
+array(1) {
+  ["file"]=>
+  array(5) {
+    ["name"]=>
+    array(3) {
+      [0]=>
+      string(12) "gradient.png"
+      [1]=>
+      string(13) "Forum Fit.xls"
+      [2]=>
+      string(13) "controlsv.xls"
+    }
+    ["type"]=>
+    array(3) {
+      [0]=>
+      string(9) "image/png"
+      [1]=>
+      string(20) "application/ms-excel"
+      [2]=>
+      string(20) "application/ms-excel"
+    }
+    ["tmp_name"]=>
+    array(3) {
+      [0]=>
+      string(27) "C:\Windows\Temp\php2DBC.tmp"
+      [1]=>
+      string(27) "C:\Windows\Temp\php2DBD.tmp"
+      [2]=>
+      string(27) "C:\Windows\Temp\php2DBE.tmp"
+    }
+    ["error"]=>
+    array(3) {
+      [0]=>
+      int(0)
+      [1]=>
+      int(0)
+      [2]=>
+      int(0)
+    }
+    ["size"]=>
+    array(3) {
+      [0]=>
+      int(14853)
+      [1]=>
+      int(11776)
+      [2]=>
+      int(149504)
+    }
+  }
+}
+	 */
 	
 	public function _get_param_value($method_name,$param_name){
 		switch($method_name){
@@ -131,14 +171,8 @@ class gallery_config extends base_module_config{
 		),
 	);
 	
-	protected $link = array(
-		'admin_mode.edit'=>array(
-			'right'=>'file.get_list&module=article'
-		),
-	);
-	
 	protected $include = array(
-		'get_category,edit,_admin'=>
+		'get_category,edit,_admin,edit'=>
 			'<link href="/extensions/jquery_lightbox/jquery_lightbox.css" rel="stylesheet" type="text/css"/>
 			<script type="text/javascript" src="/extensions/jquery_lightbox/jquery_lightbox.min.js"></script>
 			<link href="/module/gallery/gallery.css" rel="stylesheet" type="text/css"/>',

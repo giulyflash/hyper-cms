@@ -3,14 +3,8 @@ class file_config extends module_config{
 	protected $img_ext=array('jpeg','jpg','png','gif','bmp');
 	protected $video_ext=array('flv','mpeg','mpg','avi','wmv');
 	protected $doc_ext=array('doc','docx','xls','xlsx');
-	protected $invalid_ext=array(
-		"php",
-		"php5",
-		"php4",
-		"phtml",
-		"pl",
-		"perl"
-	);
+	protected $invalid_ext=array('php','php5','php4','phtml','pl','perl');
+	protected $allowed_ext=array('jpeg','jpg','png','gif','bmp');
 	protected $default_thumb = 'template/admin/images/_document.png';
 	protected $include = array(
 		'get_list'=>'<script type="text/javascript" src="/extensions/SWFUpload/swfupload.js"></script>
@@ -25,8 +19,6 @@ class file_config extends module_config{
 	protected $thumb_path='thumb/';
 	protected $thumb_width=180;
 	protected $thumb_height=180;
-	protected $thumb2_width=60;
-	protected $thumb2_height=60;
 	protected $overwrite_if_exist = false;
 	
 	protected $callable_method=array(
@@ -62,24 +54,45 @@ class file extends module{
 		$this->_result = $this->get_files($module);
 	}
 	
-	public function get_files($module='file'){
+	public function get_files($module='file', $id=NULL, $title=NULL, $category_id=NULL){
 		$result = array();
+		if(!$category_id)
+			$category_id = NULL;
 		foreach($_FILES as $file_order=>$file){
 			if(is_array($file['name'])){
-				foreach($file['name'] as $arg_order=>$useless){
-					$args=array(
-						'name'=>$file[$name][$arg_order],
-						'tmp_name'=>$file[$tmp_name][$arg_order],
-						'error'=>$file[$error][$arg_order],
-						'size'=>$file[$size][$arg_order],
-						'type'=>$file[$type][$arg_order],
-						'module'=>$module,
-					);
-					$result[] = self::save_file($args);
+				if($id && count($file['name'])>1)
+					throw new my_exception('denied to edit a lot of files');
+				foreach(array_keys($file['name']) as $arg_order){
+					if(!(
+						$file['name'][$arg_order]=='' &&
+						$file['type'][$arg_order]=='' &&
+						$file['tmp_name'][$arg_order]=='' &&
+						($file['error'][$arg_order]=='' || $file['error'][$arg_order]==4) &&
+						$file['size'][$arg_order]==''
+					)){
+						$args=array(
+							'title'=>$file['name'][$arg_order],
+							'tmp_name'=>$file['tmp_name'][$arg_order],
+							'error'=>$file['error'][$arg_order],
+							'size'=>$file['size'][$arg_order],
+							'type'=>$file['type'][$arg_order],
+							'module'=>$module,
+							'category_id'=>$category_id,
+						);
+						if($id && count($file['name'])==1){
+							$args['id'] = $id;
+							$args['user_title'] = $title;
+						}
+						$result[] = self::save_file($args);
+					}
 				}
 			}
 			else{
 				$file['module'] = $module;
+				$file['title'] = $file['name'];
+				$file['id'] = $id;
+				$file['user_title'] = $title;
+				$file['category_id'] = $category_id;
 				$result[] = self::save_file($file);
 			}
 		}
@@ -89,52 +102,57 @@ class file extends module{
 	private function save_file($file){
 		//TODO edit
 		//TODO error reporting
-		if(!$file['name'])
+		if(!$file['title'])
 			throw new my_exception('file name not found');
-		if(!preg_match('%^(.+?)\.?([^.]+)$%',$file['name'],$re))
-			throw new my_exception('wrong file name',$file['name']);
-		$file['name'] = $re[1];
+		if(!preg_match('%^(.+?)\.?([^.]+)$%',$file['title'],$re))
+			throw new my_exception('wrong file name',$file['title']);
+		if(!empty($file['user_title'])){
+			$file['title'] = $file['user_title'];
+			unset($file['user_title']);
+		}
+		else
+			$file['title'] = $re[1];
 		$file['extension'] = strtolower($re[2]);
 		if(in_array($file['extension'], $this->_config('invalid_ext')))
 			throw new my_exception('unallowed extension',$file['extension']);
-		$file['translit_name'] = translit::transliterate($file['name']);
-		$file['path'] = $this->_config('file_path').$file['translit_name'];
-		if(file_exists($file['path'])){
-			if($this->_config('overwrite_if_exist')){
-				//TODO remove file
-			}
+		$file['translit_title'] = translit::transliterate($file['title']);
+		$file['path'] = $this->_config('file_path').$file['translit_title'].'.'.$file['extension'];
+		if(!empty($file['id']))
+			$this->remove($file['id'], false, false, false);
+		while(file_exists($file['path'])){
+			if(!empty($file['id']) && $this->_config('overwrite_if_exist'))
+				$this->remove($file['id'], false, false, false);
 			else
-				$file['path'].= '_'.md5(rand(1,1000).date('Y-m-d H:i:s'));
+				$file['path'] = $this->_config('file_path').$file['translit_title'].'_'.md5(rand(1,1000).date('Y-m-d H:i:s')).'.'.$file['extension'];
 		}
-		$file['path'].= '.'.$file['extension'];
 		if(!move_uploaded_file($file['tmp_name'], $file['path']))
 			throw new my_exception('move file fail');
 		$date = new DateTime();
 		$file['create_date'] = $date->format('Y-m-d H:i:s');
 		$file['thumb_path'] = $this->create_thumb($file);
-		$file['thumb2_path'] = $this->create_thumb($file,true);
-		//echo "\n".$this->_query->insert('file')->values($file)->get_sql()."\n";
-		if($id=$this->_query->select('id')->from('file')->where('path',$file['path'])->query1('id'))
-			$this->_query->update('file')->set($file)->where('id',$id);
-		else
+		if(!empty($file['id']))
+			$this->_query->update('file')->set($file)->where('id',$file['id'])->execute();
+		else{
 			$this->_query->insert('file')->values($file)->execute();
-		$file['id'] = $this->parent->db->insert_id();
+			$file['id'] = $this->parent->db->insert_id();
+		}
 		return $file;
 	}
 	
-	public function remove($id, $die=true){
+	public function remove($id, $die=true, $delete_sql=true, $throw_error = true){
 		$path = $this->_query->select('path,thumb_path')->from('file')->where('id',$id)->query1();
 		if(!$path)
 			throw new my_exception('file not found','id='.$id);
-		if(!unlink($path['path']) || $path['thumb_path']!=$this->_config('default_thumb') && !unlink($path['thumb_path']))
-			throw new my_exception('remove file fail');
-		$this->_query->delete()->from('file')->where('id',$id)->query1();
+		if($delete_sql)
+			$this->_query->delete()->from('file')->where('id',$id)->query1();
+		if($throw_error && (!@unlink($path['path']) || $path['thumb_path']!=$this->_config('default_thumb') && !@unlink($path['thumb_path'])) )
+			throw new my_exception('remove file fail','id='.$id);
 		if($die)
 			die;
 		//TODO output JSON
 	}
 	
-	private function create_thumb(&$file,$thumb2=false){
+	private function create_thumb(&$file){
 		if(!in_array($file['extension'], $this->_config('img_ext'))){
 			if(in_array($file['extension'], $this->_config('doc_ext'))){
 				$file['internal_type'] = 'document';
@@ -144,7 +162,7 @@ class file extends module{
 			return $this->_config('default_thumb');
 		}
 		$file['internal_type'] = 'image';
-		$img = new my_image($file['path'],$this->_config('thumb_path'),$this->_config($thumb2?'thumb2_width':'thumb_width'),$this->_config($thumb2?'thumb2_height':'thumb_height'));
+		$img = new my_image($file['path'],$this->_config('thumb_path'),$this->_config('thumb_width'),$this->_config('thumb_height'));
 		return $img->thumb();
 	}
 }

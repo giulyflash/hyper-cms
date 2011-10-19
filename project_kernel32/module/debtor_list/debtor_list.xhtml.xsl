@@ -3,15 +3,15 @@
 <xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" />
 
 <xsl:template match="root/module/item[_module_name='debtor_list' and (_method_name='get' or _method_name='search')]">
-	<xsl:variable name="href_order"><xsl:if test="argument/order!='num' and argument/order!=''">&amp;order=<xsl:value-of select="argument/order"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_page"><xsl:if test="argument/page!=1 and argument/page!=''">&amp;page=<xsl:value-of select="argument/page"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_order"><xsl:if test="_argument/order!='num' and _argument/order!=''">&amp;order=<xsl:value-of select="_argument/order"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_page"><xsl:if test="_argument/page!=1 and _argument/page!=''">&amp;page=<xsl:value-of select="_argument/page"/></xsl:if></xsl:variable>
 	<xsl:variable name="href_count"><xsl:if test="_count!='' and _count!=_default_count">&amp;count=<xsl:value-of select="_count"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_search"><xsl:if test="argument/search!=''">&amp;search=<xsl:value-of select="argument/search"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_filter"><xsl:if test="argument/filter!=''">&amp;filter=<xsl:value-of select="argument/filter"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_column"><xsl:if test="argument/column!=''">&amp;column=<xsl:value-of select="argument/column"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_zero_debt"><xsl:if test="argument/zero_debt!=''">&amp;zero_debt=1</xsl:if></xsl:variable>
-	<xsl:variable name="href_table_name"><xsl:if test="argument/table_name!=''">&amp;table_name=<xsl:value-of select="argument/table_name"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_show_sum"><xsl:if test="argument/show_sum!=''">&amp;show_sum=1</xsl:if></xsl:variable>
+	<xsl:variable name="href_search"><xsl:if test="_argument/search!=''">&amp;search=<xsl:value-of select="_argument/search"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_filter"><xsl:if test="_argument/filter!=''">&amp;filter=<xsl:value-of select="_argument/filter"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_column"><xsl:if test="_argument/column!=''">&amp;column=<xsl:value-of select="_argument/column"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_zero_debt"><xsl:if test="_argument/zero_debt!=''">&amp;zero_debt=1</xsl:if></xsl:variable>
+	<xsl:variable name="href_table_name"><xsl:if test="_argument/table_name!=''">&amp;table_name=<xsl:value-of select="_argument/table_name"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_show_sum"><xsl:if test="_argument/show_sum!=''">&amp;show_sum=1</xsl:if></xsl:variable>
 	<xsl:variable name="href_debug"><xsl:if test="/root/debug">&amp;_debug=1</xsl:if></xsl:variable>
 	<script type="text/javascript">_default_page_count = <xsl:value-of select="_default_count"/>;</script>
 	<div class="curtain"></div>
@@ -103,7 +103,7 @@
 							</td>
 						</tr>
 					</xsl:for-each>
-					<xsl:if test = "argument/show_sum=1">
+					<xsl:if test = "_argument/show_sum=1">
 						<tr class="sum">
 							<xsl:for-each select="_field/*[selected=1]">
 								<td>
@@ -114,10 +114,10 @@
 						</tr>
 					</xsl:if>
 				</table>
-				<!-- <xsl:if test="argument/table_name='' or argument/table_name=_config/default_table">
+				<!-- <xsl:if test="_argument/table_name='' or _argument/table_name=_config/default_table">
 					<form method="post" action="/?call={_module_name}{$href_order}{$href_filter}{$href_column}{$href_table_name}{$href_debug}{$href_page}{$href_count}{$href_search}{$href_zero_debt}" enctype="multipart/form-data">
 						<input type="checkbox" id="_show_sum" name="show_sum">
-							<xsl:if test="argument/show_sum=1">
+							<xsl:if test="_argument/show_sum=1">
 								<xsl:attribute name="checked">checked</xsl:attribute>
 							</xsl:if>
 						</input>
@@ -134,7 +134,7 @@
 				Результатов: <span><xsl:value-of select="__num_rows"/></span>&#160;&#160;&#160;
 			</xsl:if>
 			<xsl:choose>
-				<xsl:when test="argument/table_name='debtor_log'">
+				<xsl:when test="_argument/table_name='debtor_log'">
 					<a href="/">Должники</a>
 				</xsl:when>
 				<xsl:otherwise>
@@ -202,7 +202,7 @@
 				<a href="/?call={_module_name}{$href_order}{$href_page}{$href_count}{$href_zero_debt}{$href_table_name}{$href_search}{$href_filter}{$href_debug}{$href_show_sum}">
 					<img src="module/{_module_name}/img/column_delete.png" alt="Очистить выбор колонок" title="Очистить выбор колонок"/>
 				</a>
-				<xsl:if test = "argument/table_name!=_config/log_table">
+				<xsl:if test = "_argument/table_name!=_config/log_table">
 					<a href="/?call={_module_name}.edit{$href_order}{$href_page}{$href_count}{$href_search}{$href_filter}{$href_column}{$href_zero_debt}{$href_table_name}{$href_debug}{$href_show_sum}">
 						<img src="module/{_module_name}/img/table_add.png" alt="добавить запись" title="добавить запись"/>
 					</a>
@@ -210,7 +210,7 @@
 				<a href="/?call={_module_name}{$href_page}{$href_count}{$href_zero_debt}{$href_table_name}{$href_search}{$href_filter}{$href_column}{$href_debug}{$href_show_sum}">
 					<img src="module/{_module_name}/img/sort_delete.png" alt="Отменить сортировку" title="Отменить сортировку"/>
 				</a>
-				<xsl:if test = "argument/table_name!=_config/log_table">
+				<xsl:if test = "_argument/table_name!=_config/log_table">
 					<a href="/?call={_module_name}.import{$href_order}{$href_page}{$href_count}{$href_search}{$href_filter}{$href_column}{$href_zero_debt}{$href_table_name}{$href_debug}{$href_show_sum}">
 						<img src="module/{_module_name}/img/excel_import.png" alt="Импорт" title="Импорт"/>
 					</a>
@@ -263,16 +263,16 @@
 							строк на странице:<input type="text" size="1" value="{__page_size}" name="count"/>
 						</span>
 						<xsl:variable name="search_value"><xsl:choose>
-							<xsl:when test="argument/search"></xsl:when>
+							<xsl:when test="_argument/search"></xsl:when>
 						</xsl:choose></xsl:variable>
 						<span>
-							<input type="text" size="15" placeholder="быстрый поиск" value="{argument/search}" name="search"/>
+							<input type="text" size="15" placeholder="быстрый поиск" value="{_argument/search}" name="search"/>
 						</span>
 						<input type="submit" value="Ok"/>
 					</div>
-					<!-- <xsl:if test="argument/table_name='' or argument/table_name=_config/default_table">
+					<!-- <xsl:if test="_argument/table_name='' or _argument/table_name=_config/default_table">
 						<input id="zero_debt_input" type="checkbox" name="zero_debt">
-							<xsl:if test="argument/zero_debt and argument/zero_debt!=''">
+							<xsl:if test="_argument/zero_debt and _argument/zero_debt!=''">
 								<xsl:attribute name="checked">checked</xsl:attribute>
 							</xsl:if>
 						</input>
@@ -307,14 +307,14 @@
 </xsl:template>
 
 <xsl:template match="root/module/item[_module_name='debtor_list' and (_method_name='edit' or _method_name='save')]">
-	<xsl:variable name="href_order"><xsl:if test="argument/order and argument/order!='num' and argument/order!=''">&amp;order=<xsl:value-of select="argument/order"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_page"><xsl:if test="argument/page and argument/page!=1 and argument/page!=''">&amp;page=<xsl:value-of select="argument/page"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_count"><xsl:if test="argument/count!=''">&amp;count=<xsl:value-of select="argument/count"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_search"><xsl:if test="argument/search!=''">&amp;search=<xsl:value-of select="argument/search"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_filter"><xsl:if test="argument/filter and argument/filter!=''">&amp;filter=<xsl:value-of select="argument/filter"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_column"><xsl:if test="argument/column and argument/column!=''">&amp;column=<xsl:value-of select="argument/column"/></xsl:if></xsl:variable>
-	<xsl:variable name="href_zero_debt"><xsl:if test="argument/zero_debt and argument/zero_debt!=''">&amp;zero_debt=1</xsl:if></xsl:variable>
-	<xsl:variable name="href_table_name"><xsl:if test="argument/table_name and argument/table_name!=''">&amp;table_name=<xsl:value-of select="argument/table_name"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_order"><xsl:if test="_argument/order and _argument/order!='num' and _argument/order!=''">&amp;order=<xsl:value-of select="_argument/order"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_page"><xsl:if test="_argument/page and _argument/page!=1 and _argument/page!=''">&amp;page=<xsl:value-of select="_argument/page"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_count"><xsl:if test="_argument/count!=''">&amp;count=<xsl:value-of select="_argument/count"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_search"><xsl:if test="_argument/search!=''">&amp;search=<xsl:value-of select="_argument/search"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_filter"><xsl:if test="_argument/filter and _argument/filter!=''">&amp;filter=<xsl:value-of select="_argument/filter"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_column"><xsl:if test="_argument/column and _argument/column!=''">&amp;column=<xsl:value-of select="_argument/column"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_zero_debt"><xsl:if test="_argument/zero_debt and _argument/zero_debt!=''">&amp;zero_debt=1</xsl:if></xsl:variable>
+	<xsl:variable name="href_table_name"><xsl:if test="_argument/table_name and _argument/table_name!=''">&amp;table_name=<xsl:value-of select="_argument/table_name"/></xsl:if></xsl:variable>
 	<xsl:call-template name="nbk_edit">
 		<xsl:with-param name="href_order" select="$href_order"/>
 		<xsl:with-param name="href_page" select="$href_page"/>

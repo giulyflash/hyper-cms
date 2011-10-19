@@ -5,7 +5,7 @@
 }
 
 .nested_items .item .controls{
-	padding: 0 0 0 80px;
+	padding: 0 0 0 110px;
 }
 
 .nested_items .item_cont:hover>.controls,
@@ -44,10 +44,6 @@
 	color: red;
 }
 
-.nested_items .item .controls{
-
-}
-
 .nested_items .controls select{
 	margin-right: 7px;
 }
@@ -58,4 +54,51 @@
 .nested_items.dropdown._admin .item_cont:hover>a>span.text,
 .nested_items.dropdown._admin .item:hover>a>span.text{
 	text-decoration: underline;
+}
+
+.nested_items.dropdown._admin .items .item{
+	float: none;
+	min-height: 65px;
+	text-align: left;
+}
+
+.nested_items.dropdown._admin .items .item>a>div{
+	min-width: 65px;
+	display: inline;
+	float: left;
+	margin-right: 7px;
+}
+
+.nested_items.dropdown._admin .items .item img{
+	height: 60px;
+}
+
+/*edit*/
+.gallery.file_edit{
+	text-align: center;
+}
+.gallery.file_edit form{
+	margin-top: 20px;
+	display: inline-block;
+	text-align: left;
+}
+.gallery.file_edit form tr:last-child td input{
+	display: inline;
+	padding: 10px;
+	width: auto;
+}
+.gallery.file_edit form tr:last-child td{
+	text-align: center;
+}
+.gallery.file_edit>a>div>div{
+	display: inline-block;
+	border: 1px solid #777;
+	padding: 2px;
+}
+.gallery.file_edit form input{
+	width: 100%;
+}
+
+.nested_items.gallery._admin li{
+	min-height: 2.2em;
 }

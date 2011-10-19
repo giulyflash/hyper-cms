@@ -59,8 +59,7 @@ class base_module_config extends module_config{
 	
 	protected $include = array(
 		'admin_mode.*' =>
-			'<link href="module/base_module/admin.css" rel="stylesheet" type="text/css"/>
-			<script type="text/javascript" src="/module/base_module/admin.js"></script>',
+			'<link href="module/base_module/admin.css" rel="stylesheet" type="text/css"/>',
 		'*,admin_mode.*' =>
 			'<link href="module/base_module/base_module.css" rel="stylesheet" type="text/css"/>
 			<script type="text/javascript" src="/module/base_module/base_module.js"></script>',
@@ -104,6 +103,8 @@ abstract class base_module extends module{
 	
 	public function _admin($title=NULL){
 		$this->get_category('translit_title', $title);
+		//parent::get_category('translit_title', $title, true, 'auto', NULL, array(array('module',$this->module_name), array('internal_type','image')));
+		//FIXME wtf it do not lod category by title?
 	}
 	
 	public function get_category($field = 'translit_title', $value=false, $need_item=true, $show='auto', $category_condition=array(),$item_condition=array()){
@@ -229,10 +230,16 @@ abstract class base_module extends module{
 		//TODO remove this temp code below
 		//var_dump($_SERVER['REQUEST_URI'],$this->parent->admin_mode); die;
 		if($this->parent->admin_mode){
-			$this->_query->select('id,title,translit_title,depth')->from($category_table);
-			$this->parse_condition($category_condition,false);
-			$this->_result['_category_list'] = $this->_query->order('left')->query();
+			$this->category_list($category_condition);
 		}
+	}
+	
+	public function category_list($category_table=NULL, $category_condition=NULL){
+		if(!$category_table)
+			$category_table = ($category_table = $this->_config('category_table'))?$category_table:($this->_table_name.'_category');
+		$this->_query->select('id,title,translit_title,depth')->from($category_table);
+		$this->parse_condition($category_condition,false);
+		$this->_result['_category_list'] = $this->_query->order('left')->query();
 	}
 	
 	private function create_tree(&$parent=NULL, &$prev=NULL){
@@ -282,52 +289,6 @@ abstract class base_module extends module{
 		$this->_result = &$result;
 	}
 	
-	/*public function get_category($field = 'translit_title', $value=false, $need_item=true, $all = false, $item_fields = '*', $category_fields='id,title,translit_title,depth',$category_condition=array(),$item_condition=array()){
-		//TODO common nested items: http://dev.mysql.com/tech-resources/articles/hierarchical-data.html
-		//var_dump("module: {$this->module_name}.{$this->method_name}; field: $field; value: $value; need_item: $need_item; all: $all; item_fields: $item_fields");
-		if(!$this->_config('has_category'))
-			throw new my_exception('try to use not existing category',array('title'=>$value));
-		$this->_query->select($category_fields)->from($this->_table_name.$this->_config('category_posfix'));
-		$where = false;
-		if($field && $value!==false){
-			$temp_sql = $this->_query->sql;
-			$this->_query->set_sql();
-			//
-			$category_item = $this->_query->select('left,right,id')->from($this->_table_name.$this->_config('category_posfix'))->where($field,$value)->query1();
-			if(!$category_item){
-				$this->_message('category not found',array('field'=>$field,'value'=>$value));
-				return;
-			}
-			$edge = array($category_item['left']+1,$category_item['right']);
-			//
-			$this->_query->set_sql($temp_sql);
-			$this->_query->where('left', $edge, 'between');
-			$where = true;
-		}
-		elseif(!$all){
-			$this->_query->where('depth',0);
-			$where = true;
-		}
-		$this->parse_condition($category_condition,$where);
-		$this->_result = $this->_query->order('left')->query();
-		if($need_item){
-			if(!$this->_config('has_item'))
-				throw new my_exception('module has not items',array('name'=>$this->module_name));
-			else{
-				$this->_query->select($item_fields)->from($this->_table_name);
-				if(isset($category_item,$category_item['id']))
-					$this->_query->where('category_id',$category_item['id']);
-				else
-					$this->_query->where('category_id',NULL);
-				$this->parse_condition($item_condition,true);
-				$this->_result['items'] = $this->_query->order('order')->query();
-				//$this->_result[-2] = array('items'=>$items, 'uncategorized'=>1);
-			}
-		}
-		$this->_result['lt'] = '<';
-		$this->_result['gt'] = '>';
-	}*/
-	
 	public function get_category_by_title($title){
 		$this->get_category('translit_title', $title);
 	}
@@ -369,13 +330,14 @@ abstract class base_module extends module{
 			$this->_message('object not found',array('name'=>$value));
 	}
 	
-	public function edit($id=NULL,$select='*'){
+	public function edit($id=NULL, $category_id=NULL, $select='*'){
 		if($id){
 			$result = $this->_query->select($select)->from($this->_table_name)->where('id',$id)->query1();
 			if(!$result)
 				throw new my_exception('object not found by id', array('id'=>$id));
 			$this->_result = $result;
 		}
+		$this->category_list();
 	}
 	
 	public function save($id=NULL, $value = array(), $redirect = 'edit', $output_message = true, $params=array()){
@@ -466,6 +428,7 @@ abstract class base_module extends module{
 			throw new my_exception('can not paste category into itselve',array('id'=>$id));
 		$width = $target['right'] - $target['left'] + 1;
 		$this->_query->lock($table_name)->execute();
+		$redirect_params = array();
 		if($insert_place=='last'){
 			$this->_query->injection('SELECT max(`right`) as `right`')->from($table_name);
 			$this->parse_condition($condition);
@@ -477,9 +440,10 @@ abstract class base_module extends module{
 			$target['right'] = $target['right']-$width;
 		}
 		else{
-			$destination = $this->_query->select('left,right,depth')->from($table_name)->where('id',$insert_place)->query1();
+			$destination = $this->_query->select('left,right,depth,translit_title')->from($table_name)->where('id',$insert_place)->query1();
 			if(!$destination)
 				throw new my_exception('insert place not found',array('id'=>$insert_place));
+			$redirect_params['title'] = $destination['translit_title'];
 			if($destination['left'] > $target['left'] && $destination['left'] < $target['right'])
 				$this->_message('may not to move category into itselve');
 			else{
@@ -522,7 +486,7 @@ abstract class base_module extends module{
 		$this->_query->unlock()->execute();
 		$this->_message('category moved successfully',array('title'=>$target['title']));
 		if($redirect)
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect);
+			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, $redirect_params);
 	}
 
 	public function remove_category($id=NULL,$condition = array(), $redirect = '_admin'){
@@ -555,7 +519,7 @@ abstract class base_module extends module{
 	}
 	
 	public function move_item($id=NULL, $insert_after=NULL, $insert_category=NULL, $insert_item=NULL, $redirect='get_category'){
-		$this->_query->echo_sql=1;
+		$redirect_params = array();
 		if($id){
 			$match = $this->_query->select()->from($this->_table_name)->where('id',$id)->query1();
 			if(!$match)
@@ -570,6 +534,8 @@ abstract class base_module extends module{
 				$this->_query->update($this->_table_name)->injection(' SET `order`=`order`+1 ')->where('order',$place['order'],'>')->_and('category_id',$place['category_id'])->query();
 				$this->_query->update($this->_table_name)->set(array('order'=>$place['order']+1))->where('id',$id)->query1();
 				$order = $place['order'];
+				if($place['category_id'])
+					$redirect_params['title'] = $this->_query->select('translit_title')->from('file_category')->where('id',$place['category_id'])->query1('translit_title');
 			}else{
 				if(!$insert_category)
 					$insert_category = NULL;
@@ -579,13 +545,15 @@ abstract class base_module extends module{
 				else
 					$order+=1;
 				$this->_query->update($this->_table_name)->set(array('category_id'=>$insert_category, 'order'=>($order?$order:1)))->where('id',$id)->query1();
+				if($insert_category)
+					$redirect_params['title'] = $this->_query->select('translit_title')->from('file_category')->where('id',$insert_category)->query1('translit_title');
 			}
 			$this->_message('item moved',array('name'=>$match['title']));
 		}
 		if($redirect){
 			if($this->parent->admin_mode)
 				$redirect = $this->_config('admin_method');
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect);
+			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, $redirect_params);
 		}
 	}
 	
