@@ -3,7 +3,7 @@
 <xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" />
 
 <xsl:template match="root/module/item[_module_name='menu' and _method_name='get']">
-	<div id="menu" class="menu {argument/type}">
+	<div id="menu" class="menu {_argument/type}">
 		<xsl:call-template name="menu_items"/>
 	</div>
 </xsl:template>
@@ -28,7 +28,7 @@
 
 <xsl:template match="root/module/item[_module_name='menu' and _method_name='edit']">
 	<div class="menu nested_tree">
-		<xsl:if test="argument/id='' or id">
+		<xsl:if test="_argument/id='' or id">
 			<form method="post" action="admin.php?call=menu.save&amp;id={id}">
 				Заголовок: <input value="{title}" type="text" name="title"/>
 				<input type = "submit" value="ок"/>
@@ -102,12 +102,12 @@
 			</xsl:if>
 		</script>
 	</xsl:if>
-	<form class="menu menu_editor link_form" method="post" action="admin.php?call=menu.save_item&amp;menu_id={argument/menu_id}">
+	<form class="menu menu_editor link_form" method="post" action="admin.php?call=menu.save_item&amp;menu_id={_argument/menu_id}">
 		<xsl:if test="id">
 			<input type="hidden" value="{id}" name="id"/>
 		</xsl:if>
-		<xsl:if test="argument/insert_place">
-			<input type="hidden" value="{argument/insert_place}" name="insert_place"/>
+		<xsl:if test="_argument/insert_place">
+			<input type="hidden" value="{_argument/insert_place}" name="insert_place"/>
 		</xsl:if>
 		<table class="edit_item">
 			<tr>

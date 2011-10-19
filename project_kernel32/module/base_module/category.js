@@ -12,7 +12,7 @@ function category_add_event(obj){
 	else
 		obj = $('.nested_items.dropdown');
 	if(obj.lightBox)
-		obj.find('.item a').lightBox({
+		obj.find('.item>a').lightBox({
 			imageLoading: 'extensions/jquery_lightbox/images/ru/loading.gif',
 			imageBtnClose: 'extensions/jquery_lightbox/images/ru/closelabel.gif',
 			imageBtnPrev: 'extensions/jquery_lightbox/images/ru/prev.gif',
@@ -68,7 +68,7 @@ function category_add_event(obj){
 			text = container.find('.text:first');
 			obj_text=text.size()?('категорию "'+text.html()+'"'):'эту категорию';
 		}
-		if(!confirm('Вы действительно хотите безвозвратно удалить '+obj_text+'?'));
+		if(!confirm('Вы действительно хотите безвозвратно удалить '+obj_text+'?'))
 			return false;
 	});
 	

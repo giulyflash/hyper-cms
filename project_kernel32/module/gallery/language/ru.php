@@ -34,6 +34,9 @@ $error = array(
 	'category name must not be empty'=>'Имя категории не должно быть пустым',
 	'not found by id' => 'Статья не найдена по номеру "$id"',
 	'title not found' => 'Заголовок статьи не найден',*/
+	'file loaded successfully' => 'Файл $file успешно загружен',
+	'files loaded successfully' => 'Файлы $files успешно загружены',
+	'file edited successfully' => 'Файл $file успешно отредактирован',
 );
 
 

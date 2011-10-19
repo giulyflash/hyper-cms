@@ -64,21 +64,3 @@
 	min-height: 210px;
 	padding:5px;
 }
-
-/*admin*/
-
-.nested_items.dropdown._admin .items .item{
-	float: none;
-	min-height: 65px;
-	text-align: left;
-}
-
-.nested_items.dropdown._admin .items .item>a>div{
-	float: left;
-	width: 70px;
-}
-
-.nested_items.dropdown._admin .items .item img{
-	height: 60px;
-	float: left;
-}

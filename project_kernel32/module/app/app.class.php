@@ -942,12 +942,12 @@ class app extends module{
 			if(($template = $module->_config('template')) && $result['_module_name']!='app')
 				$result['_template'] = $template;
 			if(($module->_config('output_all_argument') || $module->position==$center_position) && !empty($module->argument_all)){
-				$result['argument'] = &$module->argument_all;
+				$result['_argument'] = &$module->argument_all;
 				if($module->_config('output_new_argument') && !empty($module->argument_new))
 					$result['argument_new'] = $module->argument_new;
 			}
 			elseif($module->_config('output_new_argument') && !empty($module->argument_new))
-				$result['argument'] = $module->argument_new;
+				$result['_argument'] = $module->argument_new;
 			$this->output['module'][] = $result;
 		}
 		if($this->error)

@@ -6,7 +6,7 @@ class output_json extends output implements output_interface{
 			$this->parent->output['module'][0]['_method_name'],
 			$this->parent->output['module'][0]['_config'],
 			$this->parent->output['module'][0]['_position'],
-			$this->parent->output['module'][0]['argument']
+			$this->parent->output['module'][0]['_argument']
 		);
 		if($this->parent->error)
 			$this->parent->output['module'][0]['__error'] = $this->parent->error;
