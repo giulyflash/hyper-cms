@@ -1,6 +1,8 @@
 <?php
 class article extends base_module{
 	protected $config_class_name = 'article_config';
+	
+	private $more_tag = '<!--more-->';
 
 	public function get($field = 'id', $value='1',$show_title=false){
 		$select = array('text');
@@ -32,6 +34,7 @@ class article extends base_module{
 			'title'=>$title,
 			'translit_title'=>($translit_title?$translit_title:translit::transliterate($title)),
 			'text'=>$text,
+			'preview'=>$this->get_preview($text),
 			'keyword'=>$keyword,
 			'description'=>$description,
 			'draft'=>($draft)?1:0,
@@ -49,6 +52,18 @@ class article extends base_module{
 	/*public function _admin($page=null, $count=null, $show='all'){
 		parent::_admin($page, $count, $show, 'depth,title,id', 'category_id,title,id', 'create_date');
 	}*/
+	
+	public function &get_preview(&$text){
+		$preview = '';
+		if($text){
+			if($pos = strpos($text,$this->more_tag ))
+				$preview = mb_substr($text, 0, $pos);
+			else{
+				//TODO automatical preview
+			}
+		}
+		return $preview;
+	}
 	
 	public function remove($id=NULL){
 		$param = array();
@@ -159,5 +174,6 @@ class article_config extends base_module_config{
 	public $default_show_title = true;
 	
 	private $news_trans_title = 'Novosti';
+	private $more_tag = '<!--more-->';
 }
 ?>
