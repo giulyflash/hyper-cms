@@ -85,6 +85,8 @@ class base_module_config extends module_config{
 	protected $item_field='id,title,category_id';
 	protected $item_order='order';
 	public $category_type = 'dropdown';
+	
+	public $default_thumb = 'template/admin/images/_document.png';
 }
 
 abstract class base_module extends module{
@@ -102,26 +104,27 @@ abstract class base_module extends module{
 	}
 	
 	public function _admin($title=NULL){
-		$this->get_category('translit_title', $title);
+		$this->get_category($title);
 		//parent::get_category('translit_title', $title, true, 'auto', NULL, array(array('module',$this->module_name), array('internal_type','image')));
 		//FIXME wtf it do not lod category by title?
 	}
 	
-	public function get_category($field = 'translit_title', $value=false, $need_item=true, $show='auto', $category_condition=array(),$item_condition=array()){
+	public function get_category($title=false, $show='auto'){
+		$this->get_category_base('translit_title', $title, true, $show);
+	}
+	
+	public function get_category_base($field = 'translit_title', $value=false, $need_item=true, $show='auto', $category_condition=array(),$item_condition=array()){
+		//$this->_query->echo_sql=1;
 		//TODO pages?
 		//$show: all (all categories and subcategories), category (0lvl categories + tree to current category), current (current category content only), auto ('current' for json, 'category' for others)
 		if($value=='')
 			$value = false;
 		if($show=='auto')
 			$show = in_array($this->parent->_config('content_type'), array('json','json_html'/*,'xml'*/))?'current':'category';
-		if($show=='current'){
-			//var_dump($value);die;
-			//die($field.':'.$value);
-		}
 		$item_field = $this->_config('item_field');
 		$category_field = $this->_config('category_field');
 		$item_order = $this->_config('item_order');
-		$category_table = ($category_table = $this->_config('category_table'))?$category_table:($this->_table_name.'_category');
+		$category_table = $this->_category_table_name;
 		if($this->_config('has_category')){
 			$this->_query->select($category_field);
 			if($value!==false){
@@ -358,15 +361,19 @@ abstract class base_module extends module{
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, array('id'=>$id));
 	}
 	
-	public function remove($id=NULL,$redirect='admin',$message=true,$param = array()){
+	public function remove($id=NULL,$redirect='_admin',$message=true,$param = array()){
+		$redirect_params = array();
 		if($id){
-			if($title)
-				$this->_message('deleted seccessfully',$param);
-			else
-				$this->_query->delete()->from($this->_table_name)->where('id',$id)->query1();
+			$data = $this->_query->select('title,category_id')->from($this->_table_name)->where('id',$id)->query1();
+			$this->_query->delete()->from($this->_table_name)->where('id',$id)->query1();
+			if($message)
+				$this->_message('deleted seccessfully',array('title'=>$data['title']));
+			if($data['category_id'])
+				$redirect_params['title'] = $this->_query->select('translit_title')->from($this->_category_table_name)->where('id',$data['category_id'])->query1('translit_title');
 		}
 		else
 			$this->_message('id is empty');
+		$this->parent->redirect('/'.($this->parent->admin_mode?'admin.php':'').'?call='.$this->module_name.($this->parent->admin_mode?'._admin':''),$redirect_params);
 	}
 	
 	public function edit_category($id=NULL, $insert_place=NULL){

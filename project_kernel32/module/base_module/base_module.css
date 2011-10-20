@@ -1,3 +1,15 @@
+.nested_items.dropdown ul{
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+.nested_items.dropdown ul{
+	padding-left: 20px;
+}
+.nested_items.dropdown li span, .nested_items.dropdown li>a>img{
+	padding: 0 7px 0 0;
+}
+
 /*dropdown list*/
 
 .nested_items.dropdown li>.item_cont>a>span.folder_icon{
@@ -35,10 +47,21 @@
 }
 .nested_items.dropdown ul ul{
 	list-style: none;
-	padding: 0em 0 7px 5px;
-	margin: 0px 0 10px 7px;
+	padding: 0 0 7px 5px;
+	margin: 0 0 10px 7px;
 	border-left: 1px solid #CCC;
 	background: url("/module/base_module/img/corner.png") no-repeat bottom left;
+}
+
+.nested_items.dropdown ul.items{
+	background: none;
+	border: none;
+	list-style: disc;
+	padding: 0 0 0 12px;
+}
+
+.article.nested_items.dropdown ul ul{
+	margin: 0 0 0 7px;
 }
 
 /*.nested_items.dropdown._admin ul ul{
