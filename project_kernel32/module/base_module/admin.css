@@ -102,3 +102,7 @@
 .nested_items.gallery._admin li{
 	min-height: 2.2em;
 }
+
+.nested_items.dropdown .item div div.default_thumb{
+	border: none;
+}

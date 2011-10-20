@@ -42,11 +42,15 @@ class file extends module{
 	}
 	
 	public function get($module='file'/*,$page=1,$count=10*/){
-		$this->_result = $this->_query->select()->from('file')->where(($module)?'module':'',($module)?$module:'')->_and('language',array('*',$this->_config('language')),'in')->query();
+		$this->_result = $this->_query->select()->from('file')->where(($module)?'module':'',($module)?$module:'')
+			//->_and('language',array('*',$this->_config('language')),'in')
+		->query();
 	}
 	
 	public function get_list($module='file'/*,$page=1,$count=10*/){
-		$this->_result = $this->_query->select()->from('file')->where(($module)?'module':'',($module)?$module:'')->_and('language',array('*',$this->_config('language')),'in')->order('create_date desc')->query();
+		$this->_result = $this->_query->select()->from('file')->where(($module)?'module':'',($module)?$module:'')
+			//->_and('language',array('*',$this->_config('language')),'in')->order('create_date desc')
+		->query();
 	}
 	
 	public function upload($data=NULL, $module='file'){

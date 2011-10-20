@@ -2,16 +2,22 @@
 class menu extends base_module{
 	protected $config_class_name = 'menu_config';
 	
-	public function _admin($page=null, $count=null, $show='all'){
-		$this->_result = $this->_query->select()->from($this->module_name)->query();
-		$this->_result['lt'] = '<';
-		$this->_result['gt'] = '>';
+	public function _admin($title=NULL){
+		if(!$title){
+			$menu = $this->_query->select()->from($this->module_name)->query2assoc_array('id');
+			$this->get_category_base();
+			var_dump($this->_result);
+			foreach($this->_result as $id=>$result)
+				$menu[$result['menu_id']][$id] = $result; 
+			$this->_result = $menu;
+		}else
+			$this->get_category_base('translit_title',$title);
 		if(!$this->_result)
 			$this->_message('menu list is empty');
 	}
 	
 	public function get($id = 1, $show_title=NULL, $type=NULL){
-		parent::get_category('link', $link = $_SESSION['call'][0]=='/'?false:$_SESSION['call'][0], NULL, 'all', NULL, array('menu_id',$id));
+		parent::get_category_base('link', $link = ($_SESSION['call'][0]=='/'?false:$_SESSION['call'][0]), NULL, 'all', NULL, array('menu_id',$id));
 		if($show_title)
 			$this->_result['title'] = $this->_query->select('title')->from($this->module_name)->where('id',$id)->query1('title');
 		if($type)
@@ -124,6 +130,12 @@ class menu extends base_module{
 		return $link;
 	}
 	
+	public function set_translit_title(){
+		$category = $this->_query->select('title,id')->from($this->_category_table_name)->query();
+		foreach($category as &$item)
+			$this->_query->update($this->_category_table_name)->set(array('translit_title'=>translit::transliterate($item['title'])))->where('id',$item['id']);
+	}
+	
 	public function _get_param_value($method_name,$param_name){
 		switch($method_name){
 			case 'get':{
@@ -175,9 +187,10 @@ class menu_config extends base_module_config{
 				'menu_item' => self::role_read
 			),
 		),
-		'_admin,edit,save,remove,edit_item,save_item,move_item,remove_item,unlock_database'=>array(
+		'_admin,edit,save,remove,edit_item,save_item,move_item,remove_item,unlock_database,set_translit_title'=>array(
 			'__access__' => array(
 				__CLASS__ => self::role_write,
+				'menu_item' => self::role_write
 			),
 		),
 		'move_item,save_item,remove_category,edit_category,get_category,get_category_by_title,save_category'=>array(
@@ -212,7 +225,7 @@ class menu_config extends base_module_config{
 	protected $default_link = '#';
 	//protected $category_posfix = '_item';
 	protected $category_table = 'menu_item';
-	protected $category_field='id,title,left,right,depth,link';
+	protected $category_field='id,title,translit_title,left,right,depth,link,menu_id';
 	
 	public $has_item = false;
 	public $has_category = true;

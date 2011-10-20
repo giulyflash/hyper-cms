@@ -19,13 +19,15 @@ class article extends base_module{
 			$this->get('translit_title',$title,$show_title);
 	}
 	
-	public function get_category($field = 'translit_title', $value=NULL, $need_item=true){
+	/*public function get_category($field = 'translit_title', $value=NULL, $need_item=true){
 		parent::get_category($field, $value, $need_item, false, 'id,title,translit_title,text,preview,category_id');
-	}
+	}*/
 	
 	public function save($id=NULL, $title=NULL, $translit_title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $category_id=NULL){
 		if(!$title)
 			throw new my_exception('title must not be empty');
+		if(!$category_id)
+			$category_id = NULL;
 		$value = array(
 			'title'=>$title,
 			'translit_title'=>($translit_title?$translit_title:translit::transliterate($title)),
@@ -44,9 +46,9 @@ class article extends base_module{
 		parent::save($id, $value, 'edit',true,array('name'=>$title));
 	}
 	
-	public function _admin($page=null, $count=null, $show='all'/*objects-categories-all*/){
+	/*public function _admin($page=null, $count=null, $show='all'){
 		parent::_admin($page, $count, $show, 'depth,title,id', 'category_id,title,id', 'create_date');
-	}
+	}*/
 	
 	public function remove($id=NULL){
 		$param = array();
@@ -64,6 +66,12 @@ class article extends base_module{
 		}
 		$value = array('title'=>$title,'translit_title'=>translit::transliterate($title));
 		parent::save_category($id,$value,$insert_place);
+	}
+	
+	public function get_news($title=false, $show='auto'){
+		if(!$news = $this->_query->select('left,right')->from($this->_category_table_name)->where('translit_title',$this->_config('news_trans_title'))->query1())
+			throw new my_exception('news category not found',array('translit_title'=>$this->_config('news_trans_title'))); 
+		$this->get_category_base('translit_title', $title, true, $show, array('left',$news,'between'));
 	}
 	
 	public function _get_param_value($method_name,$param_name){
@@ -141,6 +149,7 @@ class article_config extends base_module_config{
 		'edit'=>
 			'<link href="module/article/admin.css" rel="stylesheet" type="text/css"/>
 			<script type="text/javascript" src="extensions/ckeditor/ckeditor.js"></script>
+			<script type="text/javascript" src="extensions/ckeditor/plugins/wpmore/plugin.js"></script>
 			<script type="text/javascript" src="module/article/admin.js"></script>'
 	);
 	
@@ -148,5 +157,7 @@ class article_config extends base_module_config{
 	public $has_category = true;
 	public $close_nested_folder = 1;
 	public $default_show_title = true;
+	
+	private $news_trans_title = 'Novosti';
 }
 ?>

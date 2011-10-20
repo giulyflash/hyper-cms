@@ -68,6 +68,8 @@ abstract class module{
 		//FIXME temp, until the config engine update
 		if(!($this->_table_name = $this->_config('table_name')))
 			$this->_table_name = $this->module_name;
+		if(!($this->_category_table_name = $this->_config('category_table')))
+			$this->_category_table_name = $this->_table_name.'_category';
 	} 
 	
 	private function _get_module_language($module){
