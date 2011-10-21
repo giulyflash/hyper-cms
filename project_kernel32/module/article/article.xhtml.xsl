@@ -72,6 +72,14 @@
 							<input type="text" class="description" value="{description}" name="description"/>
 						</td>
 					</tr>
+					<tr>
+						<td class="table_title">
+							Дата:
+						</td>
+						<td>
+							<xsl:call-template name="article_create_date"/>
+						</td>
+					</tr>
 				</tbody>
 			</table>
 			<textarea id="article_text" name="text">
@@ -201,5 +209,113 @@
 	</xsl:if>
 </xsl:template>
 
+<xsl:template name="article_create_date">
+	<xsl:param name="create_date" select="create_date"/>
+	<!-- 2011-10-21 12:01:45 -->
+	<xsl:variable name="year" select="substring-before($create_date,'-')"/>
+	<xsl:variable name="temp1" select="substring-after($create_date,'-')"/>
+	<xsl:variable name="month" select="substring-before($temp1,'-')"/>
+	<xsl:variable name="temp2" select="substring-after($temp1,'-')"/>
+	<xsl:variable name="day" select="substring-before($temp2,' ')"/>
+	<xsl:variable name="temp3" select="substring-after($temp2,' ')"/>
+	<xsl:variable name="hour" select="substring-before($temp3,':')"/>
+	<xsl:variable name="temp4" select="substring-after($temp3,':')"/>
+	<xsl:variable name="minute" select="substring-before($temp4,':')"/>
+	<xsl:variable name="second" select="substring-after($temp4,':')"/>
+	<!-- <p><xsl:value-of select="$create_date"/></p>
+	<p><xsl:value-of select="$year"/></p>
+	<p><xsl:value-of select="$month"/></p>
+	<p><xsl:value-of select="$day"/></p>
+	<p><xsl:value-of select="$hour"/></p>
+	<p><xsl:value-of select="$minute"/></p>
+	<p><xsl:value-of select="$second"/></p> -->
+	<select name="create_date[y]" autocomplete="off">
+		<xsl:call-template name="__article_date_loop">
+			<xsl:with-param name="var" select="2010"/>
+			<xsl:with-param name="max" select="2040"/>
+			<xsl:with-param name="selected" select="$year"/>
+		</xsl:call-template>
+	</select>
+	<select  name="create_date[m]" autocomplete="off">
+		<xsl:call-template name="__article_date_loop">
+			<xsl:with-param name="var" select="1"/>
+			<xsl:with-param name="max" select="12"/>
+			<xsl:with-param name="selected" select="$month"/>
+			<xsl:with-param name="month" select="1"/>
+		</xsl:call-template>
+	</select>
+	<select  name="create_date[d]" autocomplete="off">
+		<xsl:call-template name="__article_date_loop">
+			<xsl:with-param name="var" select="1"/>
+			<xsl:with-param name="max" select="31"/>
+			<xsl:with-param name="selected" select="$day"/>
+		</xsl:call-template>
+	</select>
+	&#160;&#160;
+	<select name="create_date[h]" autocomplete="off">
+		<xsl:call-template name="__article_date_loop">
+			<xsl:with-param name="var" select="0"/>
+			<xsl:with-param name="max" select="23"/>
+			<xsl:with-param name="selected" select="$hour"/>
+		</xsl:call-template>
+	</select>
+	:
+	<select name="create_date[i]" autocomplete="off">
+		<xsl:call-template name="__article_date_loop">
+			<xsl:with-param name="var" select="0"/>
+			<xsl:with-param name="max" select="59"/>
+			<xsl:with-param name="selected" select="$minute"/>
+		</xsl:call-template>
+	</select>
+	:
+	<select name="create_date[s]" autocomplete="off">
+		<xsl:call-template name="__article_date_loop">
+			<xsl:with-param name="var" select="0"/>
+			<xsl:with-param name="max" select="59"/>
+			<xsl:with-param name="selected" select="$second"/>
+		</xsl:call-template>
+	</select>
+</xsl:template>
+
+<xsl:template name="__article_date_loop">
+	<xsl:param name="var"/>
+	<xsl:param name="max"/>
+	<xsl:param name="selected"/>
+	<xsl:param name="month">0</xsl:param>
+	<option value="{$var}">
+		<xsl:if test="$var = $selected">
+			<xsl:attribute name="selected">1</xsl:attribute>
+		</xsl:if>
+		<xsl:choose>
+			<xsl:when test="$month='1'">
+				<xsl:choose>
+					<xsl:when test="$var='1'">Январь</xsl:when>
+					<xsl:when test="$var='2'">Февраль</xsl:when>
+					<xsl:when test="$var='3'">Март</xsl:when>
+					<xsl:when test="$var='4'">Апрель</xsl:when>
+					<xsl:when test="$var='5'">Май</xsl:when>
+					<xsl:when test="$var='6'">Июнь</xsl:when>
+					<xsl:when test="$var='7'">Июль</xsl:when>
+					<xsl:when test="$var='8'">Август</xsl:when>
+					<xsl:when test="$var='9'">Сентябрь</xsl:when>
+					<xsl:when test="$var='10'">Октябрь</xsl:when>
+					<xsl:when test="$var='11'">Ноябрь</xsl:when>
+					<xsl:when test="$var='12'">Декабрь</xsl:when>
+				</xsl:choose>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="$var"/>
+			</xsl:otherwise>
+		</xsl:choose>
+	</option>
+	<xsl:if test = "$var &lt; $max">
+		<xsl:call-template name="__article_date_loop">
+			<xsl:with-param name="var" select="$var+1"/>
+			<xsl:with-param name="max" select="$max"/>
+			<xsl:with-param name="selected" select="$selected"/>
+			<xsl:with-param name="month" select="$month"/>
+		</xsl:call-template>
+	</xsl:if>
+</xsl:template>
 
 </xsl:stylesheet>
