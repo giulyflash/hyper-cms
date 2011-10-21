@@ -1,6 +1,7 @@
 <?php
 class article extends base_module{
 	protected $config_class_name = 'article_config';
+	protected $preview_default_count = 200;
 	
 	private $more_tag = '<!--more-->';
 
@@ -33,7 +34,7 @@ class article extends base_module{
 		$value = array(
 			'title'=>$title,
 			'translit_title'=>($translit_title?$translit_title:translit::transliterate($title)),
-			'text'=>$text,
+			'text'=>&$text,
 			'preview'=>$this->get_preview($text),
 			'keyword'=>$keyword,
 			'description'=>$description,
@@ -56,14 +57,39 @@ class article extends base_module{
 	public function &get_preview(&$text){
 		$preview = '';
 		if($text){
-			if($pos = strpos($text,$this->more_tag ))
+			if( ($pos = mb_strpos($text,$this->more_tag ))!==false)
 				$preview = mb_substr($text, 0, $pos);
-			else{
-				//TODO automatical preview
+			elseif($this->preview_default_count){
+				$strip_text = trim(strip_tags($text));
+				$insert_pos = $this->preview_default_count-mb_strpos($this->mb_strrev(mb_substr($strip_text,0,$this->preview_default_count)),' ');
+				if($insert_pos){
+					$preview = mb_substr($strip_text,0, $insert_pos );
+					//$text = substr_replace($text, $this->more_tag, $insert_pos, 0);
+				}
+				else
+					$preview = &$text;
 			}
 		}
 		return $preview;
 	}
+	
+	private function mb_strrev(&$text, $encoding = null)
+	{
+	    $funcParams = array($text);
+	    if ($encoding !== null)
+	        $funcParams[] = $encoding;
+	    $length = call_user_func_array('mb_strlen', $funcParams);
+	
+	    $output = '';
+	    $funcParams = array($text, $length, 1);
+	    if ($encoding !== null)
+	        $funcParams[] = $encoding;
+	    while ($funcParams[1]--) {
+	         $output .= call_user_func_array('mb_substr', $funcParams);
+	    }
+	    return $output;
+	}
+	
 	
 	public function remove($id=NULL){
 		$param = array();
