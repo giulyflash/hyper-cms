@@ -26,7 +26,7 @@ class article extends base_module{
 		parent::get_category($field, $value, $need_item, false, 'id,title,translit_title,text,preview,category_id');
 	}*/
 	
-	public function save($id=NULL, $title=NULL, $translit_title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $category_id=NULL){
+	public function save($id=NULL, $title=NULL, $translit_title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $category_id=NULL, $create_date=array()){
 		if(!$title)
 			throw new my_exception('title must not be empty');
 		if(!$category_id)
@@ -43,16 +43,41 @@ class article extends base_module{
 		);
 		$date = new DateTime();
 		$date = $date->format('Y-m-d H:i:s');
-		if($id)
-			$value['edit_date'] = $date;
+		if($user_date = $this->get_date($create_date))
+			$value['create_date'] = $user_date;
 		else
 			$value['create_date'] = $date;
-		parent::save($id, $value, 'edit',true,array('name'=>$title));
+		var_dump($create_date, $user_date, $value['create_date']);
+		parent::save($id, $value, false,true,array('name'=>$title));
+		//parent::save($id, $value, 'edit',true,array('name'=>$title));
 	}
 	
 	/*public function _admin($page=null, $count=null, $show='all'){
 		parent::_admin($page, $count, $show, 'depth,title,id', 'category_id,title,id', 'create_date');
 	}*/
+	
+	private function get_date($date){
+		$user_date = '';
+		if(isset($create_date['y']) && $create_date['y']!=='')
+			$user_date.=$create_date['y'].'-';
+		else return;
+		if(isset($create_date['m']) && $create_date['m']!=='')
+			$user_date.=$create_date['m'].'-';
+		else return;
+		if(isset($create_date['d']) && $create_date['d']!=='')
+			$user_date.=$create_date['d'].' ';
+		else return;
+		if(isset($create_date['h']) && $create_date['h']!=='')
+			$user_date.=$create_date['h'].':';
+		else return;
+		if(isset($create_date['i']) && $create_date['i']!=='')
+			$user_date.=$create_date['i'].':';
+		else return;
+		if(isset($create_date['s']) && $create_date['s']!=='')
+			$user_date.=$create_date['s'];
+		else return;
+		return $user_date;
+	}
 	
 	public function &get_preview(&$text){
 		$preview = '';
@@ -167,6 +192,9 @@ class article_config extends base_module_config{
 				__CLASS__ => self::role_read,
 			),
 		),
+		'save' =>array(
+			'create_date'=>FILTER_UNSAFE_RAW,
+		)
 	);
 	
 	protected $object = array(

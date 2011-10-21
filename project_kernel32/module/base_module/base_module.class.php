@@ -341,6 +341,10 @@ abstract class base_module extends module{
 			$this->_result = $result;
 		}
 		$this->category_list();
+		if(!isset($this->_result['create_date'])){
+			$date = new DateTime();
+			$this->_result['create_date'] = $date->format('Y-m-d H:i:s');
+		}
 	}
 	
 	public function save($id=NULL, $value = array(), $redirect = 'edit', $output_message = true, $params=array()){
