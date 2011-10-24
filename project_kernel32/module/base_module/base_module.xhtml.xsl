@@ -172,9 +172,8 @@
 	<xsl:param name="edit_module_name" select="../_module_name"/>
 	<xsl:if test="/root/meta/admin_mode=1">
 		<form class="controls" method="post" action="admin.php?call={$module_name}.move_category">
-			<input type="hidden" value="{id}" name="id"/>
-			<a href="/admin.php?call={$module_name}.edit_category&amp;id={id}" class="edit">редактировать</a>
-			<a href="/admin.php?call={$module_name}.remove_category&amp;id={id}" class="remove">удалить</a>
+			<a href="/admin.php?call={$module_name}.edit_category&amp;id={id}" class="edit always">редактировать</a>
+			<a href="/admin.php?call={$module_name}.remove_category&amp;id={id}" class="remove always">удалить</a>
 			<span>Вставить:</span> 
 			<select name="insert_type" autocomplete='off'>
 				<option value="0" selected="1">&#8212;</option>
@@ -191,6 +190,7 @@
 				<xsl:with-param name="module_name" select="$module_name"/>
 				<xsl:with-param name="edit_module_name" select="$edit_module_name"/>
 			</xsl:call-template>
+			<input type="hidden" value="{id}" name="id"/>
 			<!-- <a href="/admin.php?call={$module_name}.edit_category&amp;insert_place={id}" class="subitem">добавить подпункт</a>
 			<xsl:if test="/root/module/item[_module_name=$module_name]/_config/has_item">
 				<a href="/admin.php?call={$edit_module_name}.edit&amp;category_id={id}" class="subitem">добавить объект</a>
@@ -213,7 +213,7 @@
 	<xsl:if test="not(id)">
 		<br/>
 	</xsl:if>
-	<xsl:if test="/root/module/item[_module_name=$module_name]/_config/has_item">
+	<xsl:if test="/root/module/item[_module_name=$module_name]/_config/has_item=1">
 		<a href="/admin.php?call={$edit_module_name}.edit{$href_tail2}" class="subitem">добавить объект</a>
 	</xsl:if>
 </xsl:template>

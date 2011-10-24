@@ -1,6 +1,6 @@
 $(function(){
 	$('span.more_input').click(function(){
-		$('table.more_input').slideToggle('slow');
+		$('table.more_input').toggle('slow');
 	});
 	
 	$('.article.admin #generate_translit').click(function(){

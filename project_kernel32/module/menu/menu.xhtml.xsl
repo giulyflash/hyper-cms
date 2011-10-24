@@ -142,4 +142,104 @@
 	</form>
 </xsl:template>
 
+<!--  -->
+
+<xsl:template match="root/module/item[_module_name='menu' and _method_name='_admin']">
+	<xsl:choose>
+		<xsl:when test="/root/meta/content_type='json_html'">
+			<xsl:call-template name="menu_base">
+				<xsl:with-param name="need_ul">0</xsl:with-param>
+			</xsl:call-template>
+		</xsl:when>
+		<xsl:when test="_argument/menu_id!=''">
+			<div class="nested_items {_module_name} {_method_name} {_config/category_type}">
+				<xsl:call-template name="menu_base"/>
+			</div>
+		</xsl:when>
+		<xsl:otherwise>
+			<xsl:if test="item">
+				<div class="nested_items {_module_name} {_method_name} {_config/category_type}">
+					<ul>
+						<xsl:for-each select="item">
+							<li>
+								<a href="/admin.php?call={../_module_name}.{../_method_name}&amp;menu_id={id}">
+									<xsl:value-of select="title"/>
+								</a>
+							</li>
+						</xsl:for-each>
+					</ul>
+				</div>
+			</xsl:if>
+		</xsl:otherwise>
+	</xsl:choose>
+</xsl:template>
+
+<xsl:template name="menu_base">
+	<xsl:param name="need_ul">1</xsl:param>
+	<xsl:param name="module_name" select="_module_name"/>
+	<xsl:choose>
+		<xsl:when test="item or items">
+			<xsl:choose>
+				<xsl:when test="$need_ul=1">
+					<ul>
+						<xsl:call-template name="menu_core">
+							<xsl:with-param name="module_name" select="$module_name"/>
+						</xsl:call-template>
+						<xsl:if test="active=1 and not(items)">
+							<xsl:call-template name="base_no_items"/>
+						</xsl:if>
+					</ul>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:call-template name="menu_core">
+						<xsl:with-param name="module_name" select="$module_name"/>
+					</xsl:call-template>
+					<xsl:if test="not(items)">
+						<xsl:call-template name="base_no_items"/>
+					</xsl:if>
+				</xsl:otherwise>
+			</xsl:choose>
+		</xsl:when>
+		<xsl:otherwise>
+			<xsl:if test="active=1 or _module_name">
+				<xsl:choose>
+					<xsl:when test="$need_ul=1">
+						<ul>
+							<xsl:call-template name="base_no_items"/>
+						</ul>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:call-template name="base_no_items"/>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:if>
+		</xsl:otherwise>
+	</xsl:choose>
+</xsl:template>
+
+<xsl:template name="menu_core">
+	<xsl:param name="module_name" select="_module_name"/>
+	<xsl:variable name="admin_mode"><xsl:if test="/root/meta/admin_mode=1">admin.php</xsl:if></xsl:variable>
+	<xsl:for-each select="item">
+		<li>
+			<xsl:if test="active=1">
+				<xsl:attribute name="class">active</xsl:attribute>
+			</xsl:if>
+			<div class="item_cont">
+				<a class="_ajax" href="/{$admin_mode}?call={$module_name}.get_category&amp;menu_id={/root/module/item[_module_name=$module_name]/_argument/menu_id}&amp;title={translit_title}" alt="{title}" title="{title}">
+					<span class="folder_icon"></span>
+					<span class="text"><xsl:value-of select="title"/></span>
+				</a>
+				<xsl:call-template name="controls_category">
+					<xsl:with-param name="module_name" select="$module_name"/>
+					<xsl:with-param name="edit_module_name" select="$module_name"/>
+				</xsl:call-template>
+			</div>
+			<xsl:call-template name="menu_core">
+				<xsl:with-param name="module_name" select="$module_name"/>
+			</xsl:call-template>
+		</li>
+	</xsl:for-each>
+</xsl:template>
+
 </xsl:stylesheet>

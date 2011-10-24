@@ -238,9 +238,7 @@ class article_config extends base_module_config{
 	protected $include = array(
 		'edit'=>
 			'<link href="module/article/admin.css" rel="stylesheet" type="text/css"/>
-			<script type="text/javascript" src="extensions/ckeditor/ckeditor.js"></script>
-			<script type="text/javascript" src="extensions/ckeditor/plugins/wpmore/plugin.js"></script>
-			<script type="text/javascript" src="module/article/admin.js"></script>',
+			<script type="text/javascript" src="extensions/ckeditor/ckeditor.js"></script>',
 		'*'=>'<link href="module/article/article.css" rel="stylesheet" type="text/css"/>',
 	);
 	
