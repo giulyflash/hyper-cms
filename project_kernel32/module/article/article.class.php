@@ -86,9 +86,11 @@ class article extends base_module{
 				$preview = mb_substr($text, 0, $pos);
 			elseif($this->preview_default_count){
 				$strip_text = trim(strip_tags($text));
-				$insert_pos = $this->preview_default_count-mb_strpos($this->mb_strrev(mb_substr($strip_text,0,$this->preview_default_count)),' ');
+				$strip_text = str_replace(array("\n","\t","\r"), array(" "," "), $strip_text);
+				$strip_text = preg_replace('%( +)|(&[a-z#0-9]+;)%', ' ', $strip_text);
+				$insert_pos = $this->preview_default_count-mb_strpos($this->mb_strrev(mb_substr($strip_text,0,$this->preview_default_count),'utf8'),' ')-1;
 				if($insert_pos){
-					$preview = mb_substr($strip_text,0, $insert_pos );
+					$preview = mb_substr($strip_text,0, $insert_pos);
 					//$text = substr_replace($text, $this->more_tag, $insert_pos, 0);
 				}
 				else
@@ -115,7 +117,6 @@ class article extends base_module{
 	    return $output;
 	}
 	
-	
 	public function remove($id=NULL){
 		$param = array();
 		if($id)
@@ -138,6 +139,21 @@ class article extends base_module{
 		if(!$news = $this->_query->select('left,right')->from($this->_category_table_name)->where('translit_title',$this->_config('news_trans_title'))->query1())
 			throw new my_exception('news category not found',array('translit_title'=>$this->_config('news_trans_title'))); 
 		$this->get_category_base('translit_title', $title, true, $show, array('left',$news,'between'));
+	}
+	
+	public function fill_empty_preview($all=false){
+		$this->_query->select('id,text')->from($this->_table_name);
+		if(!$all)
+			$this->_query->where('preview',NULL)->_or('preview','');
+		$items = $this->_query->query();
+		$date = new DateTime();
+		$date = $date->format('Y-m-d H:i:s');
+		foreach($items as &$item){
+			$this->_query->update($this->_table_name)->set(array(
+				'preview' => $this->get_preview($item['text']),
+				'edit_date' => $date
+			))->where('id',$item['id'])->query1();
+		}
 	}
 	
 	public function _get_param_value($method_name,$param_name){
@@ -192,6 +208,11 @@ class article_config extends base_module_config{
 				__CLASS__ => self::role_read,
 			),
 		),
+		'fill_empty_preview' =>array(
+			'__access__' => array(
+				__CLASS__ => self::role_write,
+			),
+		),
 		'save' =>array(
 			'create_date'=>FILTER_UNSAFE_RAW,
 		)
@@ -219,7 +240,8 @@ class article_config extends base_module_config{
 			'<link href="module/article/admin.css" rel="stylesheet" type="text/css"/>
 			<script type="text/javascript" src="extensions/ckeditor/ckeditor.js"></script>
 			<script type="text/javascript" src="extensions/ckeditor/plugins/wpmore/plugin.js"></script>
-			<script type="text/javascript" src="module/article/admin.js"></script>'
+			<script type="text/javascript" src="module/article/admin.js"></script>',
+		'*'=>'<link href="module/article/article.css" rel="stylesheet" type="text/css"/>',
 	);
 	
 	public $has_item = true;
@@ -229,5 +251,6 @@ class article_config extends base_module_config{
 	
 	private $news_trans_title = 'Novosti';
 	private $more_tag = '<!--more-->';
+	protected $item_field = 'id,translit_title,title,category_id,preview';
 }
 ?>

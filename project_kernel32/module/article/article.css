@@ -1,0 +1,13 @@
+.article ul.items a:last-child{
+	float: right;
+}
+.article ul.items li{
+	list-style: none;
+}
+.article ul.items h4{
+	margin: 10px 0 2px;
+}
+.article ul.items .text{
+	margin-left: 1.5em;
+	text-align: justify;
+}

@@ -200,19 +200,19 @@
 			<ul class="items">
 				<xsl:for-each select="items/item">
 					<li>
-						<a href="{path}" alt="{title}" title="{title}">
-							<xsl:if test="not(thumb_path) or thumb_path=''">
-								<xsl:attribute name="class">default_thumb</xsl:attribute>
-							</xsl:if>
-							<xsl:variable name="thumb_path">
-								<xsl:choose>
-									<xsl:when test="thumb_path and thumb_path!=''"><xsl:value-of select="thumb_path"/></xsl:when>
-									<xsl:otherwise><xsl:value-of select="/root/module/item[_module_name=$module_name]/_config/default_thumb"/></xsl:otherwise>
-								</xsl:choose>
-							</xsl:variable>
-							<!-- <img src="{$thumb_path}" alt="{title}" title="{title}"/> -->
-							<span class="title"><xsl:value-of select="title"/></span>
+						<a href="/?call=article.get_by_title&amp;title={translit_title}" alt="{title}" title="{title}">
+							<h4><xsl:value-of select="title"/></h4>
 						</a>
+						<xsl:if test="thumb_path">
+							<img class="article_thumb" src="thumb_path"/>
+						</xsl:if>
+						<div class="text">
+							<xsl:value-of select="preview"/>
+							<xsl:if test="preview!='' and substring(string-length(preview)-1, 1, preview)!='.'">...</xsl:if>
+							<a href="/?call=article.get_by_title&amp;title={translit_title}" alt="{title}" title="{title}">
+								читать полностью &#8594;
+							</a>
+						</div>
 					</li>
 				</xsl:for-each>
 			</ul>
