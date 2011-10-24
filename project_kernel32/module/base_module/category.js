@@ -37,8 +37,8 @@ function category_add_event(obj){
 		if(!obj_a[0].opened){
 			content.css('display','none');
 			if(content.html().length){
+				content.find('li.active ul').css('display','none');
 				content.find('li.active').attr('class','');
-				content.find('ul').css('display','none');
 				content.toggle('slow');
 			}
 			var loading = obj_a.parent().parent().find('.loading:first');
