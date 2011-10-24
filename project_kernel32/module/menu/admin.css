@@ -1,0 +1,15 @@
+.nested_items.menu .no_controls form.controls>*{
+	display: none;
+}
+.nested_items.menu .no_controls form.controls>*.always{
+	display: inline;
+}
+.nested_items.menu .empty{
+	display: none;
+}
+.nested_items.dropdown ul ul {
+	background: none;
+	border-left: none;
+	padding-bottom: 0px;
+	/*margin-bottom: 0px;*/
+}

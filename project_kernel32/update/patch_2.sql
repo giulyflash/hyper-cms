@@ -24,3 +24,5 @@ ALTER TABLE `file` CHANGE `translit_name` `translit_title` VARCHAR( 255 ) CHARAC
 ALTER TABLE `file` DROP `language`;
 
 ALTER TABLE `menu_item` ADD `translit_title` VARCHAR( 255 ) NULL AFTER `title`;
+
+ALTER TABLE `menu` ADD `translit_title` VARCHAR( 255 ) NULL DEFAULT NULL

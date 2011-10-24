@@ -125,6 +125,7 @@ abstract class base_module extends module{
 		$category_field = $this->_config('category_field');
 		$item_order = $this->_config('item_order');
 		$category_table = $this->_category_table_name;
+		$where = false;
 		if($this->_config('has_category')){
 			$this->_query->select($category_field);
 			if($value!==false){
@@ -138,6 +139,7 @@ abstract class base_module extends module{
 					$this->_query->injection(', (`left` <= '.$bound['left'].' AND `right`>='.$bound['right'].') as `active`')->from($category_table);
 					if($show=='category'){
 						$this->_query->where('depth',0,'=',true)->_or('left',array($bound['left'], $bound['right']),'between')->_and('depth',$bound['depth']+2,'<');
+						$where = true;
 						if($bound['depth']!=0)
 							$this->_query->_or('left',$bound['left'],'<')->_and('right',$bound['left'],'>');
 						$this->_query->close_bracket();
@@ -147,6 +149,7 @@ abstract class base_module extends module{
 					$this->_query->from($category_table);
 					if($show=='category'){
 						$this->_query->where('depth',0,'=',true);
+						$where = true;
 						if($value!==false && $bound)
 							$this->_query->_or('left', $bound, 'between');
 						$this->_query->close_bracket();
@@ -155,11 +158,13 @@ abstract class base_module extends module{
 			}
 			elseif($show=='current'){
 				$this->_query->from($category_table);
-				if($bound)
+				if($bound){
 					$this->_query->where('left', $bound['left'], '>')->_and('right', $bound['right'],'<');
+					$where = true;
+				}
 			}
 			if($bound || $show!='current'){
-				$this->parse_condition($category_condition,false);
+				$this->parse_condition($category_condition,$where);
 				$this->_result = $this->_query->order('left')->query2assoc_array('id',NULL,false);
 			}
 			else{
@@ -237,9 +242,9 @@ abstract class base_module extends module{
 		}
 	}
 	
-	public function category_list($category_table=NULL, $category_condition=NULL){
+	public function category_list($category_condition=NULL, $category_table=NULL){
 		if(!$category_table)
-			$category_table = ($category_table = $this->_config('category_table'))?$category_table:($this->_table_name.'_category');
+			$category_table = $this->_category_table_name;
 		$this->_query->select('id,title,translit_title,depth')->from($category_table);
 		$this->parse_condition($category_condition,false);
 		$this->_result['_category_list'] = $this->_query->order('left')->query();
@@ -388,7 +393,7 @@ abstract class base_module extends module{
 	}
 
 	public function save_category($id=NULL,$value=array(),$insert_place=NULL,$condition = array(),$redirect = '_admin'){
-		$table_name = $this->_table_name.$this->_config('category_posfix');
+		$table_name = $this->_category_table_name;
 		if($id){
 			$title = $this->_query->select('title')->from($table_name)->where('id',$id)->query1('title');
 			$this->_query->update($table_name)->set($value)->where('id',$id)->limit(1)->execute();
@@ -425,7 +430,7 @@ abstract class base_module extends module{
 	}
 
 	public function move_category($id=NULL, $insert_type=NULL, $insert_place=NULL, $condition = array(),$redirect = '_admin'){
-		$table_name = $this->_table_name.$this->_config('category_posfix');
+		$table_name = $this->_category_table_name;
 		if(!$id)
 			throw new my_exception('id is empty');
 		if(!$insert_type)
@@ -501,7 +506,7 @@ abstract class base_module extends module{
 	}
 
 	public function remove_category($id=NULL,$condition = array(), $redirect = '_admin'){
-		$table_name = $this->_table_name.$this->_config('category_posfix');
+		$table_name = $this->_category_table_name;
 		if(!$id)
 			throw new my_exception('id is empty');
 		$target = $this->_query->select('left,right,title')->from($table_name)->where('id',$id)->query1();
@@ -587,6 +592,19 @@ abstract class base_module extends module{
 			//var_dump($item);
 		}
 		die;
+	}
+	
+	public function set_translit_title($table=NULL){
+		if(!$table)
+			$table = $this->_table_name;
+		$category = $this->_query->select('title,id')->from($table)->query();
+		foreach($category as &$item)
+			$this->_query->update($table)->set(array('translit_title'=>translit::transliterate($item['title'])))->where('id',$item['id'])->query1();
+		$this->_message("table '$table' updated");
+	}
+	
+	public function set_translit_title_category(){
+		$this->set_translit_title($this->_category_table_name);
 	}
 	
 	public function _get_param_value($method_name,$param_name){

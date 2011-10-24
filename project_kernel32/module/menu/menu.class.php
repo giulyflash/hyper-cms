@@ -2,22 +2,16 @@
 class menu extends base_module{
 	protected $config_class_name = 'menu_config';
 	
-	public function _admin($title=NULL){
-		if(!$title){
-			$menu = $this->_query->select()->from($this->module_name)->query2assoc_array('id');
-			$this->get_category_base();
-			var_dump($this->_result);
-			foreach($this->_result as $id=>$result)
-				$menu[$result['menu_id']][$id] = $result; 
-			$this->_result = $menu;
-		}else
-			$this->get_category_base('translit_title',$title);
-		if(!$this->_result)
-			$this->_message('menu list is empty');
+	public function _admin($title=NULL,$menu_id=NULL){
+		if(!$menu_id){
+			$this->_result = $this->_query->select()->from($this->module_name)->query();
+		}else{
+			$this->get_category_base('translit_title',$title,false,'auto',array('menu_id',$menu_id));
+		}
 	}
 	
 	public function get($id = 1, $show_title=NULL, $type=NULL){
-		parent::get_category_base('link', $link = ($_SESSION['call'][0]=='/'?false:$_SESSION['call'][0]), NULL, 'all', NULL, array('menu_id',$id));
+		$this->get_category_base('link', $link = ($_SESSION['call'][0]=='/'?false:$_SESSION['call'][0]), NULL, 'all', NULL, array('menu_id',$id));
 		if($show_title)
 			$this->_result['title'] = $this->_query->select('title')->from($this->module_name)->where('id',$id)->query1('title');
 		if($type)
@@ -114,7 +108,7 @@ class menu extends base_module{
 	}
 	
 	public function save($id, $title){
-		$value = array('title'=>$title);
+		$value = array('title'=>$title, 'translit_title'=>translit::transliterate($title));
 		parent::save($id, $value, 'edit', true, array('name'=>$title));
 	}
 	
@@ -128,12 +122,6 @@ class menu extends base_module{
 			}
 		}
 		return $link;
-	}
-	
-	public function set_translit_title(){
-		$category = $this->_query->select('title,id')->from($this->_category_table_name)->query();
-		foreach($category as &$item)
-			$this->_query->update($this->_category_table_name)->set(array('translit_title'=>translit::transliterate($item['title'])))->where('id',$item['id']);
 	}
 	
 	public function _get_param_value($method_name,$param_name){
@@ -187,7 +175,7 @@ class menu_config extends base_module_config{
 				'menu_item' => self::role_read
 			),
 		),
-		'_admin,edit,save,remove,edit_item,save_item,move_item,remove_item,unlock_database,set_translit_title'=>array(
+		'_admin,edit,save,remove,edit_item,save_item,move_item,remove_item,unlock_database,set_translit_title,set_translit_title_category'=>array(
 			'__access__' => array(
 				__CLASS__ => self::role_write,
 				'menu_item' => self::role_write
@@ -217,6 +205,7 @@ class menu_config extends base_module_config{
 			'<link href="module/module_link/wizard.css" rel="stylesheet" type="text/css"/>
 			<script type="text/javascript" src="module/module_link/wizard.js"></script>
 			<script type="text/javascript" src="module/menu/admin.js"></script>',
+		'_admin'=>'<link href="module/menu/admin.css" rel="stylesheet" type="text/css"/>',
 	);
 	
 	protected $alias_table = 'menu_link_alias';
