@@ -11,7 +11,7 @@ class output_xsl extends output implements output_interface{
 		$xsl = new DOMDocument();
 		$xsl->load($xsl_filename);
 		$stylesheetNode = $xsl->firstChild;
-		foreach($this->parent->template_include as $include)
+		foreach($this->parent->template_include as &$include)
 			$this->xsl_include($xsl, $stylesheetNode, NULL, $include);
 		foreach($this->parent->output['module'] as $module){
 			if(!isset($module['_module_name'])){

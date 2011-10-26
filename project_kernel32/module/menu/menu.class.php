@@ -6,7 +6,7 @@ class menu extends base_module{
 		if(!$menu_id){
 			$this->_result = $this->_query->select()->from($this->module_name)->query();
 		}else{
-			$this->get_category_base('translit_title',$title,false,'auto',array('menu_id',$menu_id));
+			$this->get_category_base('translit_title',$title,false,'all_sub',array('menu_id',$menu_id));
 		}
 	}
 	
@@ -31,19 +31,17 @@ class menu extends base_module{
 	public function edit($id=NULL){
 		parent::edit($id);
 		if($id)
-			$this->_result = array_merge($this->_result,$this->_query->select()->from($this->module_name.$this->_config('category_posfix'))->where('menu_id',$id)->order('left')->query());
-		$this->_result['lt'] = '<';
-		$this->_result['gt'] = '>';
+			$this->_result = array_merge($this->_result,$this->_query->select()->from($this->_category_table_name)->where('menu_id',$id)->order('left')->query());
 	}
 	
 	public function remove($id=NULL){
 		parent::remove($id, NULL, true, array('name'=>$this->_query->select('title')->from($this->module_name)->where('id',$id)->query1('title')));
-		$this->_query->delete()->from($this->module_name.$this->_config('category_posfix'))->where('menu_id',$id)->query();
+		$this->_query->delete()->from($this->_category_table_name)->where('menu_id',$id)->query();
 		$this->parent->redirect('/admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
 	}
 	
 	public function edit_item($id=NULL, $insert_place=NULL, $menu_id=NULL){
-		if(!$menu_id && !$menu_id = $this->_query->select('menu_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('menu_id'))
+		if(!$menu_id && !$menu_id = $this->_query->select('menu_id')->from($this->_category_table_name)->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
 		parent::edit_category($id);
 		$module_link = new module_link($this->parent);
@@ -57,13 +55,13 @@ class menu extends base_module{
 	}
 
 	public function save_item($id=NULL,$title=NULL,$insert_place=NULL,$input_type=NULL,$link_text=NULL,$link=array(),$menu_id){
-		if(!$menu_id && !$menu_id = $this->_query->select('menu_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('menu_id'))
+		if(!$menu_id && !$menu_id = $this->_query->select('menu_id')->from($this->_category_table_name)->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
 		if(!$title){
 			$this->_message('menu item name must not be empty');
 			return;
 		}
-		$link_id = $id?($this->_query->select('link_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('link_id')):NULL;
+		$link_id = $id?($this->_query->select('link_id')->from($this->_category_table_name)->where('id',$id)->query1('link_id')):NULL;
 		if($input_type=='wizard'){
 			if($link){
 				$link = $link[0];
@@ -86,25 +84,25 @@ class menu extends base_module{
 			'menu_id'=>$menu_id,
 		);
 		parent::save_category($id,$value,$insert_place,array('menu_id',$menu_id),NULL);
-		$this->parent->redirect('/admin.php?call=menu.edit&id='.$menu_id);
+		$this->parent->redirect('/admin.php?call=menu._admin&menu_id='.$menu_id);
 	}
 
-	public function move_item($id=NULL, $insert_type=NULL, $insert_place=NULL){
-		if(!$menu_id = $this->_query->select('menu_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('menu_id'))
+	public function move_category($id=NULL, $insert_type=NULL, $insert_place=NULL){
+		if(!$menu_id = $this->_query->select('menu_id')->from($this->_category_table_name)->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
 		parent::move_category($id,$insert_type,$insert_place,array('menu_id',$menu_id),NULL);
-		$this->parent->redirect('/admin.php?call=menu.edit&id='.$menu_id);
+		$this->parent->redirect('/admin.php?call=menu._admin&menu_id='.$menu_id);
 	}
 
-	public function remove_item($id=NULL){
-		if(!$menu_id = $this->_query->select('menu_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('menu_id'))
+	public function remove_category($id=NULL){
+		if(!$menu_id = $this->_query->select('menu_id')->from($this->_category_table_name)->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
-		if($link_id = $this->_query->select('link_id')->from($this->module_name.$this->_config('category_posfix'))->where('id',$id)->query1('link_id')){
+		if($link_id = $this->_query->select('link_id')->from($this->_category_table_name)->where('id',$id)->query1('link_id')){
 			$module_link = new module_link($this->parent);
 			$module_link->remove($link_id,false);
 		}
 		parent::remove_category($id, array(), NULL);
-		$this->parent->redirect('/admin.php?call=menu.edit&id='.$menu_id);
+		$this->parent->redirect('/admin.php?call=menu._admin&menu_id='.$menu_id);
 	}
 	
 	public function save($id, $title){
@@ -154,7 +152,7 @@ class menu extends base_module{
 			case 'edit_item':{
 				switch($param_name){
 					case 'id':{
-						return $this->_query->select('id,title')->from($this->module_name.$this->_config('category_posfix'))->query2assoc_array('id','title');
+						return $this->_query->select('id,title')->from($this->_category_table_name)->query2assoc_array('id','title');
 						break;
 					}
 					default: parent::_get_param_value($method_name,$param_name);
@@ -168,6 +166,11 @@ class menu extends base_module{
 }
 
 class menu_config extends base_module_config{
+	/*protected $template_include = array(
+		'module/module_link/link_wizard.xhtml.xsl',
+		TODO wtf the bug???
+	);*/
+	
 	protected $callable_method=array(
 		'get'=>array(
 			'__access__' => array(
@@ -212,7 +215,6 @@ class menu_config extends base_module_config{
 	
 	protected $output_new_argument = true;
 	protected $default_link = '#';
-	//protected $category_posfix = '_item';
 	protected $category_table = 'menu_item';
 	protected $category_field='id,title,translit_title,left,right,depth,link,menu_id';
 	

@@ -94,6 +94,7 @@ class file extends module{
 			else{
 				$file['module'] = $module;
 				$file['title'] = $file['name'];
+				unset($file['name']);
 				$file['id'] = $id;
 				$file['user_title'] = $title;
 				$file['category_id'] = $category_id;
@@ -110,8 +111,11 @@ class file extends module{
 			throw new my_exception('file name not found');
 		if(!preg_match('%^(.+?)\.?([^.]+)$%',$file['title'],$re))
 			throw new my_exception('wrong file name',$file['title']);
-		if(!empty($file['user_title'])){
-			$file['title'] = $file['user_title'];
+		if(array_key_exists('user_title',$file)){
+			if($file['user_title'])
+				$file['title'] = $file['user_title'];
+			else
+				$file['title'] = $re[1];
 			unset($file['user_title']);
 		}
 		else

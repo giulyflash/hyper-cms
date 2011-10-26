@@ -37,7 +37,7 @@
 				</xsl:if>
 			</form>
 			<br/>
-			<ul>
+			<!-- <ul>
 				<xsl:for-each select="item">
 					<xsl:call-template name="nested_tag_before"/>
 					<div class="item_cont">
@@ -72,7 +72,7 @@
 					</div>
 				</xsl:for-each>
 				<xsl:call-template name="nested_tag_after"/>
-			</ul>
+			</ul> -->
 		</xsl:if>
 	</div>
 	<xsl:if test="id">
@@ -161,7 +161,7 @@
 				<div class="nested_items {_module_name} {_method_name} {_config/category_type}">
 					<ul>
 						<xsl:for-each select="item">
-							<li>
+							<li class="no_controls">
 								<a href="/admin.php?call={../_module_name}.{../_method_name}&amp;menu_id={id}">
 									<xsl:value-of select="title"/>
 								</a>
@@ -185,18 +185,12 @@
 						<xsl:call-template name="menu_core">
 							<xsl:with-param name="module_name" select="$module_name"/>
 						</xsl:call-template>
-						<xsl:if test="active=1 and not(items)">
-							<xsl:call-template name="base_no_items"/>
-						</xsl:if>
 					</ul>
 				</xsl:when>
 				<xsl:otherwise>
 					<xsl:call-template name="menu_core">
 						<xsl:with-param name="module_name" select="$module_name"/>
 					</xsl:call-template>
-					<xsl:if test="not(items)">
-						<xsl:call-template name="base_no_items"/>
-					</xsl:if>
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:when>
@@ -220,24 +214,31 @@
 <xsl:template name="menu_core">
 	<xsl:param name="module_name" select="_module_name"/>
 	<xsl:variable name="admin_mode"><xsl:if test="/root/meta/admin_mode=1">admin.php</xsl:if></xsl:variable>
+	<xsl:variable name="method_name"><xsl:value-of select="/root/module/item[_module_name=$module_name]/_method_name"/></xsl:variable>
+	<xsl:variable name="menu_id"><xsl:value-of select="/root/module/item[_module_name=$module_name]/_argument/menu_id"/></xsl:variable>
 	<xsl:for-each select="item">
 		<li>
 			<xsl:if test="active=1">
 				<xsl:attribute name="class">active</xsl:attribute>
 			</xsl:if>
 			<div class="item_cont">
-				<a class="_ajax" href="/{$admin_mode}?call={$module_name}.get_category&amp;menu_id={/root/module/item[_module_name=$module_name]/_argument/menu_id}&amp;title={translit_title}" alt="{title}" title="{title}">
+				<a class="_ajax" href="/{$admin_mode}?call={$module_name}.{$method_name}&amp;menu_id={$menu_id}&amp;title={translit_title}" alt="{title}" title="{title}">
 					<span class="folder_icon"></span>
 					<span class="text"><xsl:value-of select="title"/></span>
 				</a>
 				<xsl:call-template name="controls_category">
 					<xsl:with-param name="module_name" select="$module_name"/>
 					<xsl:with-param name="edit_module_name" select="$module_name"/>
+					<xsl:with-param name="edit_category_method">edit_item</xsl:with-param>
 				</xsl:call-template>
 			</div>
-			<xsl:call-template name="menu_core">
-				<xsl:with-param name="module_name" select="$module_name"/>
-			</xsl:call-template>
+			<xsl:if test="item">
+				<ul>
+					<xsl:call-template name="menu_core">
+						<xsl:with-param name="module_name" select="$module_name"/>
+					</xsl:call-template>
+				</ul>
+			</xsl:if>
 		</li>
 	</xsl:for-each>
 </xsl:template>

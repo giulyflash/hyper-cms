@@ -14,12 +14,6 @@
 					</th>
 				</tr>
 			</xsl:if>
-			<!-- <tr class="show-hidden">
-				<td colspan="2">
-					<label for="show_hidden{$num}">Показывать защищенные методы:</label>
-					<input id="show_hidden{$num}" type="checkbox"/>
-				</td>
-			</tr> -->
 			<tr class="module">
 				<td>
 					Тип объекта:

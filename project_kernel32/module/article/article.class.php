@@ -47,9 +47,7 @@ class article extends base_module{
 			$value['create_date'] = $user_date;
 		else
 			$value['create_date'] = $date;
-		var_dump($create_date, $user_date, $value['create_date']);
-		parent::save($id, $value, false,true,array('name'=>$title));
-		//parent::save($id, $value, 'edit',true,array('name'=>$title));
+		parent::save($id, $value, 'edit',true,array('name'=>$title));
 	}
 	
 	/*public function _admin($page=null, $count=null, $show='all'){

@@ -180,7 +180,7 @@
 	<xsl:param name="module_name" select="_module_name"/>
 	<xsl:variable name="admin_mode"><xsl:if test="/root/meta/admin_mode=1">admin.php</xsl:if></xsl:variable>
 	<xsl:for-each select="item">
-		<li>
+		<li>!!
 			<xsl:if test="active=1">
 				<xsl:attribute name="class">active</xsl:attribute>
 			</xsl:if>
@@ -199,7 +199,7 @@
 		<li class="items">
 			<ul class="items">
 				<xsl:for-each select="items/item">
-					<li>
+					<li>!!!
 						<a href="/?call=article.get_by_title&amp;title={translit_title}" alt="{title}" title="{title}">
 							<h4><xsl:value-of select="title"/></h4>
 						</a>

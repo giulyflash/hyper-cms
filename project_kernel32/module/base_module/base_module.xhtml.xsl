@@ -101,7 +101,11 @@
 		<li class="items">
 			<xsl:for-each select="items/item">
 				<div class="item">
-					<a href="{path}" alt="{title}" title="{title}">
+					<xsl:variable name="path"><xsl:choose>
+						<xsl:when test="path"><xsl:value-of select="path"/></xsl:when>
+						<xsl:otherwise>/<xsl:value-of select="$admin_mode"/>?call=<xsl:value-of select="$module_name"/>.edit&amp;id=<xsl:value-of select="id"/></xsl:otherwise>
+					</xsl:choose></xsl:variable>
+					<a href="{$path}" alt="{title}" title="{title}">
 						<div>
 							<div>
 								<xsl:if test="not(thumb_path) or thumb_path=''">
@@ -170,9 +174,10 @@
 <xsl:template name="controls_category">
 	<xsl:param name="module_name" select="../_module_name"/>
 	<xsl:param name="edit_module_name" select="../_module_name"/>
+	<xsl:param name="edit_category_method">edit_category</xsl:param>
 	<xsl:if test="/root/meta/admin_mode=1">
 		<form class="controls" method="post" action="admin.php?call={$module_name}.move_category">
-			<a href="/admin.php?call={$module_name}.edit_category&amp;id={id}" class="edit always">редактировать</a>
+			<a href="/admin.php?call={$module_name}.{$edit_category_method}&amp;id={id}" class="edit always">редактировать</a>
 			<a href="/admin.php?call={$module_name}.remove_category&amp;id={id}" class="remove always">удалить</a>
 			<span>Вставить:</span> 
 			<select name="insert_type" autocomplete='off'>

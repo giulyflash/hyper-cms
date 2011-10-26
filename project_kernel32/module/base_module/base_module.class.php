@@ -116,7 +116,7 @@ abstract class base_module extends module{
 	public function get_category_base($field = 'translit_title', $value=false, $need_item=true, $show='auto', $category_condition=array(),$item_condition=array()){
 		//$this->_query->echo_sql=1;
 		//TODO pages?
-		//$show: all (all categories and subcategories), category (0lvl categories + tree to current category), current (current category content only), auto ('current' for json, 'category' for others)
+		//$show: all (all categories and subcategories), all_sub (all subcategories), category (0lvl categories + tree to current category), current (current category content only), auto ('current' for json, 'category' for others)
 		if($value=='')
 			$value = false;
 		if($show=='auto')
@@ -134,7 +134,7 @@ abstract class base_module extends module{
 			}
 			else
 				$bound = array();
-			if($show=='category' || $show=='all'){
+			if($show=='category' || $show=='all' || $show='all_sub'){
 				if($value!==false && $bound){
 					$this->_query->injection(', (`left` <= '.$bound['left'].' AND `right`>='.$bound['right'].') as `active`')->from($category_table);
 					if($show=='category'){
@@ -142,6 +142,10 @@ abstract class base_module extends module{
 						$where = true;
 						if($bound['depth']!=0)
 							$this->_query->_or('left',$bound['left'],'<')->_and('right',$bound['left'],'>');
+						$this->_query->close_bracket();
+					}elseif($show=='all_sub'){
+						$where = true;
+						$this->_query->where('left',array($bound['left'], $bound['right']),'between',true)->_and('left',$bound['left'],'!=');
 						$this->_query->close_bracket();
 					}
 				}
@@ -387,7 +391,7 @@ abstract class base_module extends module{
 	
 	public function edit_category($id=NULL, $insert_place=NULL){
 		if($id)
-			$this->_result = $this->_query->select()->from($this->_table_name.$this->_config('category_posfix'))->where('id',$id)->query1();
+			$this->_result = $this->_query->select()->from($this->_category_table_name)->where('id',$id)->query1();
 		$this->_result['lt'] = '<';
 		$this->_result['gt'] = '>';
 	}
@@ -623,7 +627,7 @@ abstract class base_module extends module{
 			case 'get_category':{
 				switch($param_name){
 					case 'field':{
-						$this->_result = $this->_query->fetch_field($this->_table_name.$this->_config('category_posfix'));
+						$this->_result = $this->_query->fetch_field($this->_category_table_name);
 						break;
 					}
 					case 'value':break;
@@ -638,7 +642,7 @@ abstract class base_module extends module{
 			case 'get_category_by_title':{
 				switch($param_name){
 					case 'title':{
-						$this->_result = $this->_query->select('title,translit_title')->from($this->_table_name.$this->_config('category_posfix'))->query2assoc_array('translit_title','title');
+						$this->_result = $this->_query->select('title,translit_title')->from($this->_category_table_name)->query2assoc_array('translit_title','title');
 						break;
 					}
 					default: parent::_get_param_value($method_name,$param_name);
@@ -669,7 +673,7 @@ abstract class base_module extends module{
 				switch($param_name){
 					case 'id':
 					case 'insert_place':{
-						$this->_result = $this->_query->select('id,title')->from($this->_table_name.$this->_config('category_posfix'))->query2assoc_array('id','title');
+						$this->_result = $this->_query->select('id,title')->from($this->_category_table_name)->query2assoc_array('id','title');
 						break;
 					}
 					default: parent::_get_param_value($method_name,$param_name);
@@ -679,7 +683,7 @@ abstract class base_module extends module{
 			case 'remove_category':{
 				switch($param_name){
 					case 'id':{
-						$this->_result = $this->_query->select('id,title')->from($this->_table_name.$this->_config('category_posfix'))->query2assoc_array('id','title');
+						$this->_result = $this->_query->select('id,title')->from($this->_category_table_name)->query2assoc_array('id','title');
 						break;
 					}
 					default: parent::_get_param_value($method_name,$param_name);

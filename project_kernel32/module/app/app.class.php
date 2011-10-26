@@ -621,9 +621,9 @@ class app extends module{
 			if($include = $module->_config('template_include')){
 				if(!is_array($include)){
 					if(strpos($include,',')!==false)
-						$name = explode(',',$include);
+						$include = explode(',',$include);
 					else
-						$name = array($include);
+						$include = array($include);
 				}
 				foreach($include as $item){
 					$this->template_include[] = $item;
