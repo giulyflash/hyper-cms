@@ -34,6 +34,10 @@ $language = array(
 			'id' => 'заголовок',
 		),
 	),
+	'_admin' => array(
+		'add_item' => 'Добавить объект',
+		'add_category' => 'Добавить категорию'
+	),
 	'edit_category' => array(
 		'__title' => 'редактировать категорию',
 		'__param' => array(

@@ -206,20 +206,20 @@
 
 <xsl:template name="controls_add">
 	<xsl:param name="module_name" select="_module_name"/>
-	<xsl:param name="edit_module_name" select="_module_name"/>
+	<xsl:param name="edit_module_name" select="$module_name"/>
+	<xsl:param name="method_name" select="/root/module/item[_module_name=$module_name]/_method_name"/>
 	<xsl:variable name="href_tail"><xsl:if test="id">&amp;insert_place={id}</xsl:if></xsl:variable>
 	<xsl:variable name="href_tail2"><xsl:if test="id">&amp;category_id={id}</xsl:if></xsl:variable>
-	<a href="/admin.php?call={$module_name}.edit_category{$href_tail}" class="subitem">добавить 
-		<xsl:choose>
-			<xsl:when test="id">подпункт</xsl:when>
-			<xsl:otherwise>категорию</xsl:otherwise>
-		</xsl:choose>
+	<a href="/admin.php?call={$edit_module_name}.edit{$href_tail2}" class="subitem">
+		<xsl:value-of select="/root/language/*[name()=$module_name]/*[name()=$method_name]/add_category"/>
 	</a>
 	<xsl:if test="not(id)">
 		<br/>
 	</xsl:if>
 	<xsl:if test="/root/module/item[_module_name=$module_name]/_config/has_item=1">
-		<a href="/admin.php?call={$edit_module_name}.edit{$href_tail2}" class="subitem">добавить объект</a>
+		<a href="/admin.php?call={$edit_module_name}.edit{$href_tail2}" class="subitem">
+			<xsl:value-of select="/root/language/*[name()=$module_name]/*[name()=$method_name]/add_item"/>
+		</a>
 	</xsl:if>
 </xsl:template>
 

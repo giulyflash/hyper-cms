@@ -104,7 +104,7 @@ abstract class base_module extends module{
 	}
 	
 	public function _admin($title=NULL){
-		$this->get_category($title);
+		$this->get_category_base('translit_title', $title, true, 'auto');
 		//parent::get_category('translit_title', $title, true, 'auto', NULL, array(array('module',$this->module_name), array('internal_type','image')));
 		//FIXME wtf it do not lod category by title?
 	}
@@ -134,7 +134,7 @@ abstract class base_module extends module{
 			}
 			else
 				$bound = array();
-			if($show=='category' || $show=='all' || $show='all_sub'){
+			if($show=='category' || $show=='all' || $show=='all_sub'){
 				if($value!==false && $bound){
 					$this->_query->injection(', (`left` <= '.$bound['left'].' AND `right`>='.$bound['right'].') as `active`')->from($category_table);
 					if($show=='category'){
@@ -180,7 +180,7 @@ abstract class base_module extends module{
 				$this->_query->select($item_field)->from($this->_table_name);
 				$categories = array();
 				$null_categories = false;
-				if($show!='current')
+				if($show!='current' || $show=='all_sub' && !$value)
 					$null_categories = true;
 				elseif($value)
 					$categories[] = $bound['id'];

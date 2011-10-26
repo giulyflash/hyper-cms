@@ -11,7 +11,7 @@ class menu extends base_module{
 	}
 	
 	public function get($id = 1, $show_title=NULL, $type=NULL){
-		$this->get_category_base('link', $link = ($_SESSION['call'][0]=='/'?false:$_SESSION['call'][0]), NULL, 'all', NULL, array('menu_id',$id));
+		$this->get_category_base('link', $link = ($_SESSION['call'][0]=='/'?false:$_SESSION['call'][0]), NULL, 'all', array('menu_id',$id));
 		if($show_title)
 			$this->_result['title'] = $this->_query->select('title')->from($this->module_name)->where('id',$id)->query1('title');
 		if($type)
