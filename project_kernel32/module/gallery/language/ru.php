@@ -14,6 +14,7 @@ $language = array(
 	),
 	'_admin'=>array(
 		'__title'=>'Фотогалерея',
+		'add_item' => 'Добавить изображение',
 	),
 	'__title'=>'фотогалерея',
 	'__object'=>array(

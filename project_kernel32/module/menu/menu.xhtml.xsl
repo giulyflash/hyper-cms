@@ -154,6 +154,11 @@
 		<xsl:when test="_argument/menu_id!=''">
 			<div class="nested_items {_module_name} {_method_name} {_config/category_type}">
 				<xsl:call-template name="menu_base"/>
+				<p>
+					<a href="/admin.php?call={_module_name}.edit_item&amp;menu_id={_argument/menu_id}">
+						<xsl:value-of select="/root/language/menu/_admin/add_category"/>
+					</a>
+				</p>
 			</div>
 		</xsl:when>
 		<xsl:otherwise>
@@ -168,6 +173,11 @@
 							</li>
 						</xsl:for-each>
 					</ul>
+					<p>
+						<a href="/admin.php?call=menu.edit">
+							<xsl:value-of select="/root/language/menu/_admin/add_menu"/>
+						</a>
+					</p>
 				</div>
 			</xsl:if>
 		</xsl:otherwise>

@@ -29,6 +29,7 @@ $language = array(
 	),
 	'_admin'=>array(
 		'__title'=>'Статьи',
+		'add_item' => 'Добавить статью',
 	),
 	'__title'=>'статьи',
 	'__object'=>array(

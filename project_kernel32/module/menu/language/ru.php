@@ -14,6 +14,8 @@ $language = array(
 	'__title'=>'меню',
 	'_admin'=>array(
 		'__title'=>'Меню',
+		'add_menu'=>'Добавить меню',
+		'add_category'=>'Добавить пункт меню'
 	),
 	'edit_item'=>array(
 		'__title'=>'редактировать пункт меню',

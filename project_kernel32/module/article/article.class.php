@@ -206,7 +206,7 @@ class article_config extends base_module_config{
 				__CLASS__ => self::role_read,
 			),
 		),
-		'fill_empty_preview' =>array(
+		'fill_empty_preview,set_translit_title,set_translit_title_category' =>array(
 			'__access__' => array(
 				__CLASS__ => self::role_write,
 			),
