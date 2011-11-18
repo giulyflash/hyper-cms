@@ -59,12 +59,12 @@ class base_module_config extends module_config{
 	
 	protected $include = array(
 		'admin_mode.*' =>
-			'<link href="module/base_module/admin.css" rel="stylesheet" type="text/css"/>',
+			'<link href="/module/base_module/admin.css" rel="stylesheet" type="text/css"/>',
 		'*,admin_mode.*' =>
-			'<link href="module/base_module/base_module.css" rel="stylesheet" type="text/css"/>
-			<script type="text/javascript" src="/module/base_module/base_module.js"></script>',
+			'<link href="/module/base_module/base_module.css" rel="stylesheet" type="text/css"/>
+			<script src="/module/base_module/base_module.js" type="text/javascript"></script>',
 		'get_category,_admin' =>
-			'<script type="text/javascript" src="/module/base_module/category.js"></script>',
+			'<script src="/module/base_module/category.js" type="text/javascript"></script>',
 	);
 	
 	//<script type="text/javascript" src="/module/base_module/category.js"></script>

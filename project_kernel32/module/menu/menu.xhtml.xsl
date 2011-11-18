@@ -90,21 +90,25 @@
 			$this->result['link0'] = $module_link->_result['link']; 
 	 -->
 	 	<script type="text/javascript">
-			document.module_data=<xsl:value-of select="data"/>
-			<xsl:if test="link">
-				document.link_data=<xsl:value-of select="link"/>
+			document.module_data=<xsl:value-of select="data" disable-output-escaping="yes"/>
+			<xsl:if test="link_data">
+				document.link_data=<xsl:value-of select="link_data" disable-output-escaping="yes"/>;
 			</xsl:if>
 		</script>
-		<script type="text/javascript">
+		<!-- <script type="text/javascript">
 			document.module_data=<xsl:value-of select="data"/>
 			<xsl:if test="link0">
-				document.link_data=<xsl:value-of select="link0"/>
+				document.link_data="<xsl:value-of select="link0"/>";
 			</xsl:if>
-		</script>
+		</script> -->
 	</xsl:if>
-	<form class="menu menu_editor link_form" method="post" action="admin.php?call=menu.save_item&amp;menu_id={_argument/menu_id}">
+	<form class="menu menu_editor link_form" method="post" action="admin.php?call=menu.save_item">
 		<xsl:if test="id">
 			<input type="hidden" value="{id}" name="id"/>
+			<input type="hidden" value="{menu_id}" name="menu_id"/>
+		</xsl:if>
+		<xsl:if test="_argument/menu_id">
+			<input type="hidden" value="{_argument/menu_id}" name="menu_id"/>
 		</xsl:if>
 		<xsl:if test="_argument/insert_place">
 			<input type="hidden" value="{_argument/insert_place}" name="insert_place"/>

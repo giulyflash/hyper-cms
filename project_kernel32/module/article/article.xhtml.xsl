@@ -9,6 +9,14 @@
 	<div class="article">
 		<xsl:value-of select="text" disable-output-escaping="yes"/>
 	</div>
+	<!-- temp -->
+	<xsl:if test="/root/session/user_info">
+		<p class="article_edit">
+			<a class="edit_article" href="/admin.php?call=article.edit&amp;id={id}" target="_blank" title="редактировать" alt="редактировать">
+				<img src="module/base_module/img/pencil.png"/>&#160;<span>редактировать</span>
+			</a>
+		</p>
+	</xsl:if> 
 </xsl:template>
 
 <xsl:template match="root/module/item[_module_name='article' and (_method_name='edit' or _method_name='save')]">
@@ -96,6 +104,16 @@
 							</select>
 						</td>
 					</tr>
+					<tr>
+						<td class="table_title">
+							Редактор связей:
+						</td>
+						<td>
+							<xsl:call-template name="link_editor_href">
+								<xsl:with-param name="method_name">get_by_title</xsl:with-param>
+							</xsl:call-template>
+						</td>
+					</tr>
 				</tbody>
 			</table>
 			<textarea id="article_text" name="text">
@@ -180,7 +198,7 @@
 	<xsl:param name="module_name" select="_module_name"/>
 	<xsl:variable name="admin_mode"><xsl:if test="/root/meta/admin_mode=1">admin.php</xsl:if></xsl:variable>
 	<xsl:for-each select="item">
-		<li>!!
+		<li>
 			<xsl:if test="active=1">
 				<xsl:attribute name="class">active</xsl:attribute>
 			</xsl:if>
@@ -199,7 +217,7 @@
 		<li class="items">
 			<ul class="items">
 				<xsl:for-each select="items/item">
-					<li>!!!
+					<li>
 						<a href="/?call=article.get_by_title&amp;title={translit_title}" alt="{title}" title="{title}">
 							<h4><xsl:value-of select="title"/></h4>
 						</a>

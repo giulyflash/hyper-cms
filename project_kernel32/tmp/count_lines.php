@@ -1,6 +1,6 @@
 <?php
 
-$allowed_ext = array('php','xsl','js','sql');
+$allowed_ext = array('php','xsl','js','sql','css');
 $dedied_folder = array('extensions','.svn','archive','tmp','phpBB3');
 
 function count_lines($dir=NULL){

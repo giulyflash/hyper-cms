@@ -6,7 +6,7 @@ class article extends base_module{
 	private $more_tag = '<!--more-->';
 
 	public function get($field = 'id', $value='1',$show_title=false){
-		$select = array('text');
+		$select = array('text','id');
 		if($show_title === false)
 			$show_title = $this->_config('default_show_title');
 		if($show_title)
@@ -235,9 +235,10 @@ class article_config extends base_module_config{
 	
 	protected $include = array(
 		'edit'=>
-			'<link href="module/article/admin.css" rel="stylesheet" type="text/css"/>
-			<script type="text/javascript" src="extensions/ckeditor/ckeditor.js"></script>',
-		'*'=>'<link href="module/article/article.css" rel="stylesheet" type="text/css"/>',
+			'<link href="/module/article/admin.css" rel="stylesheet" type="text/css"/>
+			<script src="/extensions/ckeditor/ckeditor.js" type="text/javascript"></script>
+			<script src="/module/article/admin.js" type="text/javascript"></script>',
+		'*'=>'<link href="/module/article/article.css" rel="stylesheet" type="text/css"/>',
 	);
 	
 	public $has_item = true;

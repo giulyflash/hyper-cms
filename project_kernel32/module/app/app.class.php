@@ -54,10 +54,10 @@ class app_config extends config{
 	); //link for all admin modules
 	
 	protected $include = array(
-		'*'=>'<script type="text/javascript" src="extensions/jquery/jquery-1.5.2.min.js"></script>
-			<script type="text/javascript" src="module/app/app.js"></script>',
-		'admin_mode.*'=>'<script type="text/javascript" src="extensions/jquery/jquery-1.5.2.min.js"></script>
-			<script type="text/javascript" src="module/app/app.js"></script>',
+		'*'=>'<script src="/extensions/jquery/jquery-1.5.2.min.js" type="text/javascript"></script>
+			<script src="/module/app/app.js" type="text/javascript"></script>',
+		'admin_mode.*'=>'<script src="/extensions/jquery/jquery-1.5.2.min.js" type="text/javascript"></script>
+			<script src="/module/app/app.js" type="text/javascript"></script>',
 	); //include for all modules
 	
 	protected $admin_exclude = array(
@@ -352,10 +352,10 @@ class app extends module{
 			}
 		}
 		elseif(!$this->admin_mode && $this->_config('config_from_db') &&
-			$db_call = $this->_query->select(array('param_name','value'))->from('module_param')->where('module_name','app')->_and('param_name',array('default_module','default_method','default_param'),'in')->query()
+			$db_call = $this->_query->select(array('name','value'))->from('module_param')->where('module_name','app')->_and('name',array('default_module','default_method','default_param'),'in')->query()
 		){
 			foreach(array_keys($db_call) as $key)
-				$db_call[$db_call[$key]['param_name']] = $db_call[$key]['value'];
+				$db_call[$db_call[$key]['name']] = $db_call[$key]['value'];
 			if(empty($db_call['default_module']))
 				throw new my_exception('default call module not found in db');
 			else
@@ -521,9 +521,9 @@ class app extends module{
 				if(!isset($param_group[$param['link_id']]))
 					$param_group[$param['link_id']] = array('condition'=>array(),'param'=>array());
 				if($param['type'] == 'param')
-					$param_group[$param['link_id']]['param'][$param['param_name']] = $param['value'];
+					$param_group[$param['link_id']]['param'][$param['name']] = $param['value'];
 				elseif($param['type'] == 'condition')
-					$param_group[$param['link_id']]['condition'][$param['param_name']] = $param['value'];
+					$param_group[$param['link_id']]['condition'][$param['name']] = $param['value'];
 			}
 			//applying params
 			foreach($call_db_list as &$call){
@@ -541,9 +541,9 @@ class app extends module{
 		//get config for modules from db and put them to cache
 		$this->get_module_list();
 		if($this->_config('config_from_db')){
-			$db_params = $this->_query->select('module_name,param_name,value')->from('module_param')->where('module_name',array_merge(array('app'),$this->module_list),'in')->query();
+			$db_params = $this->_query->select('module_name,name,value')->from('module_param')->where('module_name',array_merge(array('app'),$this->module_list),'in')->query();
 			foreach($db_params as $param)
-				$this->config_cache[$param['module_name']][$param['param_name']] = $param['value'];
+				$this->config_cache[$param['module_name']][$param['name']] = $param['value'];
 		}
 	}
 	
@@ -943,7 +943,7 @@ class app extends module{
 				$result['_template'] = $template;
 			if(($module->_config('output_all_argument') || $module->position==$center_position) && !empty($module->argument_all)){
 				$result['_argument'] = &$module->argument_all;
-				if($module->_config('output_new_argument') && !empty($module->argument_new))
+				if($module->_config('output_new_argument') && !empty($module->argument_new) && $module->method_name!='_get_param_value')
 					$result['argument_new'] = $module->argument_new;
 			}
 			elseif($module->_config('output_new_argument') && !empty($module->argument_new))

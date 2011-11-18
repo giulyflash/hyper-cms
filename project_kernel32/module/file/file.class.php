@@ -7,13 +7,13 @@ class file_config extends module_config{
 	protected $allowed_ext=array('jpeg','jpg','png','gif','bmp');
 	protected $default_thumb = 'template/admin/images/_document.png';
 	protected $include = array(
-		'get_list'=>'<script type="text/javascript" src="/extensions/SWFUpload/swfupload.js"></script>
-		<script type="text/javascript" src="/extensions/SWFUpload/plugins/swfupload.queue.js"></script>
-		<script type="text/javascript" src="/extensions/SWFUpload/plugins/fileprogress.js"></script>
-		<script type="text/javascript" src="/extensions/SWFUpload/plugins/handlers.js"></script>
+		'get_list'=>'<script src="/extensions/SWFUpload/swfupload.js" type="text/javascript"></script>
+		<script src="/extensions/SWFUpload/plugins/swfupload.queue.js" type="text/javascript"></script>
+		<script src="/extensions/SWFUpload/plugins/fileprogress.js" type="text/javascript"></script>
+		<script src="/extensions/SWFUpload/plugins/handlers.js" type="text/javascript"></script>
 		<link rel="stylesheet" type="text/css" href="/extensions/SWFUpload/default.css"/>
-		<script type="text/javascript" src="/module/file/load_file.js"></script>
-		<link rel="stylesheet" type="text/css" href="/module/file/admin.css"/>',
+		<script src="/module/file/load_file.js" type="text/javascript"></script>
+		<link href="/module/file/admin.css" type="text/css" rel="stylesheet"/>',
 	);
 	protected $file_path='file/';
 	protected $thumb_path='thumb/';

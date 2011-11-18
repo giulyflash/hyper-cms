@@ -699,12 +699,12 @@ class debtor_list_config extends module_config{
 		'get,filter,edit,column'=>'<link href="/module/debtor_list/index.css" rel="stylesheet" type="text/css"/>',
 		'get,filter,edit'=>'<link href="/module/debtor_list/index.css" rel="stylesheet" type="text/css"/>
 			<script src="/module/debtor_list/list.js"></script>',
-		'get,edit'=>'<link rel="stylesheet" href="/extensions/datapicker/jquery.ui.all.css">
+		'get,edit'=>'<link href="/extensions/datapicker/jquery.ui.all.css" rel="stylesheet"/>
 			<script src="/extensions/datapicker/jquery.ui.core.js"></script>
 			<script src="/extensions/datapicker/jquery.ui.widget.js"></script>
 			<script src="/extensions/datapicker/jquery.ui.datepicker.js"></script>
 			<script src="/extensions/datapicker/jquery.ui.datepicker-ru.js"></script>',
-		'edit'=>'<script type="text/javascript" src="extensions/ckeditor/ckeditor.js"></script>
+		'edit'=>'<script src="/extensions/ckeditor/ckeditor.js" type="text/javascript"></script>
 			<script src="/module/debtor_list/edit.js"></script>'
 	);
 	

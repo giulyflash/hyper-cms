@@ -17,3 +17,13 @@
 .nested_items.dropdown .no_controls{
 	list-style: disc;
 }
+
+.menu.link_form>div{
+	 min-height: 200px;
+}
+.menu .input_text{
+	display: none;
+}
+.menu .method, .menu .params{
+	display: none;
+}

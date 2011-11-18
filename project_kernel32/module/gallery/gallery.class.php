@@ -174,7 +174,7 @@ class gallery_config extends base_module_config{
 	protected $include = array(
 		'get_category,edit,_admin,edit'=>
 			'<link href="/extensions/jquery_lightbox/jquery_lightbox.css" rel="stylesheet" type="text/css"/>
-			<script type="text/javascript" src="/extensions/jquery_lightbox/jquery_lightbox.min.js"></script>
+			<script src="/extensions/jquery_lightbox/jquery_lightbox.min.js" type="text/javascript"></script>
 			<link href="/module/gallery/gallery.css" rel="stylesheet" type="text/css"/>',
 	);
 	

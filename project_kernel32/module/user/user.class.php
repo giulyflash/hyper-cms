@@ -4,8 +4,8 @@ class user_config extends module_config{
 	public $registration = false;
 	protected $output_config = true;
 	protected $include = array(
-		'*'=>'<link href="module/user/user.css" rel="stylesheet" type="text/css">',
-		'form'=>'<link href="module/user/user.css" rel="stylesheet" type="text/css">',
+		'*'=>'<link href="/module/user/user.css" rel="stylesheet" type="text/css">',
+		'form'=>'<link href="/module/user/user.css" rel="stylesheet" type="text/css">',
 	);
 	
 	protected $callable_method=array(
