@@ -15,7 +15,7 @@ class menu extends base_module{
 		if($show_title)
 			$this->_result['title'] = $this->_query->select('title')->from($this->module_name)->where('id',$id)->query1('title');
 		if($type)
-			$this->parent->include[] = '<link href="module/menu/'.$type.'.css" rel="stylesheet" type="text/css"/>';
+			$this->parent->include[] = '<link href="/module/menu/'.$type.'.css" rel="stylesheet" type="text/css"/>';
 	}
 	
 	/*function build_menu(&$src, &$result_node, $parent_id=NULL){
@@ -40,33 +40,49 @@ class menu extends base_module{
 		$this->parent->redirect('/admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
 	}
 	
-	public function edit_item($id=NULL, $insert_place=NULL, $menu_id=NULL){
+	public function edit_item($id=NULL, $insert_place=NULL, $menu_id=NULL, $link=NULL){
 		if(!$menu_id && !$menu_id = $this->_query->select('menu_id')->from($this->_category_table_name)->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
 		parent::edit_category($id);
 		$module_link = new module_link($this->parent);
-		$module_link->edit(isset($this->_result['link_id'])?$this->_result['link_id']:NULL);
+		$module_link->edit(isset($this->_result['link_id'])?$this->_result['link_id']:NULL, $id?NULL:$link);
 		$this->_result['data'] = $module_link->_result['data'];
 		if(isset($module_link->_result['link']))
-			$this->_result['link0'] = $module_link->_result['link'];
+			$this->_result['link_data'] = $module_link->_result['link'];
 		//TODO draft
 		//TODO alias editor
 		//TODO drag-n-drop edit alias order of aliases
 	}
 
 	public function save_item($id=NULL,$title=NULL,$insert_place=NULL,$input_type=NULL,$link_text=NULL,$link=array(),$menu_id){
-		if(!$menu_id && !$menu_id = $this->_query->select('menu_id')->from($this->_category_table_name)->where('id',$id)->query1('menu_id'))
+		//var_dump($link);die;
+		if(!$menu_id && !($menu_id = $this->_query->select('menu_id')->from($this->_category_table_name)->where('id',$id)->query1('menu_id')))
 			throw new my_exception('menu_id not found');
 		if(!$title){
-			$this->_message('menu item name must not be empty');
-			return;
+			if(isset($link[0]['module'], $link[0]['method'], $link[0]['param'], $link[0]['param']['name'], $link[0]['param']['value']) && count($link[0]['param'])==1){
+				$temp_module_name = $link[0]['module'];
+				$temp_module = new $temp_module_name($this->parent);
+				$temp_params = $temp_module->_get_param_value($link[0]['method'], $link[0]['param']['name']);
+				if($temp_params && isset($temp_params[$link[0]['param']['value']]))
+					$title = $temp_params[$link[0]['param']['value']];
+			}
+			if(!$title){
+				$this->_message('menu item name must not be empty');
+				//array(1) { [0]=> array(3) { ["module"]=> string(7) "article" ["method"]=> string(12) "get_by_title" ["param"]=> array(1) { [0]=> array(2) { ["name"]=> string(5) "title" ["value"]=> string(7) "Servera" } } } } 
+				//{"center_module":"*","center_method":"*","module_name":"article","method_name":"get_by_title","param":[{"param_name":"title","value":"Server","type":"param"}]}
+				if(!empty($link[0]))
+					$link = '&link='.json_encode($link[0]);
+				$this->parent->redirect('/admin.php?call=menu.edit_item&menu_id='.$menu_id.$link);
+			}
 		}
 		$link_id = $id?($this->_query->select('link_id')->from($this->_category_table_name)->where('id',$id)->query1('link_id')):NULL;
 		if($input_type=='wizard'){
 			if($link){
 				$link = $link[0];
+				if(!$link['module'])
+					throw new my_exception('module name not found');
 				$module_link = new module_link($this->parent);
-				$link_id = $module_link->save($link_id,array(1=>$link),false,1);
+				$link_id = $module_link->save($link_id,array(0=>$link),false,1);
 				$link_text = '/?call='.$link['module'].'.'.$link['method'];
 				if(isset($link['param']))
 					foreach($link['param'] as &$param)
@@ -79,6 +95,7 @@ class menu extends base_module{
 		}
 		$value = array(
 			'title'=>$title,
+			'translit_title'=>translit::transliterate($title),
 			'link'=>($link_text?$link_text:$this->_config('default_link')),
 			'link_id'=>$link_id,
 			'menu_id'=>$menu_id,
@@ -189,7 +206,10 @@ class menu_config extends base_module_config{
 		),
 		'edit_item'=>array(
 			'insert_place'=>'_exclude',
-		)
+		),
+		'save_item'=>array(
+			'link'=>'_disable_filter',
+		),
 	);
 	
 	protected $object = array(
@@ -205,10 +225,10 @@ class menu_config extends base_module_config{
 	
 	protected $include = array(
 		'edit_item'=>
-			'<link href="module/module_link/wizard.css" rel="stylesheet" type="text/css"/>
-			<script type="text/javascript" src="module/module_link/wizard.js"></script>
-			<script type="text/javascript" src="module/menu/admin.js"></script>',
-		'_admin'=>'<link href="module/menu/admin.css" rel="stylesheet" type="text/css"/>',
+			'<link href="/module/module_link/wizard.css" rel="stylesheet" type="text/css"/>
+			<script src="/module/module_link/wizard.js" type="text/javascript"></script>
+			<script src="/module/menu/admin.js" type="text/javascript"></script>',
+		'_admin,edit_item'=>'<link href="/module/menu/admin.css" rel="stylesheet" type="text/css"/>',
 	);
 	
 	protected $alias_table = 'menu_link_alias';

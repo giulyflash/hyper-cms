@@ -78,19 +78,21 @@ class module_link extends module{
 			return true;
 	}
 
-	public function edit($id=NULL, $module=NULL, $method=NULL, $params=array()){
+	public function edit($id=NULL, $link=NULL){
 		//module, method, params - to made link from
 		//TODO switch show/hide private methods in the list
+		//$data format: {"center_module":"*","center_method":"*","module_name":"article","method_name":"get_by_title","param":[{"link_id":"7","param_name":"title","value":"Server","type":"param"}]};
 		if($id){
 			$this->_result['link'] = $this->_query->select()->from('module_link')->where('id',$id)->query1();
 			if(!$this->_result['link']){
 				$this->_message('link not found');
 				//$this->parent->redirect('/admin.php?call=module_link._admin');
 			}
-			$this->_result['link_data'] = $this->_result['link'];
+			//$this->_result['link_data'] = $this->_result['link'];
 			$this->_result['link']['param'] = $this->_query->select()->from('module_link_param')->where('link_id',$id)->order('order')->query();
 			$this->_result['link'] = json_encode($this->_result['link']);
-		}
+		}elseif($link)
+			$this->_result['link'] = str_replace('&#34;', '"', $link);//FIXME decode punicode
 		$module_list = $this->get_module($this->_config('exclude_from_admin_list'));
 		$this->_result['data'] = json_encode($module_list);
 		$this->_result['position'] = $this->_query->select('translit_title,title')->from('position')->query2assoc_array('translit_title','title');
@@ -98,9 +100,9 @@ class module_link extends module{
 	}
 	
 	public function save($id=NULL,$link=NULL,$redirect=true,$menu=NULL,$position=NULL,$order=NULL,$draft=NULL){
-		if(empty($link[0]['module']))
+		if(isset($link[0]) && empty($link[0]['module']))
 			throw new my_exception('module name not found');
-		$link_value = array('module_name'=>$link[0]['module']);
+		$link_value = array('module_name'=>empty($link[0]['module'])?'*':$link[0]['module']);
 		if(!empty($link[0]['method']))
 			$link_value['method_name'] = $link[0]['method'];
 		if(!empty($link[1]['module']))
@@ -126,7 +128,7 @@ class module_link extends module{
 			if(isset($link_item['param']))
 				foreach($link_item['param'] as $order=>&$param){
 					$type = ($link_num==1)?'condition':'param';
-					$param_value = array('param_name'=>$param['name'], 'type'=>$type, 'link_id'=>$id, 'order'=>$order);
+					$param_value = array('name'=>$param['name'], 'type'=>$type, 'link_id'=>$id, 'order'=>$order);
 					if(isset($param['value']))
 						$param_value['value'] = $param['value'];
 					$this->_query->insert($this->module_name.'_param')->values($param_value)->execute();
@@ -180,9 +182,9 @@ class module_link extends module{
 		if(isset($link['params']))
 		foreach($link['params'] as &$param)
 			if($param['type']==$type_param){
-				$param['title'] = (!empty($this->parent->language_cache[$link[$module_param]][$link[$method_param]][$param_field][$param['param_name']]))?
-				$this->parent->language_cache[$link[$module_param]][$link[$method_param]][$param_field][$param['param_name']]:$param['param_name'];
-				if($param_values = $module->_get_param_value($link[$method_param],$param['param_name']))
+				$param['title'] = (!empty($this->parent->language_cache[$link[$module_param]][$link[$method_param]][$param_field][$param['name']]))?
+				$this->parent->language_cache[$link[$module_param]][$link[$method_param]][$param_field][$param['name']]:$param['name'];
+				if($param_values = $module->_get_param_value($link[$method_param],$param['name']))
 					if(!empty($param_values[$param['value']]))
 						$param['value'] = $param_values[$param['value']];
 			}
@@ -221,11 +223,11 @@ class module_link_config extends module_config{
 	
 	protected $include = array(
 		'_admin,edit'=>
-			'<link href="module/module_link/admin.css" rel="stylesheet" type="text/css"/>
-			<script type="text/javascript" src="module/module_link/admin.js"></script>',
+			'<link href="/module/module_link/admin.css" rel="stylesheet" type="text/css"/>
+			<script src="/module/module_link/admin.js" type="text/javascript"></script>',
 		'edit'=>
-			'<link href="module/module_link/wizard.css" rel="stylesheet" type="text/css"/>
-			<script type="text/javascript" src="module/module_link/wizard.js"></script>',
+			'<link href="/module/module_link/wizard.css" rel="stylesheet" type="text/css"/>
+			<script src="/module/module_link/wizard.js" type="text/javascript"></script>',
 	);
 }
 ?>

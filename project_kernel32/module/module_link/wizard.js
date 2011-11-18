@@ -1,3 +1,5 @@
+//TODO object
+
 $(function(){
 	admin_method_name = '_admin';
 	//sorting elements
@@ -20,62 +22,67 @@ $(function(){
 		$('.method_select').each(function(num,method_list){
 			method_list = $(method_list);
 			get_module_name(method_list);
-			if(document.module_data[module_name]['_method'] && method_name == document.module_data[module_name]['_method']){
-				param_count = 0;
-				for(i in document.link_data['param']){
-					if(is_condition && document.link_data['param'][i]['type']=='condition' ||
-						!is_condition && document.link_data['param'][i]['type']=='param'){
-							param_count++;
-							param_id = i;
-						}
+			if(module_name && module_name!='*'){
+				if(module_name && module_name!='*' && document.module_data[module_name]['_method'] && method_name == document.module_data[module_name]['_method']){
+					param_count = 0;
+					for(i in document.link_data['param']){
+						//alert('is condition: '+is_condition+'; '+document.link_data['param'][i]['type']);
+						if(is_condition && document.link_data['param'][i]['type']=='condition' ||
+							(!is_condition && (document.link_data['param'][i]['type']=='param' || !document.link_data['param'][i]['type']))){
+								param_count++;
+								param_id = i;
+							}
+					}
+					if(param_count==1 && document.link_data['param'][param_id]['name']==document.module_data[module_name]['param']){
+						//if is object
+						obect_select = method_list.parent().find('.object_select');
+						parent = obect_select.parent().parent().parent().parent();
+						get_param_value(
+							module_name,
+							method_name,
+							document.link_data['param'][param_id]['name'],
+							obect_select,
+							document.link_data['param'][param_id]['value'],
+							true
+						);
+						parent.find('.params td:last').append(
+							'<input type="hidden" name="link['+is_condition+'][param][0][name]" value="'+document.module_data[module_name]['param']+'"/>'+
+							'<input type="hidden" name="link['+is_condition+'][param][0][value]" value="'+document.link_data['param'][param_id]['value']+'"/>'
+						);
+						show_object_select(true,false,parent);
+						method_list.val(method_name);
+					}
 				}
-				if(param_count==1 && document.link_data['param'][param_id]['param_name']==document.module_data[module_name]['param']){
-					obect_select = method_list.parent().find('.object_select');
-					parent = obect_select.parent().parent().parent().parent();
-					//function get_param_value(module,method,param,obj,value,exact){
-					get_param_value(
-						module_name,
-						method_name,
-						document.link_data['param'][param_id]['param_name'],
-						obect_select,
-						document.link_data['param'][param_id]['value'],
-						true
-					);
-					parent.find('.params td:last').append(
-						'<input type="hidden" name="link['+is_condition+'][param][0][name]" value="'+document.module_data[module_name]['param']+'"/>'+
-						'<input type="hidden" name="link['+is_condition+'][param][0][value]" value="'+document.link_data['param'][param_id]['value']+'"/>'
-					);
-					show_object_select(true,false,parent);
-				}
-				method_list.val(method_name);
+				fill_method_list(method_list, module_name, method_name);
+				method_list.parent().parent().parent().find('.module input[type="hidden"]').val(module_name);
+				method_list.parent().find('input[type="hidden"]').val(method_name);
+				method_list.parent().parent().css('display','table-row');
 			}
-			else
-				for(i in document.module_data[module_name]['method'])
-					method_list.append('<option value="'+i+'" '+(method_name==i?'selected="1"':'')+'>'+document.module_data[module_name]['method'][i]['title']+'</option>');
-			method_list.parent().parent().parent().find('.module input[type="hidden"]').val(module_name);
-			method_list.parent().find('input[type="hidden"]').val(method_name);
-			method_list.parent().parent().css('display','table-row');
 		});
 		//init params
 		$('.param_box').each(function(num,param_box){
 			param_box = $(param_box);
+			console.log(document.link_data['param']);
 			if(param_box.parent().parent().parent().find('.method p').css('display')!='block'){
 				get_module_name(param_box);
-				for(i in document.link_data['param']){
-					if(document.link_data['param'][i]['type']==(is_condition?'condition':'param')){
-						param_box.append(get_param_td_html());
-						param_list = param_box.find('.param_select').last();
-						var parent_internal = parent;
-						param_list.change(function(){
-							param_change(parent_internal,$(this));
-						});
-						parameter_name = document.link_data['param'][i]['param_name'];
-						param_list.append('<option value="'+parameter_name+'" selected=1>'+document.module_data[module_name]['method'][method_name]['params'][parameter_name]+'</option>');
-						get_param_value(document.module_data[module_name]['method'][method_name]['_module'],method_name,parameter_name,param_list,document.link_data['param'][i]['value']);
+				if(module_name && method_name && module_name!='*' && method_name!='*'){
+					var param_list = null;
+					for(i in document.link_data['param']){
+						if(document.link_data['param'][i]['type']==(is_condition?'condition':'param') || !(is_condition || document.link_data['param'][i]['type'])){
+							param_box.append(get_param_td_html());
+							param_list = param_box.find('.param_select').last();
+							var parent_internal = parent;
+							param_list.change(function(){
+								param_change(parent_internal,$(this));
+							});
+							parameter_name = document.link_data['param'][i]['name'];
+							param_list.append('<option value="'+parameter_name+'" selected=1>'+document.module_data[module_name]['method'][method_name]['params'][parameter_name]+'</option>');
+							get_param_value(document.module_data[module_name]['method'][method_name]['_module'],method_name,parameter_name,param_list,document.link_data['param'][i]['value']);
+						}
 					}
+					param_change(parent,param_list,true);
+					param_box.parent().parent().css('display','table-row');
 				}
-				param_change(parent,param_list,true);
-				param_box.parent().parent().css('display','table-row');
 			}
 		});
 	}
@@ -128,10 +135,12 @@ $(function(){
 			return;
 		}
 		method = $(this).val();
-		if(method)
+		if(method){
 			show_object_select(false,true,parent);
-		else
+		}
+		else{
 			show_object_select(document.module_data[module]['_method']?true:false,true,parent);
+		}
 		$(this).parent().find('input').val(method);
 		module = parent.find('.module_select').val();
 		parent.find('.params').css('display','none');
@@ -167,8 +176,9 @@ $(function(){
 			);
 			show_object_select(true,false,parent);
 		}
-		else
+		else{
 			show_object_select(true,true,parent);
+		}
 	});
 });
 
@@ -186,6 +196,10 @@ function param_change(parent,param_select,need_not_value){
 	}
 	select_list = parent.find('.params .param_box td:first-child .param_select');
 	param_count = 0;
+	if(!method){
+		//alert('error there!');
+		return;
+	}
 	for(param_name in document.module_data[module]['method'][method]['params'])
 		param_count++;
 	if((!select_list.size() || select_list.last().val())  && select_list.size()<param_count){
@@ -230,6 +244,12 @@ function param_change(parent,param_select,need_not_value){
 	$('.link_form .param_box').css('display','block');
 }
 
+function fill_method_list(method_list, module_name, method_name){
+	if(module_name && module_name!='*')
+		for(i in document.module_data[module_name]['method'])
+			method_list.append('<option value="'+i+'" '+(method_name==i?'selected="1"':'')+'>'+document.module_data[module_name]['method'][i]['title']+'</option>');
+}
+
 function get_param_td_html(){
 	return '<tr><td><select class="param_select" autocomplete = "off"><option value=""></option></select></td><td></td></tr>';
 }
@@ -265,11 +285,11 @@ function get_param_value(module,method,param,obj,value,exact){
 					set_param_value(obj, null, value);
 					alert(error_str);
 				}
-				else
+				else{
 					set_param_value(obj, value_list, value,exact);
+				}
 			}
 			catch(e){
-				alert(e);
 				alert('can not evaluete server data!');
 			}
 		},

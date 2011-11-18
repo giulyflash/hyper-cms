@@ -335,7 +335,7 @@ img.right {
 }
 
 .timetable table tr td:FIRST-CHILD{
-	min-width: 107px;
+	width: 97px;
 }
 
 div.timetable{
@@ -486,4 +486,10 @@ div.timetable{
 	border: 1px solid #405A67;
 	border-width: 1px 0 0 1px;
 	padding: 3px;
+}
+
+/*timetable*/
+
+.article .timetable table.time{
+	width: 243px;
 }

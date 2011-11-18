@@ -77,5 +77,6 @@ $error = array(
 	'category not found by id' => 'Пункт меню не найден по идентификатору id="$id"',
 	'category deleted successfully' => 'Пункт меню "$name" уcпешно удален',
 	'database unlocked' => 'База разблокирована',
+	'menu item name must not be empty'=>'Имя пункта меню не должно быть пустым',
 )
 ?>

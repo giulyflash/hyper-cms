@@ -476,3 +476,7 @@ div.timetable{
 	height: auto;
 	font-size: 0.9em;
 }
+
+.message_box{
+	color: #FF7A00;
+}

@@ -14,7 +14,6 @@ $config = array(
 //if _exclude do not load
 $link = array(
 	'*.*'=>array(
-		'top'=>'menu',
 		'right'=>'article.get&field=translit_title&value=Kontaktnaja-informacija&show_title=0',
 	),
 );

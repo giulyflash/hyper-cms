@@ -25,4 +25,18 @@ ALTER TABLE `file` DROP `language`;
 
 ALTER TABLE `menu_item` ADD `translit_title` VARCHAR( 255 ) NULL AFTER `title`;
 
-ALTER TABLE `menu` ADD `translit_title` VARCHAR( 255 ) NULL DEFAULT NULL
+ALTER TABLE `menu` ADD `translit_title` VARCHAR( 255 ) NULL DEFAULT NULL;
+
+ALTER TABLE `menu_item` ADD `link_id` INT NULL DEFAULT NULL;
+
+ALTER TABLE `module_link_param` CHANGE `order` `order` INT( 11 ) NOT NULL DEFAULT '0';
+
+CREATE TABLE IF NOT EXISTS `menu_link_alias` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `link_template` varchar(255) DEFAULT NULL,
+  `alias_template` varchar(255) DEFAULT NULL,
+  `order` int(11) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+TRUNCATE TABLE `module_include`;

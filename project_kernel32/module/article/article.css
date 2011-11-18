@@ -11,3 +11,14 @@
 	margin-left: 1.5em;
 	text-align: justify;
 }
+
+
+.article_edit{
+	text-align: right;
+}
+.article_edit a{
+	text-decoration: none;
+}
+.article_edit span{
+	text-decoration: underline;
+}

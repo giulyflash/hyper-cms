@@ -3,7 +3,7 @@
 <xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" />
 <xsl:template match="/">
 <html><head>
-	<link href="template/jkomfort/default.css" rel="stylesheet" type="text/css"/>
+	<link href="/template/jkomfort/default.css" rel="stylesheet" type="text/css"/>
 	<xsl:call-template name="_head"/>
 </head>
 <body>
@@ -11,7 +11,7 @@
 	<div id="header" alt="На главную" title="На главную">
 		<div id="logo1">
 			<xsl:variable name="domain" select="/root/meta/domain"/>
-				<xsl:variable name="img_prefix">template/jkomfort/domain/<xsl:value-of select="$domain"/><xsl:if test="substring($domain,string-length($domain)-2,3)!='.ru'">.ru</xsl:if>_</xsl:variable>
+				<xsl:variable name="img_prefix">/template/jkomfort/domain/<xsl:value-of select="$domain"/><xsl:if test="substring($domain,string-length($domain)-2,3)!='.ru'">.ru</xsl:if>_</xsl:variable>
 			<div id="logo2" style="background-image: url('{$img_prefix}arms.png')">
 				<img title="На главную" src="{$img_prefix}text.png" alt="{root/meta/app_config/default_page_title}"/>
 			</div>
