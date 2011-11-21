@@ -144,23 +144,39 @@ class module_link extends module{
 	public function _admin($link=NULL){
 		$this->_query->select()->from('module_link')->where('inactive',0);
 		if($link){
-			$link = json_decode($this->convert_link($link));
-			if(!$link)
-				throw new my_exception('parse json error');
-			//$this->_query->_and();
+			$link_arr = json_decode($this->convert_link($link), true);
+			if(!$link_arr)
+				throw new my_exception('parse json error',array('json'=>$link));
+			//TODO how to select smth from big link list? Link from or link to?
+			$this->_query->_and('module_name',$link_arr['module_name'],'=','`',true);
+			$this->_query->_or('center_module',$link_arr['module_name']);
+			$this->_query->close_bracket();
+			$this->_query->_and('method_name',$link_arr['method_name'],'=','`',true);
+			$this->_query->_or('center_method',$link_arr['method_name']);
+			$this->_query->close_bracket();
+			if(!empty($link_arr['param'])){
+				$this->_query->injection(' AND ((SELECT COUNT(*) FROM `module_link_param`');
+				foreach($link_arr['param'] as $param_num=>&$param)
+					$this->_query->injection(($param_num?' OR ':' WHERE ').' `link_id`=`id` AND `name`="'.$this->_query->escstr($param['name']).'" AND `value`="'.$this->_query->escstr($param['value']).'"');
+				$this->_query->injection(') = '.count($link_arr['param']).')');
+			}
 		}
 		$this->_result = $this->_query->order('position,order,id')->query2assoc_array('id',NULL,false);
-		$params = $this->_query->select()->from('module_link_param')->where('link_id',array_keys($this->_result),'in')->query();
-		foreach($params as &$param)
-			$this->_result[$param['link_id']]['params'][] = $param;
-		$title_field = $this->parent->_config('language_title_name');
-		$param_field =  $this->parent->_config('language_param_name');
-		$position = $this->_query->select('translit_title,title')->from('position')->query2assoc_array('translit_title','title');
-		foreach($this->_result as &$link){
-			$link['position_title'] = (!empty($position[$link['position']]))?$position[$link['position']]:$link['position'];
-			$this->get_link_translation($link,$title_field,$param_field);
-			$this->get_link_translation($link,$title_field,$param_field,1);
+		if($this->_result){
+			$params = $this->_query->select()->from('module_link_param')->where('link_id',array_keys($this->_result),'in')->query();
+			foreach($params as &$param)
+				$this->_result[$param['link_id']]['params'][] = $param;
+			$title_field = $this->parent->_config('language_title_name');
+			$param_field =  $this->parent->_config('language_param_name');
+			$position = $this->_query->select('translit_title,title')->from('position')->query2assoc_array('translit_title','title');
+			foreach($this->_result as &$link){
+				$link['position_title'] = (!empty($position[$link['position']]))?$position[$link['position']]:$link['position'];
+				$this->get_link_translation($link,$title_field,$param_field);
+				$this->get_link_translation($link,$title_field,$param_field,1);
+			}
 		}
+		else
+			$this->parent->redirect('admin.php?call='.$this->module_name.'.edit'.($link?('&link='.$link):''));
 	}
 	
 	private function get_link_translation(&$link,$title_field,$param_field,$center_module = NULL){
@@ -219,6 +235,7 @@ class module_link_config extends module_config{
 			'__access__' => array(
 				__CLASS__ => self::role_write,
 			),
+			'link' => FILTER_UNSAFE_RAW,
 		),
 		'save'=>array(
 			'link'=>'_disable_filter',

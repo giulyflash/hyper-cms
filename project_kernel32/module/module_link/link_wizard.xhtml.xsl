@@ -71,14 +71,15 @@
 		<xsl:when test="$link!=''"><xsl:value-of select="$link"/></xsl:when>
 		<xsl:otherwise><xsl:variable name="param_last"><xsl:choose>
 				<xsl:when test="$param_name!=''"><xsl:value-of select="concat('{',$q,'name',$q,':',$q,$param_title,$q,',',$q,'value',$q,':',$q,*[name()=$param_name],$q,'}')" disable-output-escaping="yes"/></xsl:when>
-				<xsl:otherwise><xsl:value-of select="$param"/></xsl:otherwise>
-			</xsl:choose></xsl:variable><xsl:value-of select="concat('{',$q,'module_name',$q,':',$q,$module_name,$q,',',$q,'method_name',$q,':',$q,$method_name,$q,',',$q,param,$q,':[',$param_last,']','}')" disable-output-escaping="yes"/></xsl:otherwise>
+				<xsl:otherwise><xsl:value-of select="$param"/></xsl:otherwise></xsl:choose></xsl:variable><xsl:value-of select="concat('{',$q,'module_name',$q,':',$q,$module_name,$q,',',$q,'method_name',$q,':',$q,$method_name,$q,',',$q,'param',$q,':[',$param_last,']','}')" disable-output-escaping="yes"/></xsl:otherwise>
 	</xsl:choose></xsl:variable>
-	<a>
-		<!-- output escaping do not work! -->
-		<xsl:attribute name="href">/admin.php?call=module_link.<xsl:value-of select="$link_method"/>&amp;link=<xsl:value-of select="$href" disable-output-escaping="yes"/></xsl:attribute>
-		<xsl:value-of select="$title"/>
-	</a>
+	<xsl:text disable-output-escaping="yes">&lt;a href='/admin.php?call=module_link.</xsl:text>
+	<xsl:value-of select="$link_method"/>
+	<xsl:text disable-output-escaping="yes">&amp;link=</xsl:text>
+	<xsl:value-of select="$href" disable-output-escaping="yes"/>
+	<xsl:text disable-output-escaping="yes">' &gt;</xsl:text>
+	<xsl:value-of select="$title"/>
+	<xsl:text disable-output-escaping="yes">&lt;/a&gt;</xsl:text>
 </xsl:template>
 
 </xsl:stylesheet>

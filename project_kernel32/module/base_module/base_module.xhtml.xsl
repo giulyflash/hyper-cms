@@ -210,7 +210,7 @@
 	<xsl:param name="method_name" select="/root/module/item[_module_name=$module_name]/_method_name"/>
 	<xsl:variable name="href_tail"><xsl:if test="id">&amp;insert_place={id}</xsl:if></xsl:variable>
 	<xsl:variable name="href_tail2"><xsl:if test="id">&amp;category_id={id}</xsl:if></xsl:variable>
-	<a href="/admin.php?call={$edit_module_name}.edit{$href_tail2}" class="subitem">
+	<a href="/admin.php?call={$edit_module_name}.edit_category{$href_tail}" class="subitem">
 		<xsl:value-of select="/root/language/*[name()=$module_name]/*[name()=$method_name]/add_category"/>
 	</a>
 	<xsl:if test="not(id)">

@@ -975,7 +975,9 @@ class app extends module{
 		}
 	}
 	
-	public function redirect($location,$params=array()){
+	public function redirect($location,$params=array(), $auto_base = false){
+		if(!$location)
+			return;
 		if(!isset($_SESSION))
 			session_start();
 		if($this->error)
@@ -984,6 +986,7 @@ class app extends module{
 			$_SESSION['message'] = $this->message;
 		foreach($params as $name=>$value)
 			$location.= '&'.$name.'='.$value;
+		//if($auto_base) TODO get module-method
 		header("Location: ".$location);
 		die;
 	}
