@@ -5,58 +5,60 @@
 <xsl:template match="root/module/item[_module_name='module_link' and _method_name='_admin']">
 	<xsl:param name="method_separator"> - </xsl:param>
 	<xsl:param name="param_separator"> = </xsl:param>
-	<xsl:if test="_argument/link">
-		<h1>{Заголовок}</h1>
+	<!-- <xsl:if test="_argument/link">
+		<h1>Связи</h1>
+	</xsl:if> -->
+	<xsl:if test="item">
+		<table class="module_link_list">
+			<thead>
+				<th>Позиция</th>
+				<th>Что связываем</th>
+				<th>С чем связываем</th>
+				<th>Удалить</th>
+			</thead>
+			<xsl:for-each select="item">
+				<xsl:variable name="href" select="concat('admin.php?call=module_link.edit&amp;id=',id)"/>
+				<tr>
+					<td>
+						<span><xsl:value-of select="position_title"/></span>
+					</td>
+					<td>
+						<a href="{$href}">
+							<xsl:value-of select="concat(module_title,$method_separator,method_title)"/>
+							<xsl:if test = "params/item[type='param']">
+								:<br/>
+							</xsl:if>
+						</a>
+						<xsl:for-each select="params/item[type='param']">
+							<xsl:value-of select="concat(title,$param_separator)"/>
+							<span><xsl:value-of select="value"/></span>
+							<xsl:if test="position()!=last()">
+								,<br/>
+							</xsl:if>
+						</xsl:for-each>
+					</td>
+					<td>
+						<a href="{$href}">
+							<xsl:value-of select="concat(center_module_title,$method_separator,center_method_title)"/>
+							<xsl:if test = "params/item[type='condition']">
+								:<br/>
+							</xsl:if>
+						</a>
+						<xsl:for-each select="params/item[type='condition']">
+							<xsl:value-of select="concat(title,$param_separator)"/>
+							<span><xsl:value-of select="value"/></span>
+							<xsl:if test="position()!=last()">
+								,<br/>
+							</xsl:if>
+						</xsl:for-each>
+					</td>
+					<td class="remove">
+						<a href="admin.php?call=module_link.remove&amp;id={id}">X</a>
+					</td>
+				</tr>
+			</xsl:for-each>
+		</table>
 	</xsl:if>
-	<table class="module_link_list">
-		<thead>
-			<th>Позиция</th>
-			<th>Что связываем</th>
-			<th>С чем связываем</th>
-			<th>Удалить</th>
-		</thead>
-		<xsl:for-each select="item">
-			<xsl:variable name="href" select="concat('admin.php?call=module_link.edit&amp;id=',id)"/>
-			<tr>
-				<td>
-					<span><xsl:value-of select="position_title"/></span>
-				</td>
-				<td>
-					<a href="{$href}">
-						<xsl:value-of select="concat(module_title,$method_separator,method_title)"/>
-						<xsl:if test = "params/item[type='param']">
-							:<br/>
-						</xsl:if>
-					</a>
-					<xsl:for-each select="params/item[type='param']">
-						<xsl:value-of select="concat(title,$param_separator)"/>
-						<span><xsl:value-of select="value"/></span>
-						<xsl:if test="position()!=last()">
-							,<br/>
-						</xsl:if>
-					</xsl:for-each>
-				</td>
-				<td>
-					<a href="{$href}">
-						<xsl:value-of select="concat(center_module_title,$method_separator,center_method_title)"/>
-						<xsl:if test = "params/item[type='condition']">
-							:<br/>
-						</xsl:if>
-					</a>
-					<xsl:for-each select="params/item[type='condition']">
-						<xsl:value-of select="concat(title,$param_separator)"/>
-						<span><xsl:value-of select="value"/></span>
-						<xsl:if test="position()!=last()">
-							,<br/>
-						</xsl:if>
-					</xsl:for-each>
-				</td>
-				<td class="remove">
-					<a href="admin.php?call=module_link.remove&amp;id={id}">X</a>
-				</td>
-			</tr>
-		</xsl:for-each>
-	</table>
 	<p>
 		<xsl:variable name="new_link_data"><xsl:if test="_argument/link">&amp;link=<xsl:value-of select="_argument/link" disable-output-escaping="yes"/></xsl:if></xsl:variable>
 		<a href="/admin.php?call=module_link.edit{$new_link_data}">Новая связь</a>

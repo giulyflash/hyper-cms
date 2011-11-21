@@ -322,7 +322,7 @@ class object_sql_query{
 		if(!in_array(strtolower($inner), array('inner','outer')))
 			throw new my_exception('Wrong join',$inner);
 		$this->check_table_name($table);
-		$sql = ' '.strtoupper($left).' '.strtoupper($inner).' JOIN '.$this->escstr($table);
+		$sql = ' '.strtoupper($left).' '.strtoupper($inner).' JOIN '.$table;
 		$this->parent->add_sql($sql);
 		return new object_sql_query(NULL, $this->parent);
 	}
