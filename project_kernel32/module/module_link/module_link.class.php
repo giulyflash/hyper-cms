@@ -92,7 +92,7 @@ class module_link extends module{
 			$this->_result['link']['param'] = $this->_query->select()->from('module_link_param')->where('link_id',$id)->order('order')->query();
 			$this->_result['link'] = json_encode($this->_result['link']);
 		}elseif($link)
-			$this->_result['link'] = str_replace('&#34;', '"', $link);//FIXME decode punicode
+			$this->_result['link'] = $this->convert_link($link);
 		$module_list = $this->get_module($this->_config('exclude_from_admin_list'));
 		$this->_result['data'] = json_encode($module_list);
 		$this->_result['position'] = $this->_query->select('translit_title,title')->from('position')->query2assoc_array('translit_title','title');
@@ -141,8 +141,15 @@ class module_link extends module{
 		return $id;
 	}
 	
-	public function _admin(){
-		$this->_result = $this->_query->select()->from('module_link')->where('inactive',0)->order('position,order,id')->query2assoc_array('id',NULL,false);
+	public function _admin($link=NULL){
+		$this->_query->select()->from('module_link')->where('inactive',0);
+		if($link){
+			$link = json_decode($this->convert_link($link));
+			if(!$link)
+				throw new my_exception('parse json error');
+			//$this->_query->_and();
+		}
+		$this->_result = $this->_query->order('position,order,id')->query2assoc_array('id',NULL,false);
 		$params = $this->_query->select()->from('module_link_param')->where('link_id',array_keys($this->_result),'in')->query();
 		foreach($params as &$param)
 			$this->_result[$param['link_id']]['params'][] = $param;
@@ -199,6 +206,10 @@ class module_link extends module{
 			$this->_message('deleted seccessfully');
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
 		}
+	}
+	
+	public function convert_link($link){
+		return str_replace('&#34;', '"', $link);//FIXME decode punicode
 	}
 }
 

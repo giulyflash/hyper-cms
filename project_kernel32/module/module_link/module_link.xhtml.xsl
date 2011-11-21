@@ -5,6 +5,9 @@
 <xsl:template match="root/module/item[_module_name='module_link' and _method_name='_admin']">
 	<xsl:param name="method_separator"> - </xsl:param>
 	<xsl:param name="param_separator"> = </xsl:param>
+	<xsl:if test="_argument/link">
+		<h1>{Заголовок}</h1>
+	</xsl:if>
 	<table class="module_link_list">
 		<thead>
 			<th>Позиция</th>
@@ -55,7 +58,8 @@
 		</xsl:for-each>
 	</table>
 	<p>
-		<a href="/admin.php?call=module_link.edit">Новая связь</a>
+		<xsl:variable name="new_link_data"><xsl:if test="_argument/link">&amp;link=<xsl:value-of select="_argument/link" disable-output-escaping="yes"/></xsl:if></xsl:variable>
+		<a href="/admin.php?call=module_link.edit{$new_link_data}">Новая связь</a>
 	</p>
 </xsl:template>
 

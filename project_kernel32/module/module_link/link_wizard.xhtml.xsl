@@ -58,19 +58,27 @@
 </xsl:template>
 
 <xsl:template name="link_editor_href">
+	<xsl:param name="link"/>
 	<xsl:param name="module_name" select="_module_name"/>
 	<xsl:param name="method_name" select="_method_name"/>
 	<xsl:param name="param"/>
 	<xsl:param name="param_name">translit_title</xsl:param>
 	<xsl:param name="param_title">title</xsl:param>
-	<xsl:param name="title">добавить связь</xsl:param>
-	<xsl:variable name="open_bracket">{</xsl:variable>
-	<xsl:variable name="close_bracket">}</xsl:variable>
-	<xsl:variable name="param_last"><xsl:choose>
-		<xsl:when test="$param_name!=''">{"name":"<xsl:value-of select="$param_title"/>","value":"<xsl:value-of select="*[name()=$param_name]"/>"}</xsl:when>
-		<xsl:otherwise><xsl:value-of select="$param"/></xsl:otherwise>
+	<xsl:param name="title">редактор связей</xsl:param>
+	<xsl:param name="link_method">_admin</xsl:param>
+	<xsl:variable name="q">"</xsl:variable>
+	<xsl:variable name="href"><xsl:choose>
+		<xsl:when test="$link!=''"><xsl:value-of select="$link"/></xsl:when>
+		<xsl:otherwise><xsl:variable name="param_last"><xsl:choose>
+				<xsl:when test="$param_name!=''"><xsl:value-of select="concat('{',$q,'name',$q,':',$q,$param_title,$q,',',$q,'value',$q,':',$q,*[name()=$param_name],$q,'}')" disable-output-escaping="yes"/></xsl:when>
+				<xsl:otherwise><xsl:value-of select="$param"/></xsl:otherwise>
+			</xsl:choose></xsl:variable><xsl:value-of select="concat('{',$q,'module_name',$q,':',$q,$module_name,$q,',',$q,'method_name',$q,':',$q,$method_name,$q,',',$q,param,$q,':[',$param_last,']','}')" disable-output-escaping="yes"/></xsl:otherwise>
 	</xsl:choose></xsl:variable>
-	<a href='/admin.php?call=module_link.edit&amp;link={$open_bracket}"module_name":"{$module_name}","method_name":"{$method_name}",param:[{$param_last}]{$close_bracket}'><xsl:value-of select="$title"/></a>
+	<a>
+		<!-- output escaping do not work! -->
+		<xsl:attribute name="href">/admin.php?call=module_link.<xsl:value-of select="$link_method"/>&amp;link=<xsl:value-of select="$href" disable-output-escaping="yes"/></xsl:attribute>
+		<xsl:value-of select="$title"/>
+	</a>
 </xsl:template>
 
 </xsl:stylesheet>
