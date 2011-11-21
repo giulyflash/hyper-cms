@@ -48,6 +48,8 @@ class app_config extends config{
 	protected $language_param_name = '__param';
 	protected $disable_php_filter = '_disable_filter';//disable filter for method parameter 
 	protected $language_obj_name = '__object';
+	protected $path = array();
+	protected $main_page_title = 'Главная';//FIXME translation
 
 	protected $link = array(
 		'admin_mode.*'=>array('head'=>'user',),
@@ -116,6 +118,7 @@ class app extends module{
 		//$this->module[] = &$this;
 		$this->module_name = get_class($this);//get_called_class();
 		$this->config = new app_config($temp=NULL,$this);
+		$this->_path[] = array('link'=>($this->admin_mode?'/admin.php':'/'), 'title'=>$this->_config('main_page_name'));
 		try{
 			$this->_set_call_time();
 			$this->get_domain_config();
@@ -277,10 +280,6 @@ class app extends module{
 	}
 	
 	//service section
-	
-	public function add_path($path){
-		$this->path[] = $path;
-	}
 	
 	public function check_admin_mode(){
 		if($this->admin_mode){
@@ -973,6 +972,12 @@ class app extends module{
 		if($this->_config('debug')){
 			$this->output['debug'] = $this->_debug;
 		}
+	}
+	
+	public function &add_path($item){
+		if($item)
+			$this->_path[] = $item; 
+		return $this->_path;
 	}
 	
 	public function redirect($location,$params=array(), $auto_base = false){

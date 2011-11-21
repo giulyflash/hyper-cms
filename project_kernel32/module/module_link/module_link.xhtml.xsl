@@ -60,7 +60,7 @@
 		</table>
 	</xsl:if>
 	<p>
-		<xsl:variable name="new_link_data"><xsl:if test="_argument/link">&amp;link=<xsl:value-of select="_argument/link" disable-output-escaping="yes"/></xsl:if></xsl:variable>
+		<xsl:variable name="new_link_data"><xsl:if test="_argument/link!=''">&amp;link=<xsl:value-of select="_argument/link" disable-output-escaping="yes"/></xsl:if></xsl:variable>
 		<a href="/admin.php?call=module_link.edit{$new_link_data}">Новая связь</a>
 	</p>
 </xsl:template>
