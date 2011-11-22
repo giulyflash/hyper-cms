@@ -106,7 +106,7 @@ abstract class base_module extends module{
 	public function _admin($title=NULL){
 		$this->get_category_base('translit_title', $title, true, 'auto');
 		//parent::get_category('translit_title', $title, true, 'auto', NULL, array(array('module',$this->module_name), array('internal_type','image')));
-		//FIXME wtf it do not lod category by title?
+		//FIXME wtf it do not load category by title?
 	}
 	
 	public function get_category($title=false, $show='auto'){
@@ -348,6 +348,7 @@ abstract class base_module extends module{
 			if(!$result)
 				throw new my_exception('object not found by id', array('id'=>$id));
 			$this->_result = $result;
+			$this->parent->add_full_path($result['title']);
 		}
 		$this->category_list();
 		if(!isset($this->_result['create_date'])){

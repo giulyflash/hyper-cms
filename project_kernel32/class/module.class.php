@@ -255,5 +255,12 @@ abstract class module{
 	public function _get_param_value($method_name,$param_name){
 		//throw new my_exception('under construction');
 	}
+	
+	public function get_default_method(){
+		if($this->parent->admin_mode)
+			return $this->_config('admin_method');
+		else
+			return $this->_config('default_method');
+	}
 }
 ?>

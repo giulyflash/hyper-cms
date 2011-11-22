@@ -1,0 +1,12 @@
+.breadcrumbs span{
+	padding: 0 3px 0 0;
+	font-size: 0.65em;
+}
+
+.breadcrumbs a{
+	text-decoration: none;
+}
+
+.breadcrumbs a:hover{
+	text-decoration: underline;
+}

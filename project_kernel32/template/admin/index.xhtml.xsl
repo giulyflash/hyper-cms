@@ -13,7 +13,12 @@
 				<xsl:with-param name="position">head</xsl:with-param>
 			</xsl:call-template>
 		</div>
-		<a href="/admin.php"><h2>Панель управления</h2></a>
+		<h2>Панель управления</h2>
+		<div class="breadcrumbs">
+			<xsl:call-template name="_call">
+				<xsl:with-param name="position">breadcrumbs</xsl:with-param>
+			</xsl:call-template>
+		</div>
 	</div>
 <hr />
 <div id="page">

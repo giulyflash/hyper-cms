@@ -195,7 +195,7 @@ class module_link extends module{
 			$method_trans_title = 'method_title';
 		}
 		$module_name = $link[$module_param];
-		if(!$module_name || $module_name=='*')
+		if(!$module_name || $module_name=='*' || $module_name=='admin_mode.*')
 			return;
 		$module = new $module_name($this->parent);
 		$link[$module_trans_title] = (!empty($this->parent->language_cache[$link[$module_param]][$title_field]))?
