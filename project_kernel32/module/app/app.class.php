@@ -500,8 +500,8 @@ class app extends module{
 	private function get_db_link(){
 		//TODO join there, remove cicles
 		//get links
-		//$center_module = array($this->center_module, ($this->admin_mode?'admin_mode.':'').'*');
-		$center_module = array($this->center_module, 'admin_mode.*');
+		$center_module = array($this->center_module, ($this->admin_mode?'admin_mode.':'').'*');
+		//$center_module = array($this->center_module, 'admin_mode.*');
 		$center_method = array('*');
 		if($this->center_method)
 			$center_method[] = $this->center_method;//TODO nedd to get center method from call
