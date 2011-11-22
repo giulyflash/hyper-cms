@@ -3,9 +3,8 @@ class breadcrumbs extends module{
 	protected $config_class_name = 'breadcrumbs_config';
 
 	public function get($manual=NULL){
-		if(!$manual && $this->parent->get_path_count()==$this->parent->default_path_count && 
-			($this->parent->center_module!='admin' && $this->parent->center_method))
-				$this->parent->get_method_path();
+		if(!$manual && !$this->parent->manual_path && $this->parent->get_path_count()==$this->parent->default_path_count)
+			$this->parent->get_method_path();
 		return $this->parent->get_path();
 	}
 }
