@@ -26,7 +26,7 @@ function autoload($class_name){
 	elseif(file_exists($class_file = _kernel_path.$class_name._class_ext))
 		require_once($class_file);
 	elseif($output_index_error)
-		echo 'index.php error: class "'.$class_name.'" not found<br/>';
+		echo 'index.php error: class "'.$class_name.' ('.$class_file.') " not found<br/>';
 }
 
 if(!isset($admin_mode))

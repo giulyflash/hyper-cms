@@ -22,21 +22,26 @@
 				</td>
 			</tr>
 			<tr class="menu_cont">
-				<div class="img_preload">
-					<img src="/template/grosstech/images/button2_center_left.png"/>
-					<img src="/template/grosstech/images/button2_center_right.png"/>
-					<img src="/template/grosstech/images/button2_bottom_left.png"/>
-					<img src="/template/grosstech/images/button2_bottom_right.png"/>
-					<img src="template/grosstech/images/round/round_on_left.png"/>
-					<img src="template/grosstech/images/round/round_on_right.png"/>
-				</div>
 				<td>
+					<div class="img_preload">
+						<img src="/template/grosstech/images/button2_center_left.png"/>
+						<img src="/template/grosstech/images/button2_center_right.png"/>
+						<img src="/template/grosstech/images/button2_bottom_left.png"/>
+						<img src="/template/grosstech/images/button2_bottom_right.png"/>
+						<img src="template/grosstech/images/round/round_on_left.png"/>
+						<img src="template/grosstech/images/round/round_on_right.png"/>
+					</div>
 					<div class="menu wrap_left">
 						<div class="menu wrap_right">
 							<xsl:call-template name="_call">
 								<xsl:with-param name="position">top</xsl:with-param>
 							</xsl:call-template>
 						</div>
+					</div>
+					<div class="breadcrumbs">
+						<xsl:call-template name="_call">
+							<xsl:with-param name="position">breadcrumbs</xsl:with-param>
+						</xsl:call-template>
 					</div>
 				</td>
 			</tr>

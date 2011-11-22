@@ -480,3 +480,12 @@ div.timetable{
 .message_box{
 	color: #FF7A00;
 }
+
+/**/
+
+.breadcrumbs *{
+	color: white;
+}
+.breadcrumbs{
+	padding-left: 18px;
+}
