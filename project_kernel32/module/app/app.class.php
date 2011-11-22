@@ -80,6 +80,7 @@ class app_config extends config{
 	protected $access_name = '__access__';
 	//$file_name = _module_path.$class_name.'/'.$class_name.$this->parent->_config('module_template_ext');
 	protected $json_html_template = 'json_html.xhtml.xsl';
+	protected $ucfirst_path = true;
 }
 
 class app extends module{
@@ -110,6 +111,7 @@ class app extends module{
 	private $_path = array();
 	public $_debug = array();
 	public $default_path_count = 1;
+	public $manual_path = false;
 	
 	public function __construct($admin_mode = NULL){
 		//set_error_handler("app::error_handler");
@@ -501,7 +503,6 @@ class app extends module{
 		//TODO join there, remove cicles
 		//get links
 		$center_module = array($this->center_module, ($this->admin_mode?'admin_mode.':'').'*');
-		//$center_module = array($this->center_module, 'admin_mode.*');
 		$center_method = array('*');
 		if($this->center_method)
 			$center_method[] = $this->center_method;//TODO nedd to get center method from call
@@ -1005,11 +1006,17 @@ class app extends module{
 			$item = array('title'=>$item);
 		if(!isset($item['href']))
 			$item['href'] = $_SERVER['REQUEST_URI'];
-		$item['title'] = $this->mb_ucfirst($item['title']);
+		$item['title'] = $this->_config('ucfirst_path')?$this->mb_ucfirst($item['title']):$item['title'];
 		$this->_path[] = $item;
 	}
 	
-	public function add_full_path($item){
+	public function add_module_path($item){
+		if($this->get_path_count()==$this->default_path_count)
+			$this->get_module_path();
+		$this->add_path($item);
+	}
+	
+	public function add_method_path($item){
 		if($this->get_path_count()==$this->default_path_count)
 			$this->get_method_path();
 		$this->add_path($item);
@@ -1039,17 +1046,23 @@ class app extends module{
 	}
 	
 	public function get_module_path(){
-		$module_name = $this->get_lang_title(NULL,false);
-		$admin_mode = $this->admin_mode?'admin.php':'';
-		$this->add_path(array('href'=>'/'.$admin_mode.'?call='.$this->center_module.'.'.$this->module[0]->get_default_method(),'title'=>$module_name));
+		if($this->center_module == $this->_config('default_module') && !$this->center_method){
+			if(!$this->admin_mode)
+				$this->_path = array();
+		}
+		else{
+			$module_name = $this->get_lang_title(NULL,false);
+			$admin_mode = $this->admin_mode?'admin.php':'';
+			$this->add_path(array('href'=>'/'.$admin_mode.'?call='.$this->center_module.'.'.$this->module[0]->get_default_method(),'title'=>$module_name));
+		}
 	}
 	
 	public function get_method_path($method=NULL){
 		if(!$method)
 			$method = $this->center_method;
 		$this->get_module_path();
-		$admin_mode = $this->admin_mode?'admin.php':'';
-		if($method!=$this->module[0]->get_default_method()){
+		if($method && $method!=$this->module[0]->get_default_method()){
+			$admin_mode = $this->admin_mode?'admin.php':'';
 			$method_name = $this->get_lang_title();
 			$this->add_path(array('href'=>'/'.$admin_mode.'?call='.$this->center_module.'.'.$method,'title'=>$method_name));
 		}

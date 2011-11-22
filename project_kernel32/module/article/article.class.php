@@ -20,6 +20,8 @@ class article extends base_module{
 			$this->_message('title not found');
 		else
 			$this->get('translit_title',$title,$show_title);
+		if(!empty($this->_result['title']))
+			$this->parent->add_module_path($this->_result['title']);
 	}
 	
 	/*public function get_category($field = 'translit_title', $value=NULL, $need_item=true){

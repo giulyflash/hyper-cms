@@ -344,11 +344,10 @@ abstract class base_module extends module{
 	
 	public function edit($id=NULL, $category_id=NULL, $select='*'){
 		if($id){
-			$result = $this->_query->select($select)->from($this->_table_name)->where('id',$id)->query1();
-			if(!$result)
+			$this->_result = $this->_query->select($select)->from($this->_table_name)->where('id',$id)->query1();
+			if(!$this->_result)
 				throw new my_exception('object not found by id', array('id'=>$id));
-			$this->_result = $result;
-			$this->parent->add_full_path($result['title']);
+			$this->parent->add_method_path($this->_result['title']);
 		}
 		$this->category_list();
 		if(!isset($this->_result['create_date'])){
