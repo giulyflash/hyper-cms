@@ -6,12 +6,12 @@ class article extends base_module{
 	private $more_tag = '<!--more-->';
 
 	public function get($field = 'id', $value='1',$show_title=false){
-		$select = array('text','id');
+		$select = $this->_config('item_single_field');
 		if($show_title === false)
 			$show_title = $this->_config('default_show_title');
 		if($show_title)
-			$select[] = 'title';
-		if(parent::get($field,$value,$select,array('draft',1,'!=')) && $show_title)
+			$select.=',title';
+		if(parent::get($field,$value,$select,array('draft',1,'!=')))
 			$this->_title = $this->_result['title'];
 	}
 	
@@ -20,8 +20,6 @@ class article extends base_module{
 			$this->_message('title not found');
 		else
 			$this->get('translit_title',$title,$show_title);
-		if(!empty($this->_result['title']))
-			$this->parent->add_module_path($this->_result['title']);
 	}
 	
 	/*public function get_category($field = 'translit_title', $value=NULL, $need_item=true){
@@ -221,11 +219,14 @@ class article_config extends base_module_config{
 	protected $object = array(
 		'article'=>array(
 			'method'=>'get_by_title',
-			'param'=>'title'
+			'param'=>'title',
+			//'db_param'=>'translit_title',
 		),
 		'article_category'=>array(
 			'method'=>'get_category_by_title',
-			'param'=>'title'
+			'type'=>'category',
+			'param'=>'title',
+			//'db_param'=>'translit_title',
 		),
 	);
 	
@@ -251,5 +252,6 @@ class article_config extends base_module_config{
 	private $news_trans_title = 'Novosti';
 	private $more_tag = '<!--more-->';
 	protected $item_field = 'id,translit_title,title,category_id,preview';
+	protected $item_single_field='id,category_id,text';
 }
 ?>

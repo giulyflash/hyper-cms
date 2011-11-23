@@ -2,7 +2,7 @@
 class base_module_config extends module_config{
 	protected $callable_method=array(
 		//TODO check array merge works properly for child modules
-		'get,get_category,get_category_by_title'=>array(
+		'get,get_category'=>array(
 			'__access__' => array(
 				__CLASS__ => self::role_read,
 			),
@@ -83,6 +83,7 @@ class base_module_config extends module_config{
 	
 	protected $category_field='id,title,translit_title,left,right,depth';
 	protected $item_field='id,title,category_id';
+	protected $item_single_field='id,title,category_id';
 	protected $item_order='order';
 	public $category_type = 'dropdown';
 	
@@ -301,10 +302,6 @@ abstract class base_module extends module{
 		$this->_result = &$result;
 	}
 	
-	public function get_category_by_title($title){
-		$this->get_category('translit_title', $title);
-	}
-	
 	private function parse_condition(&$condition,$where=false){
 		//$condition = array( array('field1','value1'),  array('field2','value2','!=') );
 		if(!$condition)
@@ -327,8 +324,9 @@ abstract class base_module extends module{
 		}
 	}
 	
-	public function get($field = NULL, $value=NULL,$select = '*',$condition=array()){
-
+	public function get($field = NULL, $value=NULL,$select = NULL,$condition=array()){
+		if(!$select)
+			$select = $this->_config('item_single_field');
 		$this->_result = $this->_query->select($select)->from($this->_table_name);
 		if($field){
 			$this->_query->where($field,$value);
@@ -340,6 +338,30 @@ abstract class base_module extends module{
 		$this->_result = $this->_query->query1();
 		if(!$this->_result)
 			$this->_message('object not found',array('name'=>$value));
+		//if(!empty($this->_result['title']))
+			//$this->parent->add_module_path($this->_result['title']);
+		$this->add_item_path();
+	}
+	
+	protected function add_item_path(){
+		$this->parent->add_module_path();
+		if(!empty($this->_result['category_id'])){
+			$this->_query->injection('SET @a=(SELECT `left`')->from($this->_category_table_name)->where('id', $this->_result['category_id'])->limit('1')->close_bracket()->query();
+			$matches = $this->_query->select('title,translit_title')->from($this->_category_table_name)->injection(' WHERE `left` <= @a AND `right` >= @a')->order('left')->query();
+			$admin_mode = $this->parent->admin_mode?'admin.php':'';
+			foreach($matches as &$match)
+				$this->parent->add_path(array('title'=>$match['title'],'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.get_category&title='.$match['translit_title']));
+		}
+		if(!empty($this->_result['title']))
+			$this->parent->add_path($this->_result['title']);
+	}
+	
+	protected function add_category_path(){
+		
+	}
+	
+	protected function get_path($left=NULL,$right=NULL){
+		
 	}
 	
 	public function edit($id=NULL, $category_id=NULL, $select='*'){
@@ -625,21 +647,6 @@ abstract class base_module extends module{
 				break;
 			};
 			case 'get_category':{
-				switch($param_name){
-					case 'field':{
-						$this->_result = $this->_query->fetch_field($this->_category_table_name);
-						break;
-					}
-					case 'value':break;
-					case 'need_item':{
-						return array('true'=>'+','false'=>'-');
-						break;
-					}
-					default: parent::_get_param_value($method_name,$param_name);
-				}
-				break;
-			};
-			case 'get_category_by_title':{
 				switch($param_name){
 					case 'title':{
 						$this->_result = $this->_query->select('title,translit_title')->from($this->_category_table_name)->query2assoc_array('translit_title','title');

@@ -1002,15 +1002,17 @@ class app extends module{
 	//path
 	
 	public function add_path($item){
-		if(!is_array($item))
-			$item = array('title'=>$item);
-		if(!isset($item['href']))
-			$item['href'] = $_SERVER['REQUEST_URI'];
-		$item['title'] = $this->_config('ucfirst_path')?$this->mb_ucfirst($item['title']):$item['title'];
-		$this->_path[] = $item;
+		if($item){
+			if(!is_array($item))
+				$item = array('title'=>$item);
+			if(!isset($item['href']))
+				$item['href'] = $_SERVER['REQUEST_URI'];
+			$item['title'] = $this->_config('ucfirst_path')?$this->mb_ucfirst($item['title']):$item['title'];
+			$this->_path[] = $item;
+		}
 	}
 	
-	public function add_module_path($item){
+	public function add_module_path($item=NULL){
 		if($this->get_path_count()==$this->default_path_count)
 			$this->get_module_path();
 		$this->add_path($item);
@@ -1053,7 +1055,8 @@ class app extends module{
 		else{
 			$module_name = $this->get_lang_title(NULL,false);
 			$admin_mode = $this->admin_mode?'admin.php':'';
-			$this->add_path(array('href'=>'/'.$admin_mode.'?call='.$this->center_module.'.'.$this->module[0]->get_default_method(),'title'=>$module_name));
+			if(isset($this->module[0]))
+				$this->add_path(array('href'=>'/'.$admin_mode.'?call='.$this->center_module.'.'.$this->module[0]->get_default_method(),'title'=>$module_name));
 		}
 	}
 	
