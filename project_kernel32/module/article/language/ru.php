@@ -1,17 +1,9 @@
 <?php
 $language = array(
-	'get_by_title'=>array(
-		'__title'=>'выбрать статью по заголовку',
-		'__param'=>array(
-			'title' => 'заголовок',			
-			'show_title' => 'показывать заголовок',
-		),
-	),
 	'get'=>array(
 		'__title'=>'выбрать статью',
 		'__param'=>array(
-			'field' => 'имя поля',
-			'value' => 'значение поля',			
+			'title' => 'заголовок',			
 			'show_title' => 'показывать заголовок',
 		),
 	),

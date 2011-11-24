@@ -179,10 +179,10 @@ div.img_preload{
 	margin-left: 200px;
 }
 
-.content a, .content a:visited, .footer a, .footer a:visited{
+.content a, .content a:visited, .footer a, .footer a:visited, .breadcrumbs a, .breadcrumbs a:VISITED{
 	color: #1A629D;
 }
-.content a:hover, footer a:hover{
+.content a:hover, .footer a:hover, .breadcrumbs a:hover{
 	color: #00A0E3;
 }
 .content .container{
@@ -211,4 +211,24 @@ div.img_preload{
 }
 .left_container .menu li:hover{
 	background: url("/template/grosstech/images/icon/small_button_on.png") no-repeat top left;
+}
+
+/*message*/
+
+.message_box {
+    color: #FF7A00;
+}
+
+.error_box {
+    color: #FF0000;
+}
+
+/*breadcrumbs*/
+
+.breadcrumbs{
+	padding-left: 30px;
+}
+.breadcrumbs span{
+	position: relative;
+	top:-1px;
 }

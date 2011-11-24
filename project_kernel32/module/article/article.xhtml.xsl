@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" />
 
-<xsl:template match="root/module/item[_module_name='article' and (_method_name='get' or _method_name='get_by_title')]">
+<xsl:template match="root/module/item[_module_name='article' and (_method_name='get')]">
 	<xsl:if test="title">
 		<h1><xsl:value-of select="title"/></h1>
 	</xsl:if>
@@ -110,7 +110,7 @@
 						</td>
 						<td>
 							<xsl:call-template name="link_editor_href">
-								<xsl:with-param name="method_name">get_by_title</xsl:with-param>
+								<xsl:with-param name="method_name">get</xsl:with-param>
 							</xsl:call-template>
 						</td>
 					</tr>
@@ -218,7 +218,7 @@
 			<ul class="items">
 				<xsl:for-each select="items/item">
 					<li>
-						<a href="/?call=article.get_by_title&amp;title={translit_title}" alt="{title}" title="{title}">
+						<a href="/?call=article.get&amp;title={translit_title}" alt="{title}" title="{title}">
 							<h4><xsl:value-of select="title"/></h4>
 						</a>
 						<xsl:if test="thumb_path">
@@ -227,7 +227,7 @@
 						<div class="text">
 							<xsl:value-of select="preview"/>
 							<xsl:if test="preview!='' and substring(string-length(preview)-1, 1, preview)!='.'">...</xsl:if>
-							<a href="/?call=article.get_by_title&amp;title={translit_title}" alt="{title}" title="{title}">
+							<a href="/?call=article.get&amp;title={translit_title}" alt="{title}" title="{title}">
 								читать полностью &#8594;
 							</a>
 						</div>

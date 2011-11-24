@@ -1,6 +1,13 @@
 <?php
 class menu extends base_module{
 	protected $config_class_name = 'menu_config';
+	protected $alias_data = array();
+	
+	public function __construct(&$parent=NULL){
+		parent::__construct($parent);
+		if(!$this->parent->menu_module)
+			$this->parent->menu_module = $this;
+	}
 	
 	public function _admin($title=NULL,$menu_id=NULL){
 		if(!$menu_id){
@@ -68,8 +75,8 @@ class menu extends base_module{
 			}
 			if(!$title){
 				$this->_message('menu item name must not be empty');
-				//array(1) { [0]=> array(3) { ["module"]=> string(7) "article" ["method"]=> string(12) "get_by_title" ["param"]=> array(1) { [0]=> array(2) { ["name"]=> string(5) "title" ["value"]=> string(7) "Servera" } } } } 
-				//{"center_module":"*","center_method":"*","module_name":"article","method_name":"get_by_title","param":[{"param_name":"title","value":"Server","type":"param"}]}
+				//array(1) { [0]=> array(3) { ["module"]=> string(7) "article" ["method"]=> string(12) "get" ["param"]=> array(1) { [0]=> array(2) { ["name"]=> string(5) "title" ["value"]=> string(7) "Servera" } } } } 
+				//{"center_module":"*","center_method":"*","module_name":"article","method_name":"get","param":[{"param_name":"title","value":"Server","type":"param"}]}
 				if(!empty($link[0]))
 					$link = '&link='.json_encode($link[0]);
 				$this->parent->redirect('/admin.php?call=menu.edit_item&menu_id='.$menu_id.$link);
@@ -128,11 +135,11 @@ class menu extends base_module{
 	}
 	
 	public function check_alias($link){
-		$alias_data = $this->_query->select('link_template,alias_template')->from($this->_config('alias_table'))->order('order')->query();
-		foreach($alias_data as &$alias){
-			$alias['link_template'] = '%'.$alias['link_template'].'%';
-			if(preg_match($alias['link_template'], $link)){
-				$link = preg_replace($alias['link_template'], $alias['alias_template'], $link);
+		if(!$this->alias_data) 
+			$this->alias_data = $this->_query->select('link_template,alias_template')->from($this->_config('alias_table'))->order('order')->query();
+		foreach($this->alias_data as &$alias){
+			if(preg_match('%'.$alias['link_template'].'%', $link)){
+				$link = preg_replace('%'.$alias['link_template'].'%', $alias['alias_template'], $link);
 				break;
 			}
 		}
@@ -201,7 +208,7 @@ class menu_config extends base_module_config{
 				'menu_item' => self::role_write
 			),
 		),
-		'move_item,save_item,remove_category,edit_category,get_category,get_category_by_title,save_category'=>array(
+		'move_item,save_item,remove_category,edit_category,get_category,save_category'=>array(
 			'_exclude'=>true
 		),
 		'edit_item'=>array(

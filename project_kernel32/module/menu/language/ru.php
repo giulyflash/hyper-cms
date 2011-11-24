@@ -4,7 +4,6 @@
 <option value="remove_item">remove_item</option>
 <option value="save_item">save_item</option>
 <option value="get_category">выбрать список категорий</option>
-<option value="get_category_by_title">выбрать список категорий по имени</option>
 <option value="get">выбрать список объектов</option>
 <option value="edit_category">редактировать категорию</option>
 <option value="edit">редактировать объект</option>

@@ -481,6 +481,10 @@ div.timetable{
 	color: #FF7A00;
 }
 
+.error_box {
+    color: #FF0000;
+}
+
 /**/
 
 .breadcrumbs *{
