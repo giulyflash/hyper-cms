@@ -324,7 +324,16 @@ abstract class base_module extends module{
 		}
 	}
 	
-	public function get($field = NULL, $value=NULL,$select = NULL,$condition=array()){
+	public function get($title=NULL, $select=NULL,$condition=array()){
+		$field = 'translit_title';
+		if(!$title && !($title = $this->_config('default_article_name'))){
+			$title = 1;
+			$field = 'id';
+		}
+		$this->_get($field, $title, $select, $condition);
+	}
+	
+	public function _get($field = NULL, $value=NULL,$select = NULL,$condition=array()){
 		if(!$select)
 			$select = $this->_config('item_single_field');
 		$this->_result = $this->_query->select($select)->from($this->_table_name);
@@ -370,6 +379,10 @@ abstract class base_module extends module{
 			if(!$this->_result)
 				throw new my_exception('object not found by id', array('id'=>$id));
 			$this->parent->add_method_path($this->_result['title']);
+		}
+		elseif(!empty($_SESSION['_temp_var'])){
+			$this->_result = $_SESSION['_temp_var'];
+			unset($_SESSION['_temp_var']);
 		}
 		$this->category_list();
 		if(!isset($this->_result['create_date'])){

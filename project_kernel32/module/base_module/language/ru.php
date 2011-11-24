@@ -10,17 +10,10 @@ $language = array(
 	'get_category' => array(
 		'__title' => 'выбрать список категорий',
 		'__param' => array(
-			'field' => 'имя поля',
-			'value' => 'значение поля',
+			'title' => 'заголовок',
 			'need_item' => 'выводить объекты'
 		),
 		'no_obj_msg'=>'Объектов не найдено.',
-	),
-	'get_category_by_title' => array(
-		'__title' => 'выбрать категорю по имени',
-		'__param' => array(
-			'title' => 'заголовок',
-		),
 	),
 	'edit' => array(
 		'__title' => 'редактировать объект',

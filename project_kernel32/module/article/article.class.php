@@ -5,21 +5,14 @@ class article extends base_module{
 	
 	private $more_tag = '<!--more-->';
 
-	public function get($field = 'id', $value='1',$show_title=false){
+	public function get($title = NULL, $show_title=false){
 		$select = $this->_config('item_single_field');
 		if($show_title === false)
 			$show_title = $this->_config('default_show_title');
 		if($show_title)
 			$select.=',title';
-		if(parent::get($field,$value,$select,array('draft',1,'!=')))
+		if(parent::get($title, $select, array('draft',1,'!=')))
 			$this->_title = $this->_result['title'];
-	}
-	
-	public function get_by_title($title = NULL, $show_title=false){
-		if(!$title)
-			$this->_message('title not found');
-		else
-			$this->get('translit_title',$title,$show_title);
 	}
 	
 	/*public function get_category($field = 'translit_title', $value=NULL, $need_item=true){
@@ -27,10 +20,21 @@ class article extends base_module{
 	}*/
 	
 	public function save($id=NULL, $title=NULL, $translit_title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $category_id=NULL, $create_date=array()){
-		if(!$title)
-			throw new my_exception('title must not be empty');
-		if(!$category_id)
-			$category_id = NULL;
+		if(!$title){
+			$this->_message('title must not be empty');
+			$_SESSION['_temp_var'] = array(
+				"id"=>$id,
+				"title"=>$title,
+				"translit_title"=>$translit_title,
+				"create_date"=>$create_date,
+				"text"=>$text,
+				"keyword"=>$keyword,
+				"description"=>$description,
+				"draft"=>$draft,
+				"category_id"=>$category_id
+			);
+			$this->parent->redirect('/'.($this->parent->admin_mode?'admin.php':'').'?call='.$this->module_name.'.edit');
+		}
 		$value = array(
 			'title'=>$title,
 			'translit_title'=>($translit_title?$translit_title:translit::transliterate($title)),
@@ -39,7 +43,7 @@ class article extends base_module{
 			'keyword'=>$keyword,
 			'description'=>$description,
 			'draft'=>($draft)?1:0,
-			'category_id'=>$category_id,
+			'category_id'=>$category_id?$category_id:NULL,
 		);
 		$date = new DateTime();
 		$date = $date->format('Y-m-d H:i:s');
@@ -156,17 +160,6 @@ class article extends base_module{
 	
 	public function _get_param_value($method_name,$param_name){
 		switch($method_name){
-			case 'get':{
-				switch($param_name){
-					case 'show_title':{
-						return array('true'=>'+','false'=>'-');
-						break;
-					}
-					default:
-						parent::_get_param_value($method_name,$param_name);
-				}
-				break;
-			};
 			case 'edit':{
 				switch($param_name){
 					case 'id':{
@@ -178,7 +171,7 @@ class article extends base_module{
 				}
 				break;
 			};
-			case 'get_by_title':{
+			case 'get':{
 				switch($param_name){
 					case 'title':{
 						return $this->_query->select('title,translit_title')->from($this->module_name)->where('draft',1,'!=')->query2assoc_array('translit_title','title');
@@ -201,7 +194,7 @@ class article extends base_module{
 
 class article_config extends base_module_config{
 	protected $callable_method = array(
-		'get_by_title' =>array(
+		'get' =>array(
 			'__access__' => array(
 				__CLASS__ => self::role_read,
 			),
@@ -218,12 +211,12 @@ class article_config extends base_module_config{
 	
 	protected $object = array(
 		'article'=>array(
-			'method'=>'get_by_title',
+			'method'=>'get',
 			'param'=>'title',
 			//'db_param'=>'translit_title',
 		),
 		'article_category'=>array(
-			'method'=>'get_category_by_title',
+			'method'=>'get_category',
 			'type'=>'category',
 			'param'=>'title',
 			//'db_param'=>'translit_title',

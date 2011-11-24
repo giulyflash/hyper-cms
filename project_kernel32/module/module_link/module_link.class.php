@@ -81,7 +81,7 @@ class module_link extends module{
 	public function edit($id=NULL, $link=NULL){
 		//module, method, params - to made link from
 		//TODO switch show/hide private methods in the list
-		//$data format: {"center_module":"*","center_method":"*","module_name":"article","method_name":"get_by_title","param":[{"link_id":"7","param_name":"title","value":"Server","type":"param"}]};
+		//$data format: {"center_module":"*","center_method":"*","module_name":"article","method_name":"get","param":[{"link_id":"7","param_name":"title","value":"Server","type":"param"}]};
 		if($id){
 			$this->_result['link'] = $this->_query->select()->from('module_link')->where('id',$id)->query1();
 			if(!$this->_result['link']){

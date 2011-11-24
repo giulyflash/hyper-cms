@@ -51,6 +51,7 @@ class app_config extends config{
 	protected $path = array();
 	protected $main_page_title = 'Главная';//FIXME translation in language file
 	protected $admin_page_title = 'Панель управления';
+	protected $path_link_alias = true;
 
 	protected $link = array(
 		'admin_mode.*'=>array('head'=>'user',),
@@ -112,6 +113,7 @@ class app extends module{
 	public $_debug = array();
 	public $default_path_count = 1;
 	public $manual_path = false;
+	public $menu_module = NULL;
 	
 	public function __construct($admin_mode = NULL){
 		//set_error_handler("app::error_handler");
@@ -140,7 +142,7 @@ class app extends module{
 			$this->get_db_config();
 			$this->config->set_vars($this->get_module_config());
 			$this->check_admin_mode();
-			$this->get_module_config_include($this);
+			$this->set_module_config_include($this);
 			$call_count = count($this->call_list);
 			for($num=0; $num<$call_count; $num++)
 				$this->try_call($this->call_list[$num], $num);
@@ -587,8 +589,9 @@ class app extends module{
 			$this->add_module_include('/');
 	}
 	
-	private function get_module_config_include(&$module){
+	public function set_module_config_include(&$module){
 		if($this->_config('include_from_module_config') && $include_cache = $module->_config('include')){
+			//var_dump($module->module_name,$include_cache);
 			$this->check_array_comma($include_cache);
 			if(!isset($this->loaded_module_include))
 				$this->loaded_module_include = array();
@@ -623,7 +626,7 @@ class app extends module{
 		}
 	}
 	
-	private function get_module_template_include(&$module){
+	public function set_module_template_include(&$module){
 		if($this->_config('get_module_template_include'))
 			if($include = $module->_config('template_include')){
 				if(!is_array($include)){
@@ -842,10 +845,12 @@ class app extends module{
 		$module->argument_new = &$args_new;//list of arguments different from defaults
 		$module->method_name = $method_name;
 		$module->position = (!empty($call['position']))?$call['position']:$this->main_position_name;
+		$this->set_module_config_include($module);
+		$this->set_module_template_include($module);
+		//var_dump($this->include);
 		if($result = call_user_func_array(array($module,$method_name),$args))
 			$module->_result = $result;
-		$this->get_module_config_include($module);
-		$this->get_module_template_include($module);
+		//$this->set_module_config_include($module);
 	}
 	
 	private function get_args($obj,$method,$args=NULL, &$args_new=array()){
@@ -1007,6 +1012,11 @@ class app extends module{
 				$item = array('title'=>$item);
 			if(!isset($item['href']))
 				$item['href'] = $_SERVER['REQUEST_URI'];
+			if($this->_config('path_link_alias')){
+				if(!$this->menu_module)
+					$this->menu_module = new menu($this);
+				$item['href'] = $this->menu_module->check_alias($item['href']);
+			}
 			$item['title'] = $this->_config('ucfirst_path')?$this->mb_ucfirst($item['title']):$item['title'];
 			$this->_path[] = $item;
 		}

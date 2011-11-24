@@ -108,17 +108,6 @@ array(1) {
 	
 	public function _get_param_value($method_name,$param_name){
 		switch($method_name){
-			case 'get':{
-				switch($param_name){
-					case 'show_title':{
-						return array('true'=>'+','false'=>'-');
-						break;
-					}
-					default:
-						parent::_get_param_value($method_name,$param_name);
-				}
-				break;
-			};
 			case 'edit':{
 				switch($param_name){
 					case 'id':{
@@ -130,7 +119,7 @@ array(1) {
 				}
 				break;
 			};
-			case 'get_by_title':{
+			case 'get':{
 				switch($param_name){
 					case 'title':{
 						return $this->_query->select('title,translit_title')->from($this->_table_name)->where('draft',1,'!=')->query2assoc_array('translit_title','title');
@@ -153,7 +142,7 @@ array(1) {
 
 class gallery_config extends base_module_config{
 	protected $callable_method = array(
-		'get_by_title' =>array(
+		'get' =>array(
 			'__access__' => array(
 				__CLASS__ => self::role_read,
 			),
@@ -162,11 +151,11 @@ class gallery_config extends base_module_config{
 	
 	protected $object = array(
 		'article'=>array(
-			'method'=>'get_by_title',
+			'method'=>'get',
 			'param'=>'title'
 		),
 		'article_category'=>array(
-			'method'=>'get_category_by_title',
+			'method'=>'get_category',
 			'param'=>'title'
 		),
 	);
