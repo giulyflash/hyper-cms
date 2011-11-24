@@ -10,7 +10,7 @@
 		<xsl:value-of select="text" disable-output-escaping="yes"/>
 	</div>
 	<!-- temp -->
-	<xsl:if test="/root/session/user_info">
+	<xsl:if test="/root/session/user_info and id">
 		<p class="article_edit">
 			<a class="edit_article" href="/admin.php?call=article.edit&amp;id={id}" target="_blank" title="редактировать" alt="редактировать">
 				<img src="module/base_module/img/pencil.png"/>&#160;<span>редактировать</span>
