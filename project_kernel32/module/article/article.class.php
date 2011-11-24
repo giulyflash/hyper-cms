@@ -190,6 +190,10 @@ class article extends base_module{
 				parent::_get_param_value($method_name,$param_name);
 		}
 	}
+	
+	public function create_empty_menu(){
+		
+	}
 }
 
 class article_config extends base_module_config{
@@ -199,7 +203,7 @@ class article_config extends base_module_config{
 				__CLASS__ => self::role_read,
 			),
 		),
-		'fill_empty_preview,set_translit_title,set_translit_title_category' =>array(
+		'fill_empty_preview,set_translit_title,set_translit_title_category,create_empty_menu' =>array(
 			'__access__' => array(
 				__CLASS__ => self::role_write,
 			),

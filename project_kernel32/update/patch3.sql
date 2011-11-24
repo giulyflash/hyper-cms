@@ -21,3 +21,5 @@ INSERT INTO `menu_link_alias` (`id`, `link_template`, `alias_template`, `order`)
 INSERT INTO `module_link` (`center_module`, `center_method`, `module_name`, `method_name`, `admin_mode`, `position`, `exclude`, `order`, `inactive`) VALUES
 ('*', '*', 'breadcrumbs', 'get', NULL, 'breadcrumbs', 0, 1, 0),
 ('admin_mode.*', '*', 'breadcrumbs', 'get', 1, 'breadcrumbs', 0, 1, 0);
+
+UPDATE module_link SET `method_name` = 'get' WHERE `method_name` = 'get_by_title';
