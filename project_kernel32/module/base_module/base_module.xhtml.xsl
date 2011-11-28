@@ -92,9 +92,13 @@
 					<xsl:with-param name="edit_module_name" select="$module_name"/>
 				</xsl:call-template>
 			</div>
-			<xsl:call-template name="nested_items_category_base">
-				<xsl:with-param name="module_name" select="$module_name"/>
-			</xsl:call-template>
+			<xsl:if test="items or item">
+				<ul>
+					<xsl:call-template name="nested_items_category_base">
+						<xsl:with-param name="module_name" select="$module_name"/>
+					</xsl:call-template>
+				</ul>
+			</xsl:if>
 		</li>
 	</xsl:for-each>
 	<xsl:if test="items">
@@ -150,7 +154,7 @@
 </xsl:template>
 
 <xsl:template match="root/module/item[_method_name='edit_category']" priority="0">
-	<form class="menu" method="post" action="admin.php?call={_module_name}.save_category">
+	<form class="{_module_name}" method="post" action="admin.php?call={_module_name}.save_category">
 		<xsl:if test="id">
 			<input type="hidden" value="{id}" name="id"/>
 		</xsl:if>
@@ -166,8 +170,12 @@
 					<input type="text" value="{title}" name="title"/>
 				</td>
 			</tr>
+			<tr>
+				<td colspan="2">
+					<input type="submit" value="Сохранить"/>
+				</td>
+			</tr>
 		</table>
-		<input type="submit" value="Сохранить"/>
 	</form>
 </xsl:template>
 

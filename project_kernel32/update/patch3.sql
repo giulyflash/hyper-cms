@@ -23,3 +23,5 @@ INSERT INTO `module_link` (`center_module`, `center_method`, `module_name`, `met
 ('admin_mode.*', '*', 'breadcrumbs', 'get', 1, 'breadcrumbs', 0, 1, 0);
 
 UPDATE module_link SET `method_name` = 'get' WHERE `method_name` = 'get_by_title';
+
+ALTER TABLE `article_category` ADD `article_redirect` VARCHAR( 255 ) NULL DEFAULT NULL;

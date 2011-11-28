@@ -15,9 +15,9 @@ class article extends base_module{
 			$this->_title = $this->_result['title'];
 	}
 	
-	/*public function get_category($field = 'translit_title', $value=NULL, $need_item=true){
-		parent::get_category($field, $value, $need_item, false, 'id,title,translit_title,text,preview,category_id');
-	}*/
+	public function get_category($title=false, $show='auto'){
+		parent::get_category($title, $show);
+	}
 	
 	public function save($id=NULL, $title=NULL, $translit_title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $category_id=NULL, $create_date=array()){
 		if(!$title){
@@ -127,14 +127,20 @@ class article extends base_module{
 	}
 	
 	//category
-	public function save_category($id=NULL,$title=NULL,$insert_place=NULL,$condition = array()){
+	public function save_category($id=NULL,$title=NULL,$article_redirect=NULL,$insert_place=NULL,$condition = array()){
 		if(!$title){
 			$this->_message('category name must not be empty');
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.edit_category&id='.$id.'&insert_place='.$insert_place);
 			return;
 		}
-		$value = array('title'=>$title,'translit_title'=>translit::transliterate($title));
+		$value = array('title'=>$title,'translit_title'=>translit::transliterate($title),'article_redirect'=>$article_redirect);
 		parent::save_category($id,$value,$insert_place);
+	}
+	
+	public function edit_category($id=NULL, $insert_place=NULL){
+		parent::edit_category($id,$insert_place);
+		$this->_result['article'] = $this->_get_param_value('get','title','title');
+		//var_dump($this->_result['article']);
 	}
 	
 	public function get_news($title=false, $show='auto'){
@@ -158,7 +164,7 @@ class article extends base_module{
 		}
 	}
 	
-	public function _get_param_value($method_name,$param_name){
+	public function _get_param_value($method_name,$param_name,$order=NULL){
 		switch($method_name){
 			case 'edit':{
 				switch($param_name){
@@ -174,7 +180,10 @@ class article extends base_module{
 			case 'get':{
 				switch($param_name){
 					case 'title':{
-						return $this->_query->select('title,translit_title')->from($this->module_name)->where('draft',1,'!=')->query2assoc_array('translit_title','title');
+						$this->_query->select('translit_title,title')->from($this->module_name)->where('draft',1,'!=');
+						if($order)
+						$this->_query->order($order);
+						return $this->_query->query2assoc_array('translit_title','title');
 						break;
 					}
 					case 'show_title':{
@@ -235,10 +244,11 @@ class article_config extends base_module_config{
 	
 	protected $include = array(
 		'edit'=>
-			'<link href="/module/article/admin.css" rel="stylesheet" type="text/css"/>
-			<script src="/extensions/ckeditor/ckeditor.js" type="text/javascript"></script>
+			'<script src="/extensions/ckeditor/ckeditor.js" type="text/javascript"></script>
 			<script src="/module/article/admin.js" type="text/javascript"></script>',
 		'*'=>'<link href="/module/article/article.css" rel="stylesheet" type="text/css"/>',
+		'admin_mode.*'=>
+			'<link href="/module/article/admin.css" rel="stylesheet" type="text/css"/>'
 	);
 	
 	public $has_item = true;
@@ -250,5 +260,6 @@ class article_config extends base_module_config{
 	private $more_tag = '<!--more-->';
 	protected $item_field = 'id,translit_title,title,category_id,preview';
 	protected $item_single_field='id,category_id,text';
+	protected $category_field = 'id,title,translit_title,left,right,depth,article_redirect';
 }
 ?>

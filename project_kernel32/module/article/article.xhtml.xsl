@@ -208,9 +208,13 @@
 					<span class="text"><xsl:value-of select="title"/></span>
 				</a>
 			</div>
-			<xsl:call-template name="article_core">
-				<xsl:with-param name="module_name" select="$module_name"/>
-			</xsl:call-template>
+			<xsl:if test="items or item">
+				<ul>
+					<xsl:call-template name="article_core">
+						<xsl:with-param name="module_name" select="$module_name"/>
+					</xsl:call-template>
+				</ul>
+			</xsl:if>
 		</li>
 	</xsl:for-each>
 	<xsl:if test="items">
