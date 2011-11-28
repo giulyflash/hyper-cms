@@ -85,6 +85,7 @@ class base_module_config extends module_config{
 	protected $item_field='id,title,category_id';
 	protected $item_single_field='id,title,category_id';
 	protected $item_order='order';
+	protected $need_path = true;
 	public $category_type = 'dropdown';
 	
 	public $default_thumb = 'template/admin/images/_document.png';
@@ -131,7 +132,19 @@ abstract class base_module extends module{
 			$this->_query->select($category_field);
 			if($value!==false){
 				$bound_query = new object_sql_query($this->parent->db);
-				$bound = $bound_query->select('left,right,id,depth')->from($category_table)->where($field,$value)->query1();
+				$bound_select = 'left,right,id,depth';
+				if($this->module_name=='article'){
+					$bound = $bound_query->select($bound_select.',title,translit_title,article_redirect')->from($category_table)->where($field,$value)->query1();
+					if(!empty($bound['article_redirect'])){
+						$this->_query->set_sql();
+						$this->add_category_path($bound['left'],$bound['title']);
+						$this->config->set('need_path',false);
+						$this->get($bound['article_redirect']);
+						$this->_result['article_redirect'] = $bound['article_redirect'];
+						return;
+					}
+				}else
+					$bound = $bound_query->select($bound_select)->from($category_table)->where($field,$value)->query1();
 			}
 			else
 				$bound = array();
@@ -176,6 +189,7 @@ abstract class base_module extends module{
 				$this->_query->set_sql();
 				$this->_result = array();
 			}
+			$this->add_category_path($bound?$bound['left']:NULL);
 			//items
 			if($need_item && $this->_config('has_item')){
 				$this->_query->select($item_field)->from($this->_table_name);
@@ -191,10 +205,7 @@ abstract class base_module extends module{
 							if(!empty($category['active']))
 								$categories[] = $category['id'];
 							if($category['id']==$bound['id']){
-								/*if($show=='current')
-									$category['uncategorized'] = 1;
-								else*/
-									$category['is_current'] = 1;
+								$category['is_current'] = 1;
 							}
 						}
 				}
@@ -241,7 +252,6 @@ abstract class base_module extends module{
 			$this->_result = $this->limit_page($page,$count)->_query->query();
 		}
 		//TODO remove this temp code below
-		//var_dump($_SERVER['REQUEST_URI'],$this->parent->admin_mode); die;
 		if($this->parent->admin_mode){
 			$this->category_list($category_condition);
 		}
@@ -267,7 +277,6 @@ abstract class base_module extends module{
 			else{
 				if($prev){
 					if($curr['depth'] > $prev['depth']){
-						//echo "$key.{$curr['title']} - <b>1</b> - {$prev['title']};<br/>";
 						$prev[$key] = &$curr;
 						$parents[] = &$prev;
 						$prev = &$prev[$key];
@@ -276,18 +285,13 @@ abstract class base_module extends module{
 						if($curr['depth'] != $prev['depth']){
 							for($i=($prev['depth']-$curr['depth']);$i>0; $i--)
 								array_pop($parents);
-							//echo "$key.{$curr['title']} - <b>3";
 						}
-						//else
-							//echo "$key.{$curr['title']} - <b>2";
 						$parent_key_last = end(array_keys($parents));
 						if($parent_key_last!==false && $parent = &$parents[$parent_key_last]){
-							//echo ".1</b> - {$prev['title']};<br/>";
 							$parent[$key] = &$curr;
 							$prev = &$parent[$key];
 						}
 						else{
-							//echo ".2</b> - {$prev['title']};<br/>";
 							$result[$key] = &$curr;
 							$prev = &$result[$key];
 						}
@@ -303,7 +307,6 @@ abstract class base_module extends module{
 	}
 	
 	private function parse_condition(&$condition,$where=false){
-		//$condition = array( array('field1','value1'),  array('field2','value2','!=') );
 		if(!$condition)
 			return;
 		if(!is_array($condition))
@@ -347,30 +350,57 @@ abstract class base_module extends module{
 		$this->_result = $this->_query->query1();
 		if(!$this->_result)
 			$this->_message('object not found',array('name'=>$value));
-		//if(!empty($this->_result['title']))
-			//$this->parent->add_module_path($this->_result['title']);
 		$this->add_item_path();
 	}
 	
 	protected function add_item_path(){
-		$this->parent->add_module_path();
-		if(!empty($this->_result['category_id'])){
-			$this->_query->injection('SET @a=(SELECT `left`')->from($this->_category_table_name)->where('id', $this->_result['category_id'])->limit('1')->close_bracket()->query();
-			$matches = $this->_query->select('title,translit_title')->from($this->_category_table_name)->injection(' WHERE `left` <= @a AND `right` >= @a')->order('left')->query();
-			$admin_mode = $this->parent->admin_mode?'admin.php':'';
-			foreach($matches as &$match)
-				$this->parent->add_path(array('title'=>$match['title'],'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.get_category&title='.$match['translit_title']));
+		if($this->_config('need_path')){
+			$this->parent->add_module_path();
+			if(!empty($this->_result['category_id'])){
+				//TODO path from $left
+				$this->_query->injection('SET @a=(SELECT `left`')->from($this->_category_table_name)->where('id', $this->_result['category_id'])->limit('1')->close_bracket()->query();
+				$matches = $this->_query->select('title,translit_title')->from($this->_category_table_name)->injection(' WHERE `left` <= @a AND `right` >= @a')->order('left')->query();
+				$admin_mode = $this->parent->admin_mode?'admin.php':'';
+				foreach($matches as &$match)
+					$this->parent->add_path(array('title'=>$match['title'],'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.get_category&title='.$match['translit_title']));
+			}
+			if(!empty($this->_result['title']))
+				$this->parent->add_path($this->_result['title']);
 		}
-		if(!empty($this->_result['title']))
-			$this->parent->add_path($this->_result['title']);
 	}
 	
-	protected function add_category_path(){
-		
+	protected function add_category_path($left=NULL,$title=NULL){
+		if($this->_config('need_path')){
+			$this->parent->add_module_path();
+			if($left){
+				if($title){
+					$this->get_path($left);
+					$this->parent->add_path($this->_result['title']);
+				}
+				else
+					$this->get_path($left,true);
+			}
+		}
 	}
 	
-	protected function get_path($left=NULL,$right=NULL){
-		
+	protected function get_path($left=NULL,$path_from_result=NULL){
+		if($left && !in_array($this->parent->_config('content_type'), array('json','json_html'))){
+			if($path_from_result){
+				foreach($this->_result as $name=>&$value)
+					if($value['left']<=$left && $value['right']>$left)
+						$this->parent->add_path(array(
+							'title'=>$value['title'],
+							'href'=>'/'.$value['translit_title'].'/',//TODO href
+						));
+			}
+			else{
+				$matches = $this->_query->select('title,translit_title')->from($this->_category_table_name)->where('left',$left,'<=')->_and('right',$left,'>=')->order('left')->query();
+				$admin_mode = $this->parent->admin_mode?'admin.php':'';
+				//TODO href
+				foreach($matches as &$match)
+					$this->parent->add_path(array('title'=>$match['title'],'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.get_category&title='.$match['translit_title']));
+			}
+		}
 	}
 	
 	public function edit($id=NULL, $category_id=NULL, $select='*'){
@@ -378,6 +408,7 @@ abstract class base_module extends module{
 			$this->_result = $this->_query->select($select)->from($this->_table_name)->where('id',$id)->query1();
 			if(!$this->_result)
 				throw new my_exception('object not found by id', array('id'=>$id));
+			if($this->_cofig('need_path'));
 			$this->parent->add_method_path($this->_result['title']);
 		}
 		elseif(!empty($_SESSION['_temp_var'])){
@@ -427,8 +458,6 @@ abstract class base_module extends module{
 	public function edit_category($id=NULL, $insert_place=NULL){
 		if($id)
 			$this->_result = $this->_query->select()->from($this->_category_table_name)->where('id',$id)->query1();
-		$this->_result['lt'] = '<';
-		$this->_result['gt'] = '>';
 	}
 
 	public function save_category($id=NULL,$value=array(),$insert_place=NULL,$condition = array(),$redirect = '_admin'){
@@ -650,11 +679,10 @@ abstract class base_module extends module{
 		switch($method_name){
 			case 'get':{
 				switch($param_name){
-					case 'field':{
-						$this->_result = $this->_query->fetch_field_assoc($this->_table_name);
+					case 'title':{
+						$this->_result = $this->_query->select('title,translit_title')->from($this->_table_name)->query2assoc_array('translit_title','title');
 						break;
 					}
-					case 'value':break;
 					default: parent::_get_param_value($method_name,$param_name);
 				}
 				break;

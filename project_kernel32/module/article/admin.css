@@ -60,3 +60,7 @@
 	border-top:1px solid;
 	margin:15px 25px 0 0;
 }
+
+.article table.edit_item td{
+	vertical-align: bottom;
+}

@@ -6,5 +6,5 @@ ErrorDocument 404 /404
 #RewriteRule ^/$ / [L]
 RewriteRule ^admin$ /admin.php [R]
 RewriteRule ^article/?$ /?call=article.get_category [L]
-RewriteRule ^([^/\.]+)/$ /?call=article.get_category&title=$1 [L]
-RewriteRule ^([^/\.]+)$ /?call=article.get&title=$1 [L]
+RewriteRule ^([^/.]+)/(\?.*)?$ /?call=article.get_category&title=$1$2 [L]
+RewriteRule ^([^/.?]+)(\?.*)?$ /?call=article.get&title=$1$2 [L]

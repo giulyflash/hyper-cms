@@ -106,3 +106,11 @@
 .nested_items.dropdown .item div div.default_thumb{
 	border: none;
 }
+
+table.edit_item tr:last-child td{
+	padding-top: 15px;
+	text-align: center;
+}
+table.edit_item tr:last-child input{
+	padding: 7px 10px;
+}
