@@ -135,7 +135,7 @@ abstract class base_module extends module{
 				$bound_select = 'left,right,id,depth';
 				if($this->module_name=='article'){
 					$bound = $bound_query->select($bound_select.',title,translit_title,article_redirect')->from($category_table)->where($field,$value)->query1();
-					if(!empty($bound['article_redirect'])){
+					if(!$this->parent->admin_mode && !empty($bound['article_redirect'])){
 						$this->_query->set_sql();
 						$this->add_category_path($bound['left'],$bound['title']);
 						$this->config->set('need_path',false);
@@ -603,6 +603,7 @@ abstract class base_module extends module{
 	}
 	
 	public function move_item($id=NULL, $insert_after=NULL, $insert_category=NULL, $insert_item=NULL, $redirect='get_category'){
+		//var_dump($id,$insert_after,$insert_category,$insert_item);
 		$redirect_params = array();
 		if($id){
 			$match = $this->_query->select()->from($this->_table_name)->where('id',$id)->query1();
@@ -618,8 +619,9 @@ abstract class base_module extends module{
 				$this->_query->update($this->_table_name)->injection(' SET `order`=`order`+1 ')->where('order',$place['order'],'>')->_and('category_id',$place['category_id'])->query();
 				$this->_query->update($this->_table_name)->set(array('order'=>$place['order']+1))->where('id',$id)->query1();
 				$order = $place['order'];
+				//$this->_query->echo_sql=1;
 				if($place['category_id'])
-					$redirect_params['title'] = $this->_query->select('translit_title')->from('file_category')->where('id',$place['category_id'])->query1('translit_title');
+					$redirect_params['title'] = $this->_query->select('translit_title')->from($this->_table_name)->where('id',$place['category_id'])->query1('translit_title');
 			}else{
 				if(!$insert_category)
 					$insert_category = NULL;
@@ -629,8 +631,9 @@ abstract class base_module extends module{
 				else
 					$order+=1;
 				$this->_query->update($this->_table_name)->set(array('category_id'=>$insert_category, 'order'=>($order?$order:1)))->where('id',$id)->query1();
-				if($insert_category)
-					$redirect_params['title'] = $this->_query->select('translit_title')->from('file_category')->where('id',$insert_category)->query1('translit_title');
+				if($insert_category && $title = $this->_query->select('translit_title')->from($this->_category_table_name)->where('id',$insert_category)->query1('translit_title'))
+					$redirect_params['title'] = $title;
+				var_dump($title);
 			}
 			$this->_message('item moved',array('name'=>$match['title']));
 		}

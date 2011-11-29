@@ -1000,6 +1000,7 @@ class app extends module{
 		foreach($params as $name=>$value)
 			$location.= '&'.$name.'='.$value;
 		//if($auto_base) TODO get module-method
+		//var_dump($location); return;
 		header("Location: ".$location);
 		die;
 	}
