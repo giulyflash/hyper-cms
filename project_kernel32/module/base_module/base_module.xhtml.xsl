@@ -92,13 +92,9 @@
 					<xsl:with-param name="edit_module_name" select="$module_name"/>
 				</xsl:call-template>
 			</div>
-			<xsl:if test="items or item">
-				<ul>
-					<xsl:call-template name="nested_items_category_base">
-						<xsl:with-param name="module_name" select="$module_name"/>
-					</xsl:call-template>
-				</ul>
-			</xsl:if>
+			<xsl:call-template name="nested_items_category_base">
+				<xsl:with-param name="module_name" select="$module_name"/>
+			</xsl:call-template>
 		</li>
 	</xsl:for-each>
 	<xsl:if test="items">
@@ -216,8 +212,8 @@
 	<xsl:param name="module_name" select="_module_name"/>
 	<xsl:param name="edit_module_name" select="$module_name"/>
 	<xsl:param name="method_name" select="/root/module/item[_module_name=$module_name]/_method_name"/>
-	<xsl:variable name="href_tail"><xsl:if test="id">&amp;insert_place={id}</xsl:if></xsl:variable>
-	<xsl:variable name="href_tail2"><xsl:if test="id">&amp;category_id={id}</xsl:if></xsl:variable>
+	<xsl:variable name="href_tail"><xsl:if test="id">&amp;insert_place=<xsl:value-of select="id"/></xsl:if></xsl:variable>
+	<xsl:variable name="href_tail2"><xsl:if test="id">&amp;category_id=<xsl:value-of select="id"/></xsl:if></xsl:variable>
 	<a href="/admin.php?call={$edit_module_name}.edit_category{$href_tail}" class="subitem">
 		<xsl:value-of select="/root/language/*[name()=$module_name]/*[name()=$method_name]/add_category"/>
 	</a>
@@ -253,6 +249,7 @@
 			</select>
 			<span>Вставить после:</span>
 			<select class="insert_item" name="insert_item" autocomplete='off'>
+				<option value="">&#8212;</option>
 				<xsl:for-each select="../item">
 					<xsl:if test="id!=$current_id">
 						<option value="{id}">

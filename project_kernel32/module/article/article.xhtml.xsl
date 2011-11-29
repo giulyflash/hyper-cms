@@ -242,4 +242,48 @@
 	</xsl:if>
 </xsl:template>
 
+<xsl:template match="root/module/item[_module_name='article' and _method_name='edit_category']">
+	<form class="{_module_name}" method="post" action="admin.php?call={_module_name}.save_category">
+		<xsl:if test="id">
+			<input type="hidden" value="{id}" name="id"/>
+		</xsl:if>
+		<xsl:if test="_argument/insert_place">
+			<input type="hidden" value="{_argument/insert_place}" name="insert_place"/>
+		</xsl:if>
+		<table class="edit_item">
+			<tr>
+				<td class="first">
+					Текст:
+				</td>
+				<td>
+					<input type="text" value="{title}" name="title"/>
+				</td>
+			</tr>
+			<tr>
+				<td class="first">
+					Вместо категории отображать статью:
+				</td>
+				<td>
+					<select name="article_redirect">
+						<option/>
+						<xsl:for-each select="article/*">
+							<option value="{name()}">
+								<xsl:if test="name() = ../../article_redirect">
+									<xsl:attribute name="selected">selected</xsl:attribute>
+								</xsl:if>
+								<xsl:value-of select="."/>
+							</option>
+						</xsl:for-each>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<input type="submit" value="Сохранить"/>
+				</td>
+			</tr>
+		</table>
+	</form>
+</xsl:template>
+
 </xsl:stylesheet>
