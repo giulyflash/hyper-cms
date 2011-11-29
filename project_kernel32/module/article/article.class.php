@@ -133,7 +133,7 @@ class article extends base_module{
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.edit_category&id='.$id.'&insert_place='.$insert_place);
 			return;
 		}
-		$value = array('title'=>$title,'translit_title'=>translit::transliterate($title),'article_redirect'=>$article_redirect);
+		$value = array('title'=>$title,'translit_title'=>translit::transliterate($title),'article_redirect'=>($article_redirect?$article_redirect:NULL));
 		parent::save_category($id,$value,$insert_place);
 	}
 	

@@ -135,7 +135,7 @@ abstract class base_module extends module{
 				$bound_select = 'left,right,id,depth';
 				if($this->module_name=='article'){
 					$bound = $bound_query->select($bound_select.',title,translit_title,article_redirect')->from($category_table)->where($field,$value)->query1();
-					if(!$this->parent->admin_mode && !empty($bound['article_redirect'])){
+					if(!$this->parent->admin_mode && $this->parent->content_type=='xsl' && !empty($bound['article_redirect'])){
 						$this->_query->set_sql();
 						$this->add_category_path($bound['left'],$bound['title']);
 						$this->config->set('need_path',false);
@@ -408,8 +408,8 @@ abstract class base_module extends module{
 			$this->_result = $this->_query->select($select)->from($this->_table_name)->where('id',$id)->query1();
 			if(!$this->_result)
 				throw new my_exception('object not found by id', array('id'=>$id));
-			if($this->_cofig('need_path'));
-			$this->parent->add_method_path($this->_result['title']);
+			if($this->_config('need_path'));
+				$this->parent->add_method_path($this->_result['title']);
 		}
 		elseif(!empty($_SESSION['_temp_var'])){
 			$this->_result = $_SESSION['_temp_var'];
@@ -456,22 +456,31 @@ abstract class base_module extends module{
 	}
 	
 	public function edit_category($id=NULL, $insert_place=NULL){
-		if($id)
+		if($id){
 			$this->_result = $this->_query->select()->from($this->_category_table_name)->where('id',$id)->query1();
+			if($this->_config('need_path'))
+				$this->parent->add_method_path($this->_result['title']);
+		}
 	}
 
 	public function save_category($id=NULL,$value=array(),$insert_place=NULL,$condition = array(),$redirect = '_admin'){
 		$table_name = $this->_category_table_name;
+		$redirect_params = array();
 		if($id){
-			$title = $this->_query->select('title')->from($table_name)->where('id',$id)->query1('title');
+			if(!$item = $this->_query->select('title,translit_title,left')->from($table_name)->where('id',$id)->query1())
+				new my_exception('category not found',array('id'=>$id));
+			$title = $item['title'];
 			$this->_query->update($table_name)->set($value)->where('id',$id)->limit(1)->execute();
 			$this->_message('category edited successfully',array('title'=>$title));
+			if($parent_title = $this->_query->select('translit_title')->from($this->_category_table_name)->where('left',$item['left'],'<')->_and('right',$item['left'],'>')->order('left desc')->query1('translit_title') )
+				$redirect_params['title'] = $parent_title;
 		}
 		else{
 			if($insert_place){
-				$destination = $this->_query->select('right,depth')->from($table_name)->where('id',$insert_place)->query1();
+				$destination = $this->_query->select('right,depth,translit_title')->from($table_name)->where('id',$insert_place)->query1();
 				if(!$destination)
 					throw new my_exception('parent not found',array('id'=>$insert_place));
+				$redirect_params['title'] = $destination['translit_title'];
 				$value['left'] = $destination['right'];
 				$this->_query->lock($table_name)->execute();
 				$this->_query->update($table_name)->injection(' SET `right`=`right`+2')->where('right',$value['left'],'>=');
@@ -491,10 +500,10 @@ abstract class base_module extends module{
 			$value['right'] = $value['left'] + 1;
 			$this->_query->insert($table_name)->values($value)->execute();
 			$id = $this->parent->db->insert_id();
-			$this->_message('new category add',array('title'=>$value['title']));
+			$this->_message('new category add',array('title'=>$value['title'])); 
 		}
 		if($redirect)
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect);
+			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, $redirect_params);
 	}
 
 	public function move_category($id=NULL, $insert_type=NULL, $insert_place=NULL, $condition = array(),$redirect = '_admin'){
@@ -574,12 +583,15 @@ abstract class base_module extends module{
 	}
 
 	public function remove_category($id=NULL,$condition = array(), $redirect = '_admin'){
+		$redirect_params = array();
 		$table_name = $this->_category_table_name;
 		if(!$id)
 			throw new my_exception('id is empty');
 		$target = $this->_query->select('left,right,title')->from($table_name)->where('id',$id)->query1();
 		if(!$target)
 			throw new my_exception('category not found by id',array('id'=>$id));
+		if($parent_title = $this->_query->select('translit_title')->from($this->_category_table_name)->where('left',$target['left'],'<')->_and('right',$target['left'],'>')->order('left desc')->query1('translit_title') )
+			$redirect_params['title'] = $parent_title;
 		$this->_query->lock($table_name)->execute();
 		$this->_query->delete()->from($table_name)->where('left',array($target['left'],$target['right']),'between')->query();
 		if($this->_config('repair_hole')){
@@ -594,7 +606,7 @@ abstract class base_module extends module{
 		$this->_query->unlock()->execute();
 		$this->_message('category deleted successfully',array('name'=>$target['title']));
 		if($redirect)
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect);
+			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, $redirect_params);
 	}
 	
 	public function unlock_database(){
@@ -602,7 +614,7 @@ abstract class base_module extends module{
 		$this->_message('database unlocked');
 	}
 	
-	public function move_item($id=NULL, $insert_after=NULL, $insert_category=NULL, $insert_item=NULL, $redirect='get_category'){
+	public function move_item($id=NULL, $insert_after=NULL, $insert_category=NULL, $insert_item=NULL, $redirect='_admin'){
 		//var_dump($id,$insert_after,$insert_category,$insert_item);
 		$redirect_params = array();
 		if($id){
