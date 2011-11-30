@@ -2,7 +2,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" />
 
-<xsl:template match="root/module/item[_module_name='article' and (_method_name='get')]">
+<xsl:template match="root/module/item[_module_name='article' and (_method_name='get')]" name="article_get">
 	<xsl:if test="title">
 		<h1><xsl:value-of select="title"/></h1>
 	</xsl:if>
@@ -13,10 +13,10 @@
 	<xsl:if test="/root/session/user_info and id">
 		<p class="article_edit">
 			<a class="edit_article" href="/admin.php?call=article.edit&amp;id={id}" target="_blank" title="редактировать" alt="редактировать">
-				<img src="module/base_module/img/pencil.png"/>&#160;<span>редактировать</span>
+				<img src="/module/base_module/img/pencil.png"/>&#160;<span>редактировать</span>
 			</a>
 		</p>
-	</xsl:if> 
+	</xsl:if>
 </xsl:template>
 
 <xsl:template match="root/module/item[_module_name='article' and (_method_name='edit' or _method_name='save')]">
@@ -126,11 +126,17 @@
 			<input type="submit" class="submit right" value="Сохранить"/>
 			<label for="article_draft">Черновик:</label>
 			<input type="submit" class="submit delete" value="Удалить" id="{id}"/>
-			<input id="article_draft" type="checkbox" name="draft">
-				<xsl:if test="draft=1">
-					<xsl:attribute name="checked" value="1"/>
-				</xsl:if>
-			</input>
+			<select id="article_draft" type="checkbox" name="draft">
+				<option/>
+				<option value="2">
+					<xsl:if test="draft='2'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
+					не показывать в списках
+				</option>
+				<option value="1">
+					<xsl:if test="draft='1'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
+					черновик
+				</option>
+			</select>
 			<input type="hidden" value="{id}" name="id"/>
 		</form>
 	</div>
@@ -142,6 +148,9 @@
 			<xsl:call-template name="article_base">
 				<xsl:with-param name="need_ul">0</xsl:with-param>
 			</xsl:call-template>
+		</xsl:when>
+		<xsl:when test="article_redirect">
+			<xsl:call-template name="article_get"/>
 		</xsl:when>
 		<xsl:otherwise>
 			<div class="nested_items {_module_name} {_method_name} {_config/category_type}">
@@ -253,7 +262,7 @@
 		<table class="edit_item">
 			<tr>
 				<td class="first">
-					Текст:
+					Заголовок:
 				</td>
 				<td>
 					<input type="text" value="{title}" name="title"/>
@@ -261,7 +270,7 @@
 			</tr>
 			<tr>
 				<td class="first">
-					Вместо категории отображать статью:
+					Вместо категории<br/>отображать статью:
 				</td>
 				<td>
 					<select name="article_redirect">

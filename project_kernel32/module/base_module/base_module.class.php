@@ -106,16 +106,16 @@ abstract class base_module extends module{
 	}
 	
 	public function _admin($title=NULL){
-		$this->get_category_base('translit_title', $title, true, 'auto');
+		$this->_get_category('translit_title', $title, true, 'auto');
 		//parent::get_category('translit_title', $title, true, 'auto', NULL, array(array('module',$this->module_name), array('internal_type','image')));
 		//FIXME wtf it do not load category by title?
 	}
 	
 	public function get_category($title=false, $show='auto'){
-		$this->get_category_base('translit_title', $title, true, $show);
+		$this->_get_category('translit_title', $title, true, $show);
 	}
 	
-	public function get_category_base($field = 'translit_title', $value=false, $need_item=true, $show='auto', $category_condition=array(),$item_condition=array()){
+	public function _get_category($field = 'translit_title', $value=false, $need_item=true, $show='auto', $category_condition=array(),$item_condition=array()){
 		//$this->_query->echo_sql=1;
 		//TODO pages?
 		//$show: all (all categories and subcategories), all_sub (all subcategories), category (0lvl categories + tree to current category), current (current category content only), auto ('current' for json, 'category' for others)
@@ -124,6 +124,8 @@ abstract class base_module extends module{
 		if($show=='auto')
 			$show = in_array($this->parent->_config('content_type'), array('json','json_html'/*,'xml'*/))?'current':'category';
 		$item_field = $this->_config('item_field');
+		if($this->parent->admin_mode && $this->item_draft)
+			$item_field.= ',draft';
 		$category_field = $this->_config('category_field');
 		$item_order = $this->_config('item_order');
 		$category_table = $this->_category_table_name;
@@ -132,13 +134,14 @@ abstract class base_module extends module{
 			$this->_query->select($category_field);
 			if($value!==false){
 				$bound_select = 'left,right,id,depth';
+				$bound_query = new object_sql_query($this->parent->db);
 				if($this->module_name=='article'){
-					$bound_query = new object_sql_query($this->parent->db);
 					$bound = $bound_query->select($bound_select.',title,translit_title,article_redirect')->from($category_table)->where($field,$value)->query1();
-					if(!$this->parent->admin_mode && $this->parent->content_type=='xsl' && !empty($bound['article_redirect'])){
+					if(!$this->parent->admin_mode && $this->parent->_config('content_type')=='xsl' && !empty($bound['article_redirect'])){
 						$this->_query->set_sql();
 						$this->add_category_path($bound['left'],$bound['title']);
 						$this->config->set('need_path',false);
+						//echo $bound['article_redirect'];
 						$this->get($bound['article_redirect']);
 						$this->_result['article_redirect'] = $bound['article_redirect'];
 						return;
@@ -154,7 +157,6 @@ abstract class base_module extends module{
 					if($show=='category'){
 						$this->_query->where('depth',0,'=',true);
 						$where = true;
-						//$this->_query->where('depth',0,'=',true)->_or('left',array($bound0['left'], $bound0['right']),'between')->_and('depth',$bound['depth'],'<=');
 						if($bound['depth']!=0){
 							if(!$bound_query)
 								$bound_query = new object_sql_query($this->parent->db);
@@ -192,7 +194,6 @@ abstract class base_module extends module{
 			}
 			if($bound || $show!='current'){
 				$this->parse_condition($category_condition,$where);
-				$this->_query->echo_sql = 1;
 				$this->_result = $this->_query->order('left')->query2assoc_array('id',NULL,false);
 			}
 			else{
@@ -231,6 +232,7 @@ abstract class base_module extends module{
 					$this->_query->where('category_id',NULL);
 					$where = true;
 				}
+				//TODO draft check there
 				$this->parse_condition($item_condition,$where);
 				if($item_order)
 					$this->_query->order($item_order);
@@ -339,7 +341,7 @@ abstract class base_module extends module{
 	
 	public function get($title=NULL, $select=NULL,$condition=array()){
 		$field = 'translit_title';
-		if(!$title && !($title = $this->_config('default_article_name'))){
+		if(!$title){
 			$title = 1;
 			$field = 'id';
 		}
@@ -350,12 +352,12 @@ abstract class base_module extends module{
 		if(!$select)
 			$select = $this->_config('item_single_field');
 		$this->_result = $this->_query->select($select)->from($this->_table_name);
+		$where = false;
+		//TODO draft check there
 		if($field){
 			$this->_query->where($field,$value);
 			$where = true;
 		}
-		else
-			$where = false;
 		$this->parse_condition($condition,$where);
 		$this->_result = $this->_query->query1();
 		if(!$this->_result)
