@@ -131,9 +131,9 @@ abstract class base_module extends module{
 		if($this->_config('has_category')){
 			$this->_query->select($category_field);
 			if($value!==false){
-				$bound_query = new object_sql_query($this->parent->db);
 				$bound_select = 'left,right,id,depth';
 				if($this->module_name=='article'){
+					$bound_query = new object_sql_query($this->parent->db);
 					$bound = $bound_query->select($bound_select.',title,translit_title,article_redirect')->from($category_table)->where($field,$value)->query1();
 					if(!$this->parent->admin_mode && $this->parent->content_type=='xsl' && !empty($bound['article_redirect'])){
 						$this->_query->set_sql();
@@ -152,10 +152,19 @@ abstract class base_module extends module{
 				if($value!==false && $bound){
 					$this->_query->injection(', (`left` <= '.$bound['left'].' AND `right`>='.$bound['right'].') as `active`')->from($category_table);
 					if($show=='category'){
-						$this->_query->where('depth',0,'=',true)->_or('left',array($bound['left'], $bound['right']),'between')->_and('depth',$bound['depth']+2,'<');
+						$this->_query->where('depth',0,'=',true);
 						$where = true;
-						if($bound['depth']!=0)
-							$this->_query->_or('left',$bound['left'],'<')->_and('right',$bound['left'],'>');
+						//$this->_query->where('depth',0,'=',true)->_or('left',array($bound0['left'], $bound0['right']),'between')->_and('depth',$bound['depth'],'<=');
+						if($bound['depth']!=0){
+							if(!$bound_query)
+								$bound_query = new object_sql_query($this->parent->db);
+							$bound0 = $bound_query->select('left,right,depth')->from($category_table)->where('left',$bound['left'],'<=')->_and('right',$bound['right'],'>=')->query();
+							foreach($bound0 as $level)
+								if($level['right']==$level['left']+1)
+									$this->_query->_or('left',$level['left']);
+								else
+									$this->_query->_or('left',array($level['left'],$level['right']),'between')->_and('depth',$level['depth']+1,'<=');
+						}
 						$this->_query->close_bracket();
 					}elseif($show=='all_sub'){
 						$where = true;
@@ -183,6 +192,7 @@ abstract class base_module extends module{
 			}
 			if($bound || $show!='current'){
 				$this->parse_condition($category_condition,$where);
+				$this->_query->echo_sql = 1;
 				$this->_result = $this->_query->order('left')->query2assoc_array('id',NULL,false);
 			}
 			else{
@@ -626,14 +636,12 @@ abstract class base_module extends module{
 				if($insert_item)
 					$place = $this->_query->select('order,category_id')->from($this->_table_name)->where('id',$insert_item)->query1();
 				if(!$place)
-					$place = array('order'=>'1', 'category_id'=>$match['category_id']);
-					//throw new my_exception('item not found by id',array('id'=>$insert_item));
+					$place = array('order'=>0, 'category_id'=>$match['category_id']);
 				$this->_query->update($this->_table_name)->injection(' SET `order`=`order`+1 ')->where('order',$place['order'],'>')->_and('category_id',$place['category_id'])->query();
 				$this->_query->update($this->_table_name)->set(array('order'=>$place['order']+1))->where('id',$id)->query1();
 				$order = $place['order'];
-				//$this->_query->echo_sql=1;
 				if($place['category_id'])
-					$redirect_params['title'] = $this->_query->select('translit_title')->from($this->_table_name)->where('id',$place['category_id'])->query1('translit_title');
+					$redirect_params['title'] = $this->_query->select('translit_title')->from($this->_category_table_name)->where('id',$place['category_id'])->query1('translit_title');
 			}else{
 				if(!$insert_category)
 					$insert_category = NULL;
@@ -645,7 +653,6 @@ abstract class base_module extends module{
 				$this->_query->update($this->_table_name)->set(array('category_id'=>$insert_category, 'order'=>($order?$order:1)))->where('id',$id)->query1();
 				if($insert_category && $title = $this->_query->select('translit_title')->from($this->_category_table_name)->where('id',$insert_category)->query1('translit_title'))
 					$redirect_params['title'] = $title;
-				var_dump($title);
 			}
 			$this->_message('item moved',array('name'=>$match['title']));
 		}
