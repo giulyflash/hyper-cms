@@ -25,3 +25,5 @@ INSERT INTO `module_link` (`center_module`, `center_method`, `module_name`, `met
 UPDATE module_link SET `method_name` = 'get' WHERE `method_name` = 'get_by_title';
 
 ALTER TABLE `article_category` ADD `article_redirect` VARCHAR( 255 ) NULL DEFAULT NULL;
+
+ALTER TABLE `article` CHANGE `draft` `draft` TINYINT( 2 ) NULL DEFAULT NULL;

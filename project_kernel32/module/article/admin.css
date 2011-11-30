@@ -64,3 +64,9 @@
 .article table.edit_item td{
 	vertical-align: bottom;
 }
+.article table.edit_item td:FIRST-CHILD{
+	vertical-align: middle;
+}
+table.edit_item select{
+	max-width: 300px;
+}

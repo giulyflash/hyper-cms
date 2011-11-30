@@ -120,7 +120,15 @@
 								<img src="{$thumb_path}" alt="{title}" title="{title}"/>
 							</div>
 						</div>
-						<span class="text"><xsl:value-of select="title"/></span>
+						<xsl:variable name="bracket_l"><xsl:choose>
+							<xsl:when test="draft=1">(</xsl:when>
+							<xsl:when test="draft=2">[</xsl:when>
+						</xsl:choose></xsl:variable>
+						<xsl:variable name="bracket_r"><xsl:choose>
+							<xsl:when test="draft=1">)</xsl:when>
+							<xsl:when test="draft=2">]</xsl:when>
+						</xsl:choose></xsl:variable>
+						<span class="text"><xsl:value-of select="concat($bracket_l,title,$bracket_r)"/></span>
 					</a>
 					<xsl:call-template name="controls_item">
 						<xsl:with-param name="module_name" select="$module_name"/>

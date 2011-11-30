@@ -13,12 +13,12 @@ class menu extends base_module{
 		if(!$menu_id){
 			$this->_result = $this->_query->select()->from($this->module_name)->query();
 		}else{
-			$this->get_category_base('translit_title',$title,false,'all_sub',array('menu_id',$menu_id));
+			$this->_get_category('translit_title',$title,false,'all_sub',array('menu_id',$menu_id));
 		}
 	}
 	
 	public function get($id = 1, $show_title=NULL, $type=NULL){
-		$this->get_category_base('link', $link = ($_SESSION['call'][0]=='/'?false:$_SESSION['call'][0]), NULL, 'all', array('menu_id',$id));
+		$this->_get_category('link', $link = ($_SESSION['call'][0]=='/'?false:$_SESSION['call'][0]), NULL, 'all', array('menu_id',$id));
 		if($show_title)
 			$this->_result['title'] = $this->_query->select('title')->from($this->module_name)->where('id',$id)->query1('title');
 		if($type)

@@ -2,21 +2,29 @@
 class article extends base_module{
 	protected $config_class_name = 'article_config';
 	protected $preview_default_count = 200;
+	protected $item_draft = true;
 	
 	private $more_tag = '<!--more-->';
 
 	public function get($title = NULL, $show_title=false){
+		$field = 'translit_title';
 		$select = $this->_config('item_single_field');
 		if($show_title === false)
 			$show_title = $this->_config('default_show_title');
 		if($show_title)
 			$select.=',title';
-		if(parent::get($title, $select, array('draft',1,'!=')))
+		if(!$title && !($title = $this->_config('default_article_name'))){
+			$title = 1;
+			$field = 'id';
+		}
+		//$this->_query->echo_sql=1;
+		$this->_get($field, $title, $select, array('draft',1,'!='));
+		if(!empty($this->_result['title']))
 			$this->_title = $this->_result['title'];
 	}
 	
 	public function get_category($title=false, $show='auto'){
-		parent::get_category($title, $show);
+		parent::_get_category('translit_title',$title,true,'auto',NULL,array('draft',0));
 	}
 	
 	public function save($id=NULL, $title=NULL, $translit_title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $category_id=NULL, $create_date=array()){
@@ -42,7 +50,7 @@ class article extends base_module{
 			'preview'=>$this->get_preview($text),
 			'keyword'=>$keyword,
 			'description'=>$description,
-			'draft'=>($draft)?1:0,
+			'draft'=>($draft)?$draft:0,
 			'category_id'=>$category_id?$category_id:NULL,
 		);
 		$date = new DateTime();
