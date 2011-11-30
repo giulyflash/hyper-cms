@@ -114,3 +114,7 @@ table.edit_item tr:last-child td{
 table.edit_item tr:last-child input{
 	padding: 7px 10px;
 }
+
+.nested_items._admin.dropdown select{
+	width: 80px;
+}
