@@ -123,11 +123,7 @@ abstract class base_module extends module{
 			$value = false;
 		if($show=='auto')
 			$show = in_array($this->parent->_config('content_type'), array('json','json_html'/*,'xml'*/))?'current':'category';
-		$item_field = $this->_config('item_field');
-		if($this->parent->admin_mode && $this->item_draft)
-			$item_field.= ',draft';
 		$category_field = $this->_config('category_field');
-		$item_order = $this->_config('item_order');
 		$category_table = $this->_category_table_name;
 		$where = false;
 		if($this->_config('has_category')){
@@ -141,7 +137,6 @@ abstract class base_module extends module{
 						$this->_query->set_sql();
 						$this->add_category_path($bound['left'],$bound['title']);
 						$this->config->set('need_path',false);
-						//echo $bound['article_redirect'];
 						$this->get($bound['article_redirect']);
 						$this->_result['article_redirect'] = $bound['article_redirect'];
 						return;
@@ -202,51 +197,8 @@ abstract class base_module extends module{
 			}
 			$this->add_category_path($bound?$bound['left']:NULL);
 			//items
-			if($need_item && $this->_config('has_item')){
-				$this->_query->select($item_field)->from($this->_table_name);
-				$categories = array();
-				$null_categories = false;
-				if($show!='current' || $show=='all_sub' && !$value)
-					$null_categories = true;
-				elseif($value)
-					$categories[] = $bound['id'];
-				if($this->_result){
-					if($bound)
- 						foreach($this->_result as &$category){
-							if(!empty($category['active']))
-								$categories[] = $category['id'];
-							if($category['id']==$bound['id']){
-								$category['is_current'] = 1;
-							}
-						}
-				}
-				$where = false;
-				if($categories){
-					$this->_query->where('category_id',$categories,'in',true);
-					if($null_categories)
-						$this->_query->_or('category_id',NULL);
-					$this->_query->close_bracket();
-					$where = true;
-				}
-				elseif($null_categories){
-					$this->_query->where('category_id',NULL);
-					$where = true;
-				}
-				//TODO draft check there
-				$this->parse_condition($item_condition,$where);
-				if($item_order)
-					$this->_query->order($item_order);
-				if($items = $this->_query->query()){
-					foreach(array_keys($items) as $item_num)
-						if($items[$item_num]['category_id'] && isset($this->_result[$items[$item_num]['category_id']])){
-							$this->_result[$items[$item_num]['category_id']]['items'][] = $items[$item_num];
-							unset($items[$item_num]);
-						}
-					if($items){
-						$this->_result['items'] = $items;
-					}
-				}
-			}
+			if($need_item)
+				$this->get_category_items($show,$item_condition,$value,$bound);
 			$this->create_tree();
 		}
 		elseif($need_item && $this->_config('has_item')){
@@ -266,6 +218,57 @@ abstract class base_module extends module{
 		//TODO remove this temp code below
 		if($this->parent->admin_mode){
 			$this->category_list($category_condition);
+		}
+	}
+	
+	public function get_category_items($show,$item_condition,$value,$bound){
+		if($this->_config('has_item')){
+			$item_field = $this->_config('item_field');
+			if($this->parent->admin_mode && $this->item_draft)
+				$item_field.= ',draft';
+			$this->_query->select($item_field)->from($this->_table_name);
+			$categories = array();
+			$null_categories = false;
+			if($show!='current' || $show=='all_sub' && !$value)
+				$null_categories = true;
+			elseif($value)
+				$categories[] = $bound['id'];
+			if($this->_result){
+				if($bound)
+					foreach($this->_result as &$category){
+						if(!empty($category['active']))
+							$categories[] = $category['id'];
+						if($category['id']==$bound['id']){
+							$category['is_current'] = 1;
+						}
+					}
+			}
+			$where = false;
+			if($categories){
+				$this->_query->where('category_id',$categories,'in',true);
+				if($null_categories)
+					$this->_query->_or('category_id',NULL);
+				$this->_query->close_bracket();
+				$where = true;
+			}
+			elseif($null_categories){
+				$this->_query->where('category_id',NULL);
+				$where = true;
+			}
+			//TODO draft check there
+			$this->parse_condition($item_condition,$where);
+			if($item_order = $this->_config('item_order'))
+				$this->_query->order($item_order);
+			if($items = $this->_query->query()){
+				foreach(array_keys($items) as $item_num)
+				if($items[$item_num]['category_id'] && isset($this->_result[$items[$item_num]['category_id']])){
+					$this->_result[$items[$item_num]['category_id']]['items'][] = $items[$item_num];
+					unset($items[$item_num]);
+				}
+				if($items){
+					$this->_result['items'] = $items;
+				}
+			}
 		}
 	}
 	

@@ -7,34 +7,37 @@
 	<xsl:call-template name="_head"/>
 </head>
 <body>
-	<div class="wrap">
-		<a href="index.php" alt="На главную" title="На главную">
-			<div class="header">
-				<h1>Мурманская городская Компания</h1>
-			</div>
-		</a>
-		<div class="center_wrap">
-			<div class="left">
-				<div class="menu">
+	<table class="wrap">
+		<tbody>
+			<tr>
+				<td colspan="3" class="header">
+					<a href="index.php" alt="На главную" title="На главную">
+						<h1>Мурманская Городская Компания</h1>
+					</a>
+				</td>
+			</tr>
+			<tr>
+				<td class="left">
 					<xsl:call-template name="_call">
 						<xsl:with-param name="position">top</xsl:with-param>
 					</xsl:call-template>
-				</div>
-			</div>
-			<div class="right">
-				<xsl:call-template name="_call">
-					<xsl:with-param name="position">right</xsl:with-param>
-				</xsl:call-template>
-			</div>
-			<div class="center">
-				<xsl:call-template name="_call"/>
-				<p style="clear:both"></p>
-			</div>
-		</div>
-		<div class="footer">
-			&#169; 2011 <a href="#">Гросcтех</a>. УК состоит в Некоммерческом Партнёрстве СРО «Жилищно-строительное объединение Мурмана»
-		</div>
-	</div>
+				</td>
+				<td class="center content">
+					<xsl:call-template name="_call"/>
+				</td>
+				<td class="right">
+					<xsl:call-template name="_call">
+						<xsl:with-param name="position">right</xsl:with-param>
+					</xsl:call-template>
+				</td>
+			</tr>
+			<tr>
+				<td class="footer" colspan="3">
+					&#169; 2011 <a href="#">Гросcтех</a>.
+				</td>
+			</tr>
+		</tbody>
+	</table>
 </body>
 </html>
 </xsl:template>

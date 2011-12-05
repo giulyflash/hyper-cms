@@ -136,7 +136,6 @@
 					</xsl:call-template>
 				</div>
 			</xsl:for-each>
-			<div style="clear:both"></div>
 		</li>
 	</xsl:if>
 </xsl:template>
