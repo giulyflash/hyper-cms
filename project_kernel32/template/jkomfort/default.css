@@ -4,6 +4,10 @@ Published by Free CSS Templates <http://www.freecsstemplates.org/>
 Released for free under a Creative Commons Attribution 2.5 License
 */
 
+html, body{
+	height: 100%;
+}
+
 body {
 	margin: 0;
 	padding: 0;
@@ -78,7 +82,6 @@ img.right {
 /* Header */
 
 #header {
-	width: 954px;
 	margin: 0 auto;
 	/*background: url(images/apatit.png);*/
 }
@@ -216,22 +219,44 @@ img.right {
 
 /* Page */
 
-#page {
+table.wrap{
 	width: 954px;
 	margin: 0 auto;
+	border-collapse: collapse;
+	height: 100%;
+	min-height: 641px;
+}
+#page{
 	background: #FFFFFF url(images/img03.jpg) repeat-y;
 }
+.wrap td{
+	vertical-align: top;
+	padding: 0;
+}
+.wrap > tbody > tr:FIRST-CHILD, .wrap > tr:FIRST-CHILD td{
+	height: 135px;
+}
 
-#bg {
+#page > td{
+	background: url(images/img06.jpg) no-repeat left bottom;
+}
+#page > td:last-child{
+	height: 100%;
+	background: url(images/img06.jpg) no-repeat right bottom;
+	width: 274px;
+}
+/*#bg {
 	background: url(images/img06.jpg) no-repeat left bottom;
 	min-height: 550px;
-}
+}*/
+
+/*#bg td:FIRST-CHILD{
+	background: url();
+}*/
 
 /* Content */
 
 #content {
-	float: left;
-	width: 680px;
 	background: url(images/img04.png) no-repeat;
 }
 
@@ -378,10 +403,9 @@ div.timetable{
 /* Sidebar */
 
 #sidebar {
-	float: right;
 	width: 274px;
 	background: url(images/img05.png) no-repeat;
-	min-height: 500px;
+	min-height: 400px;
 }
 
 #sidebar ul {
@@ -419,16 +443,22 @@ div.timetable{
 
 #footer {
 	padding: 10px 0;
+	margin: 0 auto;
+	height: 36px;
 }
 
 #footer p {
-	text-align: center;
 	font-size: 12px;
 	color: #83B3CE;
+	padding: 0 30px;
 }
 
 #footer a {
 	color: #83B3CE;
+}
+
+#footer .metrika{
+	float: right;
 }
 
 /*more*/
