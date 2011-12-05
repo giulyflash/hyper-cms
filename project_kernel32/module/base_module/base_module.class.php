@@ -152,7 +152,7 @@ abstract class base_module extends module{
 					if($show=='category'){
 						$this->_query->where('depth',0,'=',true);
 						$where = true;
-						if($bound['depth']!=0){
+						if($bound){
 							if(!$bound_query)
 								$bound_query = new object_sql_query($this->parent->db);
 							$bound0 = $bound_query->select('left,right,depth')->from($category_table)->where('left',$bound['left'],'<=')->_and('right',$bound['right'],'>=')->query();
@@ -160,7 +160,7 @@ abstract class base_module extends module{
 								if($level['right']==$level['left']+1)
 									$this->_query->_or('left',$level['left']);
 								else
-									$this->_query->_or('left',array($level['left'],$level['right']),'between')->_and('depth',$level['depth']+1,'<=');
+									$this->_query->_or('left',array($level['left'],$level['right']),'between')->_and('depth',$level['depth']+1,'=');
 						}
 						$this->_query->close_bracket();
 					}elseif($show=='all_sub'){
