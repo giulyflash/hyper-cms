@@ -135,14 +135,14 @@ class article extends base_module{
 	}
 	
 	//category
-	public function save_category($id=NULL,$title=NULL,$article_redirect=NULL,$insert_place=NULL,$condition = array()){
+	public function save_category($id=NULL,$title=NULL,$article_redirect=NULL,$insert_place=NULL,$draft=0){
 		if(!$title){
 			$this->_message('category name must not be empty');
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.edit_category&id='.$id.'&insert_place='.$insert_place);
 			return;
 		}
-		$value = array('title'=>$title,'translit_title'=>translit::transliterate($title),'article_redirect'=>($article_redirect?$article_redirect:NULL));
-		parent::save_category($id,$value,$insert_place);
+		$value = array('title'=>$title,'translit_title'=>translit::transliterate($title),'article_redirect'=>($article_redirect?$article_redirect:NULL),'draft'=>$draft);
+		parent::_save_category($id,$value,$insert_place);
 	}
 	
 	public function edit_category($id=NULL, $insert_place=NULL){
@@ -268,6 +268,6 @@ class article_config extends base_module_config{
 	private $more_tag = '<!--more-->';
 	protected $item_field = 'id,translit_title,title,category_id,preview';
 	protected $item_single_field='id,category_id,text';
-	protected $category_field = 'id,title,translit_title,left,right,depth,article_redirect';
+	protected $category_field = 'id,title,translit_title,left,right,depth,article_redirect,draft';
 }
 ?>

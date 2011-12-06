@@ -85,7 +85,15 @@
 			<div class="item_cont">
 				<a class="_ajax" href="/{$admin_mode}?call={$module_name}.{$method}&amp;title={translit_title}" alt="{title}" title="{title}">
 					<span class="folder_icon"></span>
-					<span class="text"><xsl:value-of select="title"/></span>
+					<xsl:variable name="bracket_l"><xsl:choose>
+						<xsl:when test="draft=1">(</xsl:when>
+						<xsl:when test="draft=2">[</xsl:when>
+					</xsl:choose></xsl:variable>
+					<xsl:variable name="bracket_r"><xsl:choose>
+						<xsl:when test="draft=1">)</xsl:when>
+						<xsl:when test="draft=2">]</xsl:when>
+					</xsl:choose></xsl:variable>
+					<span class="text"><xsl:value-of select="concat($bracket_l,title,$bracket_r)"/></span>
 				</a>
 				<xsl:call-template name="controls_category">
 					<xsl:with-param name="module_name" select="$module_name"/>
@@ -171,6 +179,24 @@
 				</td>
 				<td>
 					<input type="text" value="{title}" name="title"/>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					Черновик:
+				</td>
+				<td>
+					<select id="article_draft" type="checkbox" name="draft">
+						<option/>
+						<option value="2">
+							<xsl:if test="draft='2'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
+							не показывать в списках
+						</option>
+						<option value="1">
+							<xsl:if test="draft='1'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
+							черновик
+						</option>
+					</select>
 				</td>
 			</tr>
 			<tr>

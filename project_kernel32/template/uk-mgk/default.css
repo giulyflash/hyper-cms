@@ -151,8 +151,10 @@ html, body{
 	height: 45px;
 	vertical-align:middle;
 }
-.footer a{
+.footer>a{
 	color: #f1f1f1;
+	display: inline-block;
+	padding-top: 6px; 
 }
 .entry p{
 	text-indent: 2em;
@@ -172,4 +174,8 @@ html, body{
 }
 ul.doc{
 	list-style-image: url("images/img09.gif");
+}
+
+.footer .metrika{
+	float: right;
 }
