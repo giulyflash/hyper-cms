@@ -79,21 +79,18 @@ class object_sql_query{
 	}
 	
 	public function where($name=NULL,$value=NULL,$operand='=',$open_bracket=false){
-		$this->parent->add_sql($this->clause($name,$value,$operand,'WHERE',$open_bracket));
-		return new object_sql_query(NULL, $this->parent);
+		return $this->clause('WHERE',$name,$value,$operand,$open_bracket);
 	}
 	
 	public function _and($name=NULL,$value=NULL,$operand='=',$quot = '`',$open_bracket=false){
-		$this->parent->add_sql($this->clause($name,$value,$operand, 'AND', $open_bracket, $quot));
-		return new object_sql_query(NULL, $this->parent);
+		return $this->clause('AND',$name,$value,$operand,$open_bracket, $quot);
 	}
 	
 	public function _or($name=NULL,$value=NULL,$operand='=',$quot = '`',$open_bracket=false){
-		$this->parent->add_sql($this->clause($name,$value,$operand,'OR', $open_bracket, $quot));
-		return new object_sql_query(NULL, $this->parent);
+		return $this->clause('OR',$name,$value,$operand,$open_bracket, $quot);
 	}
 	
-	private function clause($name=NULL,$value=NULL,$operand='=',$clause='AND',$open_bracket=false,$quot = '`'){
+	public function clause($clause='AND',$name=NULL,$value=NULL,$operand='=',$open_bracket=false,$quot = '`'){
 		$sql = '';
 		$operand = strtolower(trim($operand));
 		$clause_name = strtoupper(trim($clause));
@@ -155,7 +152,8 @@ class object_sql_query{
 		}
 		if($sql)
 			$sql = ' '.$clause.' '.($open_bracket?'(':'').$sql;
-		return $sql;
+		$this->parent->add_sql($sql);
+		return new object_sql_query(NULL, $this->parent);
 	}
 	
 	public function order($name=NULL, $quot='`'){
