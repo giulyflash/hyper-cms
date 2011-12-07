@@ -126,17 +126,7 @@
 			<input type="submit" class="submit right" value="Сохранить"/>
 			<label for="article_draft">Черновик:</label>
 			<input type="submit" class="submit delete" value="Удалить" id="{id}"/>
-			<select id="article_draft" type="checkbox" name="draft">
-				<option/>
-				<option value="2">
-					<xsl:if test="draft='2'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
-					не показывать в списках
-				</option>
-				<option value="1">
-					<xsl:if test="draft='1'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
-					черновик
-				</option>
-			</select>
+			<xsl:call-template name="draft_select"/>
 			<input type="hidden" value="{id}" name="id"/>
 		</form>
 	</div>
@@ -214,15 +204,7 @@
 			<div class="item_cont">
 				<a class="_ajax" href="/{$admin_mode}?call={$module_name}.get_category&amp;title={translit_title}" alt="{title}" title="{title}">
 					<span class="folder_icon"></span>
-					<xsl:variable name="bracket_l"><xsl:choose>
-						<xsl:when test="draft=1">(</xsl:when>
-						<xsl:when test="draft=2">[</xsl:when>
-					</xsl:choose></xsl:variable>
-					<xsl:variable name="bracket_r"><xsl:choose>
-						<xsl:when test="draft=1">)</xsl:when>
-						<xsl:when test="draft=2">]</xsl:when>
-					</xsl:choose></xsl:variable>
-					<span class="text"><xsl:value-of select="concat($bracket_l,title,$bracket_r)"/></span>
+					<xsl:call-template name="base_title"/>
 				</a>
 			</div>
 			<xsl:choose>
@@ -290,17 +272,7 @@
 					Черновик:
 				</td>
 				<td>
-					<select id="article_draft" type="checkbox" name="draft">
-						<option/>
-						<option value="2">
-							<xsl:if test="draft='2'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
-							не показывать в списках
-						</option>
-						<option value="1">
-							<xsl:if test="draft='1'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
-							черновик
-						</option>
-					</select>
+					<xsl:call-template name="draft_select"/>
 				</td>
 			</tr>
 			<tr>
