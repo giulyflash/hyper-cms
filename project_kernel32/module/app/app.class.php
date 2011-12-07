@@ -1043,6 +1043,17 @@ class app extends module{
 		return count($this->_path);
 	}
 	
+	public function unset_path($start = 0, $length = 0){
+		if($start==0 and $length==0)
+			$this->_path = array();
+		else{
+			if(!$length)
+				$length = $this->get_path_count();
+			for($i=$start;$i<$length;$i++)
+				unset($this->_path[$i]);
+		}
+	}
+	
 	public function get_lang_title($module=NULL,$method=NULL,$param=NULL){
 		if(!$module)
 			$module = $this->center_module;

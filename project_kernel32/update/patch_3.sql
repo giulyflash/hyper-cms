@@ -33,3 +33,7 @@ ALTER TABLE `article` CHANGE `draft` `draft` TINYINT( 2 ) NOT NULL DEFAULT '0';
 ALTER TABLE `article_category` ADD `draft` TINYINT( 2 ) NOT NULL DEFAULT '0';
 
 ALTER TABLE `menu_item` ADD `draft` TINYINT( 2 ) NOT NULL DEFAULT '0';
+
+ALTER TABLE `article_category` DROP `language`;
+
+ALTER TABLE `menu_item` DROP `language`;

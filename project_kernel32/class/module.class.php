@@ -38,6 +38,7 @@ abstract class module{
 	public $argument = array();//call args
 	protected $config_class_name = 'module_config';//if defined config will be created from this class
 	protected $item_draft = false;
+	public $_admin_mode;
 	
 	public function __construct(&$parent=NULL){
 		$this->_set_call_time();
@@ -71,6 +72,7 @@ abstract class module{
 			$this->_table_name = $this->module_name;
 		if(!($this->_category_table_name = $this->_config('category_table')))
 			$this->_category_table_name = $this->_table_name.'_category';
+		$this->_admin_mode = $this->parent->admin_mode;
 	}
 	
 	private function _get_module_language($module){

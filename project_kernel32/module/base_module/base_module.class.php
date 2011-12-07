@@ -115,127 +115,163 @@ abstract class base_module extends module{
 		$this->_get_category('translit_title', $title, true, $show);
 	}
 	
-	public function _get_category($field = 'translit_title', $value=false, $need_item=true, $show='auto', $category_condition=array(),$item_condition=array()){
-		//$this->_query->echo_sql=1;
+	public function _get_category($field = 'translit_title', $value=false, $need_item=true, $show='auto', $category_condition=array(),$item_condition=array(),$page=NULL,$count=NULL){
 		//TODO pages?
-		//$show: all (all categories and subcategories), all_sub (all subcategories), category (0lvl categories + tree to current category), current (current category content only), auto ('current' for json, 'category' for others)
+		//$show: all (all categories and subcategories), category (0lvl categories + tree to current category), current (current category content only), auto ('current' for json, 'category' for others)
 		if($value=='')
 			$value = false;
 		if($show=='auto')
 			$show = in_array($this->parent->_config('content_type'), array('json','json_html'/*,'xml'*/))?'current':'category';
-		$category_field = $this->_config('category_field');
-		$category_table = $this->_category_table_name;
-		$where = false;
 		if($this->_config('has_category')){
-			$this->_query->select($category_field);
-			if($value!==false){
-				$bound_select = 'left,right,id,depth';
-				$bound_query = new object_sql_query($this->parent->db);
-				if($this->module_name=='article'){
-					$bound = $bound_query->select($bound_select.',title,translit_title,article_redirect')->from($category_table)->where($field,$value)->query1();
-					if(!$this->parent->admin_mode && $this->parent->_config('content_type')=='xsl' && !empty($bound['article_redirect'])){
-						$this->_query->set_sql();
-						$this->add_category_path($bound['left'],$bound['title']);
-						$this->config->set('need_path',false);
-						$this->get($bound['article_redirect']);
-						$this->_result['article_redirect'] = $bound['article_redirect'];
-						return;
-					}
-				}else
-					$bound = $bound_query->select($bound_select)->from($category_table)->where($field,$value)->query1();
-			}
-			else
-				$bound = array();
-			if($show=='category' || $show=='all' || $show=='all_sub'){
-				if($value!==false && $bound){
-					$this->_query->injection(', (`left` <= '.$bound['left'].' AND `right`>='.$bound['right'].') as `active`')->from($category_table);
-					if(!$this->parent->admin_mode){
-						$this->_query->where('draft',0);
-						$where = true;
-					}
-					if($show=='category'){
-						if($where)
-							$this->_query->_and('depth',0,'=','`',true);
-						else
-							$this->_query->where('depth',0,'=',true);
-						if($bound){
-							if(!$bound_query)
-								$bound_query = new object_sql_query($this->parent->db);
-							$bound0 = $bound_query->select('left,right,depth')->from($category_table)->where('left',$bound['left'],'<=')->_and('right',$bound['right'],'>=')->query();
-							foreach($bound0 as $level)
-								if($level['right']==$level['left']+1)
-									$this->_query->_or('left',$level['left']);
-								else
-									$this->_query->_or('left',array($level['left'],$level['right']),'between')->_and('depth',$level['depth']+1,'=');
-						}
-						$this->_query->close_bracket();
-					}elseif($show=='all_sub')
-						$this->_query->_and('left',array($bound['left'], $bound['right']),'between',true)->_and('left',$bound['left'],'!=');
+			$bound = $this->get_bound($field,$value);
+			if(!is_array($bound))
+				return;
+			$this->_query->select($this->_config('category_field'));
+			switch($show){
+				case 'category':{
+					$result = $this->get_category_tree($field, $value, $need_item, $category_condition, $bound);
+					$this->add_category_path($bound?$bound['left']:NULL);
+					break;
 				}
-				else{
-					$this->_query->from($category_table);
-					if(!$this->parent->admin_mode){
-						$this->_query->where('draft',0);
-						$where = true;
-					}
-					if($show=='category'){
-						if($where)
-							$this->_query->_and('depth',0,'=','`',true);
-						else{
-							$this->_query->where('depth',0,'=',true);
-							$where = true;
-						}
-						if($value!==false && $bound)
-							$this->_query->_or('left', $bound, 'between');
-						$this->_query->close_bracket();
-					}
+				case 'all':{
+					$result = $this->get_category_all($field, $value, $need_item, $category_condition, $bound);
+					break;
+				}
+				default:{
+					$result = $this->get_category_current($field, $value, $need_item, $category_condition, $bound);
+					$this->add_category_path($bound?$bound['left']:NULL);
 				}
 			}
-			elseif($show=='current'){
-				$this->_query->from($category_table);
-				if(!$this->parent->admin_mode){
-					$this->_query->where('draft',0);
-					$where = true;
-				}
-				if($bound)
-					$this->_query->clause($where?'AND':'WHERE','left', $bound['left'], '>')->_and('right', $bound['right'],'<')->_and('depth',$bound['depth']+1);
-				else
-					$this->_query->clause($where?'AND':'WHERE','depth',0);
-				$where = true;
-			}
-			if($bound || $show!='current'){
-				$this->parse_condition($category_condition,$where);
-				$this->_result = $this->_query->order('left')->query2assoc_array('id',NULL,false);
-			}
-			else{
-				$this->_query->set_sql();
-				$this->_result = array();
-			}
-			$this->add_category_path($bound?$bound['left']:NULL);
 			//items
 			if($need_item)
 				$this->get_category_items($show,$item_condition,$value,$bound);
 			$this->create_tree();
 		}
 		elseif($need_item && $this->_config('has_item')){
-			$this->_query->select($item_field)->from($this->_table_name);
+			//$this->get_category_items($show,$item_condition,$value,$bound);
+			$this->_query->select($this->_config('item_field'))->from($this->_table_name);
 			if($value!==false){
 				$category_id = NULL;
 				if($field!='id'){
 					$bound_query = new object_sql_query($this->parent->db);
-					$category_id = $bound_query->select('id')->from($category_table)->where($field,$value)->query1('id');
+					$category_id = $bound_query->select('id')->from($this->_category_table_name)->where($field,$value)->query1('id');
 				}
 				$this->_query->where('category_id',$category_id);
 			}
 			if($item_order)
 				$this->_query->order($item_order);
-			$this->_result = $this->limit_page($page,$count)->_query->query();
+			$this->_result = $this->_query->limit_page($page,$count)->query();
 		}
 		//TODO remove this temp code below
 		if($this->parent->admin_mode){
 			$this->category_list($category_condition);
 		}
 	}
+	
+	private function get_category_all($field=false, $value=false, $need_item=true, $category_condition=array(), &$bound=array()){
+		$where = false;
+		if($value!==false && $bound){
+			$this->get_category_sql_active($bound);
+			if(!$this->parent->admin_mode){
+				$this->_query->where('draft',0);
+				$where = true;
+			}
+			$this->parse_condition($category_condition,true);
+			$this->_result = $this->_query->order('left')->query2assoc_array('id',NULL,false);
+		}
+		else
+			$this->get_category_sql_default($category_condition, true);
+	}
+	
+	private function get_category_sql_active($bound){
+		$this->_query->injection(', (`left` <= '.$bound['left'].' AND `right`>='.$bound['right'].') as `active`')->from($this->_category_table_name);
+	}
+	
+	private function get_category_sql_default($category_condition=NULL, $query = NULL){
+		$where = false;
+		$this->_query->from($this->_category_table_name);
+		if(!$this->parent->admin_mode){
+			$this->_query->where('draft',0);
+			$where = true;
+		}
+		if($query){
+			$this->parse_condition($category_condition,$where);
+			$this->_result = $this->_query->order('left')->query2assoc_array('id',NULL,false);
+		}
+		return $where;
+	}
+	
+	
+	private function get_category_current($field=false, $value=false, $need_item=true, $category_condition=array(), &$bound=array()){
+		$where = $this->get_category_sql_default();
+		if($bound)
+			$this->_query->clause($where?'AND':'WHERE','left', $bound['left'], '>')->_and('right', $bound['right'],'<')->_and('depth',$bound['depth']+1);
+		else
+			$this->_query->clause($where?'AND':'WHERE','depth',0);
+		$this->parse_condition($category_condition,true);
+		$this->_result = $this->_query->order('left')->query2assoc_array('id',NULL,false);
+		//TODO limit page query
+	}
+	
+	private function get_category_tree($field=false, $value=false, $need_item=true, $category_condition=array(), &$bound=array()){
+		$where = false;
+		if($value!==false && $bound){
+			$this->get_category_sql_active($bound);
+			if(!$this->parent->admin_mode){
+				$this->_query->where('draft',0);
+				$where = true;
+			}
+			if($where)
+				$this->_query->_and('depth',0,'=','`',true);
+			else
+				$this->_query->where('depth',0,'=',true);
+			if($bound){
+				$bound_query = new object_sql_query($this->parent->db);
+				$bound0 = $bound_query->select('left,right,depth')->from($this->_category_table_name)->where('left',$bound['left'],'<=')->_and('right',$bound['right'],'>=')->query();
+				foreach($bound0 as $level)
+					if($level['right']==$level['left']+1)
+						$this->_query->_or('left',$level['left']);
+					else
+						$this->_query->_or('left',array($level['left'],$level['right']),'between')->_and('depth',$level['depth']+1,'=');
+			}
+			$this->_query->close_bracket();
+		}
+		else{
+			$where =$this->get_category_sql_default();
+			if($where)
+				$this->_query->_and('depth',0,'=','`',true);
+			else{
+				$this->_query->where('depth',0,'=',true);
+				$where = true;
+			}
+			$this->_query->close_bracket();
+		}
+		$this->parse_condition($category_condition,$where);
+		$this->_result = $this->_query->order('left')->query2assoc_array('id',NULL,false);
+	}
+	
+	private function get_bound($field=NULL,$value=false){
+		$bound = array();
+		if($value!==false){
+			$bound_select = 'left,right,id,depth';
+			$bound_query = new object_sql_query($this->parent->db);
+			if($this->module_name=='article'){
+				$bound = $bound_query->select($bound_select.',title,translit_title,article_redirect')->from($this->_category_table_name)->where($field,$value)->query1();
+				if(!$this->parent->admin_mode && $this->parent->_config('content_type')=='xsl' && !empty($bound['article_redirect'])){
+					$this->_query->set_sql();
+					$this->add_category_path($bound['left'],$bound['title']);
+					$this->config->set('need_path',false);
+					$this->get($bound['article_redirect']);
+					$this->_result['article_redirect'] = $bound['article_redirect'];
+					return;
+				}
+			}else
+				$bound = $bound_query->select($bound_select)->from($this->_category_table_name)->where($field,$value)->query1();
+		}
+		return $bound;
+	}
+	
+	//$show: all (all categories and subcategories), all_sub (all subcategories), category (0lvl categories + tree to current category), current (current category content only), auto ('current' for json, 'category' for others)
 	
 	public function get_category_items($show,$item_condition,$value,$bound){
 		if($this->_config('has_item')){
@@ -291,8 +327,8 @@ abstract class base_module extends module{
 	public function category_list($category_condition=NULL, $category_table=NULL){
 		if(!$category_table)
 			$category_table = $this->_category_table_name;
-		$this->_query->select('id,title,translit_title,depth')->from($category_table);
-		$this->parse_condition($category_condition,false);
+		$this->_query->select('id,title,translit_title,depth')->from($category_table)->where('draft',1,'!=');
+		$this->parse_condition($category_condition,true);
 		$this->_result['_category_list'] = $this->_query->order('left')->query();
 	}
 	
@@ -389,7 +425,7 @@ abstract class base_module extends module{
 			$this->parent->add_module_path();
 			if((empty($this->_result['draft']) || $this->_result['draft']=='0') && $this->_config('has_category') && !empty($this->_result['category_id'])){
 				//TODO path from $left
-				$left = $this->_query->select('left')->from($this->_category_table_name)->where('id', $this->_result['category_id'])->limit('1')->query1('left');
+				$left = $this->_query->select('left')->from($this->_category_table_name)->where('id', $this->_result['category_id'])->query1('left');
 				$this->get_path($left);
 			}
 			if(!empty($this->_result['title']))
@@ -415,20 +451,27 @@ abstract class base_module extends module{
 		if($left && !in_array($this->parent->_config('content_type'), array('json','json_html')) && (empty($this->_result['draft']) || $this->_result['draft']=='0' || $this->parent->admin_mode) && $this->_config('has_category')){
 			$admin_mode = $this->parent->admin_mode?'admin.php':'';
 			$method = $admin_mode?$this->_config('admin_method'):'get_category';
+			$this->module_path_count = $this->parent->get_path_count();
 			if($path_from_result){
 				foreach($this->_result as $name=>&$value)
-					if($value['left']<=$left && $value['right']>$left)
+					if($value['left']<=$left && $value['right']>$left){
+						if(!($this->_admin_mode || empty($match['draft'])))
+							$this->parent->unset_path($this->module_path_count);
 						$this->parent->add_path(array(
 							'title'=>$value['title'],
 							'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.'.$method.'&title='.$value['translit_title']
 							//'/'.$value['translit_title'].'/'
 						));
+					}
 			}
 			else{
-				$matches = $this->_query->select('title,translit_title')->from($this->_category_table_name)->where('left',$left,'<=')->_and('right',$left,'>=')->order('left')->query();
+				$matches = $this->_query->select('title,translit_title,draft')->from($this->_category_table_name)->where('left',$left,'<=')->_and('right',$left,'>=')->order('left')->query();
 				//TODO href
-				foreach($matches as &$match)
+				foreach($matches as &$match){
+					if(!($this->_admin_mode || empty($match['draft'])))
+						$this->parent->unset_path($this->module_path_count);
 					$this->parent->add_path(array('title'=>$match['title'],'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.'.$method.'&title='.$match['translit_title']));
+				}
 			}
 		}
 	}
