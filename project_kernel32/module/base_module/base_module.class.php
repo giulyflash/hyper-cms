@@ -397,7 +397,7 @@ abstract class base_module extends module{
 		}
 	}
 	
-	protected function add_category_path($left=NULL,$title=NULL){
+	protected function add_category_path($left=NULL,$title=NULL,$path_from_result=true){
 		if($this->_config('need_path')){
 			$this->parent->add_module_path();
 			if($left){
@@ -406,20 +406,21 @@ abstract class base_module extends module{
 					$this->parent->add_path($this->_result['title']);
 				}
 				else
-					$this->get_path($left,true);
+					$this->get_path($left,$path_from_result);
 			}
 		}
 	}
 	
 	protected function get_path($left=NULL,$path_from_result=NULL){
-		if($left && !in_array($this->parent->_config('content_type'), array('json','json_html')) && (empty($this->_result['draft']) || $this->_result['draft']=='0') && $this->_config('has_category')){
+		if($left && !in_array($this->parent->_config('content_type'), array('json','json_html')) && (empty($this->_result['draft']) || $this->_result['draft']=='0' || $this->parent->admin_mode) && $this->_config('has_category')){
 			$admin_mode = $this->parent->admin_mode?'admin.php':'';
+			$method = $admin_mode?$this->_config('admin_method'):'get_category';
 			if($path_from_result){
 				foreach($this->_result as $name=>&$value)
 					if($value['left']<=$left && $value['right']>$left)
 						$this->parent->add_path(array(
 							'title'=>$value['title'],
-							'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.get_category&title='.$value['translit_title']
+							'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.'.$method.'&title='.$value['translit_title']
 							//'/'.$value['translit_title'].'/'
 						));
 			}
@@ -427,7 +428,7 @@ abstract class base_module extends module{
 				$matches = $this->_query->select('title,translit_title')->from($this->_category_table_name)->where('left',$left,'<=')->_and('right',$left,'>=')->order('left')->query();
 				//TODO href
 				foreach($matches as &$match)
-					$this->parent->add_path(array('title'=>$match['title'],'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.get_category&title='.$match['translit_title']));
+					$this->parent->add_path(array('title'=>$match['title'],'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.'.$method.'&title='.$match['translit_title']));
 			}
 		}
 	}
@@ -437,8 +438,10 @@ abstract class base_module extends module{
 			$this->_result = $this->_query->select($select)->from($this->_table_name)->where('id',$id)->query1();
 			if(!$this->_result)
 				throw new my_exception('object not found by id', array('id'=>$id));
-			if($this->_config('need_path'));
-				$this->parent->add_method_path($this->_result['title']);
+			//if($this->_config('need_path'));
+				//$this->parent->add_method_path($this->_result['title']);
+			$this->_result['left'] = $this->_query->select('left')->from($this->_category_table_name)->where('id',$this->_result['category_id'])->query1('left');//FIXME temp
+			$this->add_category_path($this->_result['left'],$this->_result['title']);
 		}
 		elseif(!empty($_SESSION['_temp_var'])){
 			$this->_result = $_SESSION['_temp_var'];

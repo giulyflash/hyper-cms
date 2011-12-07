@@ -73,6 +73,18 @@
 	</li>
 </xsl:template>
 
+<xsl:template name="base_title">
+	<xsl:variable name="bracket_l"><xsl:choose>
+		<xsl:when test="draft=1">(</xsl:when>
+		<xsl:when test="draft=2">[</xsl:when>
+	</xsl:choose></xsl:variable>
+	<xsl:variable name="bracket_r"><xsl:choose>
+		<xsl:when test="draft=1">)</xsl:when>
+		<xsl:when test="draft=2">]</xsl:when>
+	</xsl:choose></xsl:variable>
+	<span class="text"><xsl:value-of select="concat($bracket_l,title,$bracket_r)"/></span>
+</xsl:template>
+
 <xsl:template name="nested_items_category_core">
 	<xsl:param name="module_name" select="_module_name"/>
 	<xsl:variable name="admin_mode"><xsl:if test="/root/meta/admin_mode=1">admin.php</xsl:if></xsl:variable>
@@ -85,15 +97,7 @@
 			<div class="item_cont">
 				<a class="_ajax" href="/{$admin_mode}?call={$module_name}.{$method}&amp;title={translit_title}" alt="{title}" title="{title}">
 					<span class="folder_icon"></span>
-					<xsl:variable name="bracket_l"><xsl:choose>
-						<xsl:when test="draft=1">(</xsl:when>
-						<xsl:when test="draft=2">[</xsl:when>
-					</xsl:choose></xsl:variable>
-					<xsl:variable name="bracket_r"><xsl:choose>
-						<xsl:when test="draft=1">)</xsl:when>
-						<xsl:when test="draft=2">]</xsl:when>
-					</xsl:choose></xsl:variable>
-					<span class="text"><xsl:value-of select="concat($bracket_l,title,$bracket_r)"/></span>
+					<xsl:call-template name="base_title"/>
 				</a>
 				<xsl:call-template name="controls_category">
 					<xsl:with-param name="module_name" select="$module_name"/>
@@ -128,15 +132,7 @@
 								<img src="{$thumb_path}" alt="{title}" title="{title}"/>
 							</div>
 						</div>
-						<xsl:variable name="bracket_l"><xsl:choose>
-							<xsl:when test="draft=1">(</xsl:when>
-							<xsl:when test="draft=2">[</xsl:when>
-						</xsl:choose></xsl:variable>
-						<xsl:variable name="bracket_r"><xsl:choose>
-							<xsl:when test="draft=1">)</xsl:when>
-							<xsl:when test="draft=2">]</xsl:when>
-						</xsl:choose></xsl:variable>
-						<span class="text"><xsl:value-of select="concat($bracket_l,title,$bracket_r)"/></span>
+						<xsl:call-template name="base_title"/>
 					</a>
 					<xsl:call-template name="controls_item">
 						<xsl:with-param name="module_name" select="$module_name"/>
@@ -186,17 +182,7 @@
 					Черновик:
 				</td>
 				<td>
-					<select id="article_draft" type="checkbox" name="draft">
-						<option/>
-						<option value="2">
-							<xsl:if test="draft='2'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
-							не показывать в списках
-						</option>
-						<option value="1">
-							<xsl:if test="draft='1'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
-							черновик
-						</option>
-					</select>
+					<xsl:call-template name="draft_select"/>
 				</td>
 			</tr>
 			<tr>
@@ -206,6 +192,20 @@
 			</tr>
 		</table>
 	</form>
+</xsl:template>
+
+<xsl:template name="draft_select">
+	<select type="checkbox" name="draft">
+		<option/>
+		<option value="2">
+			<xsl:if test="draft='2'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
+			не показывать в списках
+		</option>
+		<option value="1">
+			<xsl:if test="draft='1'"><xsl:attribute name="selected">selected</xsl:attribute></xsl:if>
+			черновик
+		</option>
+	</select>
 </xsl:template>
 
 <xsl:template name="controls_category">
