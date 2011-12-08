@@ -266,8 +266,8 @@ class article_config extends base_module_config{
 	
 	private $news_trans_title = 'Novosti';
 	private $more_tag = '<!--more-->';
-	protected $item_field = 'id,translit_title,title,category_id,preview';
-	protected $item_single_field='id,category_id,text';
+	protected $item_field = 'id,translit_title,title,category_left,category_right,preview';
+	protected $item_single_field='id,category_left,category_right,text';
 	protected $category_field = 'id,title,translit_title,left,right,depth,article_redirect,draft';
 }
 ?>

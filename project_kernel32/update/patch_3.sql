@@ -37,3 +37,28 @@ ALTER TABLE `menu_item` ADD `draft` TINYINT( 2 ) NOT NULL DEFAULT '0';
 ALTER TABLE `article_category` DROP `language`;
 
 ALTER TABLE `menu_item` DROP `language`;
+
+ALTER TABLE `article` ADD `category_left` INT NOT NULL;
+ALTER TABLE `article` ADD `category_right` INT NOT NULL;
+
+UPDATE `article` SET `category_left` = (select `left` from article_category where id = category_id), `category_right` = (select `right` from article_category where id = category_id);
+ALTER TABLE `article` DROP `category_id`;
+
+ALTER TABLE `article_category` ADD `category_count` INT NULL DEFAULT NULL;
+
+CREATE TEMPORARY TABLE `temp_category` (
+`id` int(11),
+  `title` varchar(255),
+  `translit_title` varchar(255),
+  `left` int(11),
+  `right` int(11),
+  `depth` int(11),
+  `article_redirect` varchar(255),
+  `draft` tinyint(2),
+  `category_count` int(11)
+);
+INSERT INTO temp_category (SELECT * FROM `article_category`);
+UPDATE `article_category` SET `category_count` = (SELECT count(*) FROM `temp_category` WHERE `temp_category`.`left`>`article_category`.`left` AND `temp_category`.`right`>`article_category`.`right`);
+
+ALTER TABLE `article` ADD `link` VARCHAR( 255 ) NULL;
+ALTER TABLE `article_category` ADD `link` VARCHAR( 255 ) NULL;
