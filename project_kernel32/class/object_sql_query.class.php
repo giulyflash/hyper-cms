@@ -111,7 +111,8 @@ class object_sql_query{
 				elseif($operand == 'like'){
 					if($value_type=='array')
 						$value = implode('%',$value);
-					$sql = $quot.self::escstr($name).$quot.' LIKE "%'.self::escstr($value).'%"';
+					$percent = strpos('%',$value)===false?'%':'';
+					$sql = $quot.self::escstr($name).$quot.' LIKE "'.$percent.self::escstr($value).$percent.'"';
 				}
 				else
 					$sql = $quot.self::escstr($name).$quot.$operand.'"'.self::escstr($value).'"';
