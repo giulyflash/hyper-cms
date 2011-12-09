@@ -93,6 +93,8 @@ class base_module_config extends module_config{
 
 abstract class base_module extends module{
 	protected $config_class_name = 'base_module_config';
+	protected $id_column = 'translit_title';
+	protected $category_id_column = 'translit_title';
 	
 	public function __construct(&$parent=NULL){
 		parent::__construct($parent);
@@ -115,7 +117,9 @@ abstract class base_module extends module{
 		$this->_get_category('translit_title', $title, true, $show);
 	}
 	
-	public function _get_category($field='translit_title', $value=false, $need_item=true, $show='auto', $category_condition=array(),$item_condition=array(),$page=NULL,$count=NULL){
+	public function _get_category($field=NULL, $value=false, $need_item=true, $show='auto', $category_condition=array(),$item_condition=array(),$page=NULL,$count=NULL){
+		if(!$field)
+			$field = $this->category_id_column;
 		//TODO pages?
 		//$show: all (all categories and subcategories), category (0lvl categories + tree to current category), current (current category content only), auto ('current' for json, 'category' for others)
 		if($value=='')
@@ -326,10 +330,8 @@ abstract class base_module extends module{
 		}
 	}
 	
-	public function category_list($category_condition=NULL, $category_table=NULL){
-		if(!$category_table)
-			$category_table = $this->_category_table_name;
-		$this->_query->select('left,title,translit_title,depth')->from($category_table)->where('draft',1,'!=');
+	public function category_list($category_condition=NULL){
+		$this->_query->select('left,title,translit_title,depth')->from($this->_category_table_name)->where('draft',1,'!=');
 		$this->parse_condition($category_condition,true);
 		$this->_result['_category_list'] = $this->_query->order('left')->query();
 	}
@@ -396,13 +398,15 @@ abstract class base_module extends module{
 		}
 	}
 	
-	public function get($title=NULL, $select=NULL, $condition=array()){
-		$this->_get('translit_title', $title, $select, $condition);
+	public function get($title=NULL, $select=NULL){
+		$this->_get(NULL, $title, $select);
 	}
 	
 	public function _get($field=NULL, $value=NULL, $select=NULL, $condition=array()){
 		if(!$select)
 			$select = $this->_config('item_single_field');
+		if(!$field)
+			$field = $this->category_id_column;
 		$this->_result = $this->_query->select($select)->from($this->_table_name);
 		$where = false;
 		//TODO draft check there
@@ -479,7 +483,7 @@ abstract class base_module extends module{
 	
 	public function edit($title=NULL, $category_left=NULL, $select='*'){
 		if($title){
-			$this->_result = $this->_query->select($select)->from($this->_table_name)->where('translit_title',$title)->query1();
+			$this->_result = $this->_query->select($select)->from($this->_table_name)->where($this->id_column,$title)->query1();
 			if(!$this->_result)
 				throw new my_exception('object not found by title', array('title'=>$title));
 			$this->add_category_path($this->_result['category_left'],$this->_result['title']);
@@ -495,25 +499,28 @@ abstract class base_module extends module{
 		}
 	}
 	
-	public function _save($translit_title_old=NULL, $value = array(), $redirect = 'edit', $output_message = true, $params=array()){
+	public function _save($title=NULL, $value = array(), $redirect = 'edit', $output_message = true, $params=array()){
+		if(!$params)
+			$params = array('title'=>$value['title']);
 		//TODO unique translit_title
-		if($translit_title_old){
-			$this->_query->update($this->_table_name)->set($value)->where('translit_title',$translit_title_old)->limit(1)->execute();
+		if($title){
+			$this->_query->update($this->_table_name)->set($value)->where('translit_title',$title)->limit(1)->execute();
 			if($output_message)
 				$this->_message('edited seccessfully',$params);
 		}
 		else{
+			$value['translit_title'] = $this->get_unique_title($value['translit_title']);
 			$this->_query->insert($this->_table_name)->values($value)->execute();
-			$id = $this->parent->db->insert_id();
+			//$id = $this->parent->db->insert_id();
 			if($output_message)
 				$this->_message('added seccessfully',$params);
 		}
 		//$this->edit($id);
 		if($redirect)
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, array('id'=>$id));
+			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, array('title'=>$value['translit_title']));
 	}
 	
-	public function remove($id=NULL,$redirect='_admin',$message=true,$param = array()){
+	public function remove($title=NULL,$redirect='_admin',$message=true,$param = array()){
 		$redirect_params = array();
 		if($id){
 			$data = $this->_query->select('title,category_id')->from($this->_table_name)->where('id',$id)->query1();
@@ -765,6 +772,16 @@ abstract class base_module extends module{
 	
 	public function set_translit_title_category(){
 		$this->set_translit_title($this->_category_table_name);
+	}
+	
+	private function get_unique_title($value=NULL, $table=NULL, $column = 'translit_title'){
+		if(!$table)
+			$table = $this->_table_name;
+		if(!$value)
+			$value = 1;
+		elseif($count = $this->_query->injection('SELECT count(*) as c')->from($table)->where($column,$value.'%','like')->query1('c',false))
+			$value.=$count;
+		return $value;
 	}
 	
 	public function _get_param_value($method_name,$param_name){
