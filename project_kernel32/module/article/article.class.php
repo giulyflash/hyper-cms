@@ -18,7 +18,7 @@ class article extends base_module{
 			$field = 'id';
 		}
 		//$this->_query->echo_sql=1;
-		$this->_get($field, $title, $select, array('draft',1,'!='));
+		$this->_get($field, $title, $select);
 		if(!empty($this->_result['title']))
 			$this->_title = $this->_result['title'];
 	}
@@ -266,8 +266,8 @@ class article_config extends base_module_config{
 	
 	private $news_trans_title = 'Novosti';
 	private $more_tag = '<!--more-->';
-	protected $item_field = 'id,translit_title,title,category_left,category_right,preview';
-	protected $item_single_field='id,category_left,category_right,text';
+	protected $item_field = 'id,translit_title,title,category_left,preview';
+	protected $item_single_field='id,category_left,text';
 	protected $category_field = 'id,title,translit_title,left,right,depth,article_redirect,draft';
 }
 ?>
