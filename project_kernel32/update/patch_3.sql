@@ -52,3 +52,5 @@ UPDATE `article_category` SET `category_count` = (SELECT count(*) FROM `temp_cat
 ALTER TABLE `article` ADD `link` VARCHAR( 255 ) NULL;
 ALTER TABLE `article_category` ADD `link` VARCHAR( 255 ) NULL;
 
+UPDATE `article` SET `link`=concat('/',`translit_title`);
+UPDATE `article_category` SET `link`=concat('/',`translit_title`,'/');

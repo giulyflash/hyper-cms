@@ -102,7 +102,6 @@ class menu extends base_module{
 		}
 		$value = array(
 			'title'=>$title,
-			'translit_title'=>translit::transliterate($title),
 			'link'=>($link_text?$link_text:$this->_config('default_link')),
 			'link_id'=>$link_id,
 			'menu_id'=>$menu_id,

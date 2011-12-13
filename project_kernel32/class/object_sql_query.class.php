@@ -5,9 +5,10 @@ class object_sql_query{
 	 * Kulakov Sergey 2011
 	 * mailto: kulakov.serg@gmail.com
 	 */
-	private $sql_query_class;
+	public $sql_query_class;
 	private $parent;
 	private $sql_query_method;
+	public $echo_sql;
 	
 	//TODO check called methods existence and their order
 	
@@ -345,10 +346,12 @@ class object_sql_query{
 		}
 		else
 			$this->parent->add_sql(' FLUSH TABLES WITH READ LOCK ');
+		$this->sql_query_class->lock = true;
 		return new object_sql_query(NULL, $this->parent);
 	}
 	
 	public function unlock(){
+		$this->sql_query_class->lock = false;
 		$this->parent->add_sql(' UNLOCK TABLES ');
 		return new object_sql_query(NULL, $this->parent);
 	}

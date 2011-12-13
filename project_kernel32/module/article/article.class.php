@@ -27,7 +27,7 @@ class article extends base_module{
 		parent::_get_category('translit_title',$title,true,'auto',NULL,array('draft',0));
 	}
 	
-	public function save($id=NULL, $title=NULL, $translit_title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $category_id=NULL, $create_date=array()){
+	public function save($id=NULL, $title=NULL, $translit_title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $category_left=NULL, $create_date=array()){
 		if(!$title){
 			$this->_message('title must not be empty');
 			$_SESSION['_temp_var'] = array(
@@ -39,7 +39,7 @@ class article extends base_module{
 				"keyword"=>$keyword,
 				"description"=>$description,
 				"draft"=>$draft,
-				"category_id"=>$category_id
+				"category_left"=>$category_left
 			);
 			$this->parent->redirect('/'.($this->parent->admin_mode?'admin.php':'').'?call='.$this->module_name.'.edit');
 		}
@@ -51,7 +51,7 @@ class article extends base_module{
 			'keyword'=>$keyword,
 			'description'=>$description,
 			'draft'=>($draft)?$draft:0,
-			'category_id'=>$category_id?$category_id:NULL,
+			'category_left'=>$category_left?$category_left:NULL,
 		);
 		$date = new DateTime();
 		$date = $date->format('Y-m-d H:i:s');
@@ -63,7 +63,7 @@ class article extends base_module{
 	}
 	
 	/*public function _admin($page=null, $count=null, $show='all'){
-		parent::_admin($page, $count, $show, 'depth,title,id', 'category_id,title,id', 'create_date');
+		parent::_admin($page, $count, $show, 'depth,title,id', 'category_left,title,id', 'create_date');
 	}*/
 	
 	private function get_date($date){
@@ -141,7 +141,7 @@ class article extends base_module{
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.edit_category&id='.$id.'&insert_place='.$insert_place);
 			return;
 		}
-		$value = array('title'=>$title,'translit_title'=>translit::transliterate($title),'article_redirect'=>($article_redirect?$article_redirect:NULL),'draft'=>$draft);
+		$value = array('title'=>$title,'article_redirect'=>($article_redirect?$article_redirect:NULL),'draft'=>$draft);
 		parent::_save_category($id,$value,$insert_place);
 	}
 	
