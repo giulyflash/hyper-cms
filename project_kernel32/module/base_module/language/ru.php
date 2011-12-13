@@ -70,7 +70,7 @@ $error = array(
 	'category not found by id' => 'Категория не найдена по идентификатору id="$id"',
 	'category deleted successfully' => 'Категория "$name" уcпешно удалена',
 	'database unlocked' => 'База разблокирована',
-	'item moved' => 'Объект перемещен',
+	'item moved' => 'Объект "$name" перемещен',
 );
 
 

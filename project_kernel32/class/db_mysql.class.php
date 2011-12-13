@@ -13,6 +13,7 @@ class db_mysql_config extends module_config{
 class db_mysql extends module implements db_interface{
 	protected $config_class_name = 'db_mysql_config';
 	private $link;
+	public $lock;
 	
 	public function __construct(&$parent=NULL){
 		parent::__construct($parent);
@@ -51,6 +52,10 @@ class db_mysql extends module implements db_interface{
 		if($error = mysql_error()){
 			//TODO process error, dont output row
 			$this->_message('sql: '.$query/*,array('sql'=>$query)*/);
+			if($this->lock){
+				mysql_query('unlock tables', $this->link);//TODO check if tables locked
+				$this->lock = false;
+			}
 			throw new my_exception('mysql error', $error);
 		}
 		else{

@@ -10,9 +10,9 @@
 		<xsl:value-of select="text" disable-output-escaping="yes"/>
 	</div>
 	<!-- temp -->
-	<xsl:if test="/root/session/user_info and id">
+	<xsl:if test="/root/session/user_info and translit_title">
 		<p class="article_edit">
-			<a class="edit_article" href="/admin.php?call=article.edit&amp;id={id}" target="_blank" title="редактировать" alt="редактировать">
+			<a class="edit_article" href="/admin.php?call=article.edit&amp;title={translit_title}" target="_blank" title="редактировать" alt="редактировать">
 				<img src="/module/base_module/img/pencil.png"/>&#160;<span>редактировать</span>
 			</a>
 		</p>
@@ -32,7 +32,7 @@
 								Ссылка:
 							</td>
 							<td>
-								<xsl:variable name="short_href">/<xsl:value-of select = "translit_title"/></xsl:variable>
+								<xsl:variable name="short_href"><xsl:value-of select = "link"/></xsl:variable>
 								<xsl:variable name="long_href">/?call=article.get&amp;name=translit_title&amp;value=<xsl:value-of select = "translit_title"/></xsl:variable>
 								<a href="{$short_href}" target="_blank"><xsl:value-of select="$short_href"/></a>
 							</td>
@@ -93,13 +93,13 @@
 							Категория:
 						</td>
 						<td>
-							<xsl:variable name="category_id"><xsl:choose>
-								<xsl:when test="id"><xsl:value-of select="category_id"/></xsl:when>
-								<xsl:otherwise><xsl:value-of select="_argument/category_id"/></xsl:otherwise>
+							<xsl:variable name="category_left"><xsl:choose>
+								<xsl:when test="translit_title"><xsl:value-of select="category_left"/></xsl:when>
+								<xsl:otherwise><xsl:value-of select="_argument/category_left"/></xsl:otherwise>
 							</xsl:choose></xsl:variable>
 							<select name="category_id" autocomplete='off'>
 								<xsl:call-template name="_get_category_list">
-									<xsl:with-param name="id" select="$category_id"/>
+									<xsl:with-param name="category_left" select="$category_left"/>
 								</xsl:call-template>
 							</select>
 						</td>
@@ -134,19 +134,21 @@
 
 <xsl:template match="root/module/item[_module_name='article' and _method_name='get_category']">
 	<xsl:choose>
+		<xsl:when test="article_redirect">
+			<xsl:call-template name="article_get"/>
+		</xsl:when>
+		<!-- 
 		<xsl:when test="/root/meta/content_type='json_html'">
 			<xsl:call-template name="article_base">
 				<xsl:with-param name="need_ul">0</xsl:with-param>
 			</xsl:call-template>
 		</xsl:when>
-		<xsl:when test="article_redirect">
-			<xsl:call-template name="article_get"/>
-		</xsl:when>
 		<xsl:otherwise>
 			<div class="nested_items {_module_name} {_method_name} {_config/category_type}">
 				<xsl:call-template name="article_base"/>
 			</div>
-		</xsl:otherwise>
+		</xsl:otherwise> -->
+		<xsl:call-template name="nested_items_category"/>
 	</xsl:choose>
 </xsl:template>
 
