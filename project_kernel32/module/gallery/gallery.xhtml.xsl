@@ -47,7 +47,7 @@
 					<td>
 						<select name="category_id">
 							<xsl:call-template name="_get_category_list">
-								<xsl:with-param name="id" select="$category_id"/>
+								<xsl:with-param name="category_id" select="$category_id"/>
 							</xsl:call-template>
 						</select>
 					</td>

@@ -81,9 +81,9 @@ class base_module_config extends module_config{
 	
 	protected $exclude_method_from_link_list = array('save','save_category','move_category');
 	
-	protected $category_field='title,translit_title,left,right,depth,draft,link';
-	protected $item_field='translit_title,title,category_left,link';
-	protected $item_single_field='translit_title,title,category_left';
+	protected $category_field='id,title,left,right,depth,draft,link';
+	protected $item_field='id,title,category_id,link';
+	protected $item_single_field='id,title,category_id';
 	protected $item_order='order';
 	protected $need_path = true;
 	public $category_type = 'dropdown';
@@ -93,8 +93,8 @@ class base_module_config extends module_config{
 
 abstract class base_module extends module{
 	protected $config_class_name = 'base_module_config';
-	protected $id_column = 'translit_title';
-	protected $category_id_column = 'translit_title';
+	protected $id_field = 'id';
+	protected $category_id_field = 'id';
 	
 	public function __construct(&$parent=NULL){
 		parent::__construct($parent);
@@ -107,19 +107,19 @@ abstract class base_module extends module{
 		return $values;
 	}
 	
-	public function _admin($title=NULL){
-		$this->_get_category($this->category_id_column, $title, true, 'auto');
-		//parent::get_category('translit_title', $title, true, 'auto', NULL, array(array('module',$this->module_name), array('internal_type','image')));
+	public function _admin($id=NULL){
+		$this->_get_category($this->category_id_field, $id, true, 'auto');
+		//parent::get_category('translit_title', $id, true, 'auto', NULL, array(array('module',$this->module_name), array('internal_type','image')));
 		//FIXME wtf it do not load category by title?
 	}
 	
-	public function get_category($title=false, $show='auto'){
-		$this->_get_category($this->category_id_column, $title, true, $show);
+	public function get_category($id=false, $show='auto'){
+		$this->_get_category($this->category_id_field, $id, true, $show);
 	}
 	
 	public function _get_category($field=NULL, $value=false, $need_item=true, $show='auto', $category_condition=array(),$item_condition=array(),$page=NULL,$count=NULL){
 		if(!$field)
-			$field = $this->category_id_column;
+			$field = $this->category_id_field;
 		//TODO pages?
 		//$show: all (all categories and subcategories), category (0lvl categories + tree to current category), current (current category content only), auto ('current' for json, 'category' for others)
 		if($value=='')
@@ -155,10 +155,10 @@ abstract class base_module extends module{
 			//$this->get_category_items($show,$item_condition,$value,$bound);
 			$this->_query->select($this->_config('item_field'))->from($this->_table_name);
 			if($value!==false){
-				$category_left = NULL;
+				$category_id = NULL;
 				$bound_query = new object_sql_query($this->parent->db);
-				$category_left = $bound_query->select('left')->from($this->_category_table_name)->where($field,$value)->query1('left');
-				$this->_query->where('category_left',$category_left);
+				$category_id = $bound_query->select('left')->from($this->_category_table_name)->where($field,$value)->query1('id');
+				$this->_query->where('category_id',$category_id);
 			}
 			if($item_order)
 				$this->_query->order($item_order);
@@ -204,7 +204,7 @@ abstract class base_module extends module{
 	}
 	
 	
-	private function get_category_current($field=false, $value=false, $need_item=true, $category_condition=array(), &$bound=array()){
+	private function get_category_current($field=false, $value=false, $need_item=true, $category_condition=array(), &$bound=array()){	
 		$where = $this->get_category_sql_default();
 		if($bound)
 			$this->_query->clause($where?'AND':'WHERE','left', $bound['left'], '>')->_and('right', $bound['right'],'<')->_and('depth',$bound['depth']+1);
@@ -259,13 +259,13 @@ abstract class base_module extends module{
 	private function get_bound($field=NULL,$value=false){
 		$bound = array();
 		if($value!==false){
-			$bound_select = 'left,right,depth';
+			$bound_select = 'left,right,depth,'.$this->category_id_field;
 			$bound_query = new object_sql_query($this->parent->db);
 			if($this->module_name=='article'){
-				$bound = $bound_query->select($bound_select.',title,article_redirect,'.$this->category_id_column)->from($this->_category_table_name)->where($field,$value)->query1();
+				$bound = $bound_query->select($bound_select.',title,article_redirect,'.$this->category_id_field)->from($this->_category_table_name)->where($field,$value)->query1();
 				if(!$this->parent->admin_mode && $this->parent->_config('content_type')=='xsl' && !empty($bound['article_redirect'])){
 					$this->_query->set_sql();
-					$this->add_category_path($bound['left'],$bound['title']);
+					//$this->add_category_path($bound['left'],$bound['title']);
 					$this->config->set('need_path',false);
 					$this->get($bound['article_redirect']);
 					$this->_result['article_redirect'] = $bound['article_redirect'];
@@ -289,28 +289,27 @@ abstract class base_module extends module{
 			$null_categories = false;
 			if($show!='current' || $show=='all_sub' && !$value)
 				$null_categories = true;
-			elseif($value)
-				$categories[] = $bound['left'];
-			if($this->_result){
-				if($bound)
-					foreach($this->_result as &$category){
-						if(!empty($category['active']))
-							$categories[] = $category['left'];
-						if($category['left']==$bound['left']){
-							$category['is_current'] = 1;
-						}
+			elseif($bound)
+				$categories[$bound[$this->category_id_field]] = $bound[$this->category_id_field];
+			if($this->_result && $bound){
+				foreach($this->_result as $cat_num=>&$category){
+					if(!empty($category['active']))
+						$categories[$category[$this->category_id_field]] = $cat_num;
+					if($category[$this->category_id_field]==$bound[$this->category_id_field]){
+						$category['is_current'] = 1;
 					}
+				}
 			}
 			$where = false;
 			if($categories){
-				$this->_query->where('category_left',$categories,'in',true);
+				$this->_query->where('category_id',array_keys($categories),'in',true);
 				if($null_categories)
-					$this->_query->_or('category_left',NULL);
+					$this->_query->_or('category_id',NULL);
 				$this->_query->close_bracket();
 				$where = true;
 			}
 			elseif($null_categories){
-				$this->_query->where('category_left',NULL);
+				$this->_query->where('category_id',NULL);
 				$where = true;
 			}
 			//TODO draft check there
@@ -319,8 +318,8 @@ abstract class base_module extends module{
 				$this->_query->order($item_order);
 			if($items = $this->_query->query()){
 				foreach(array_keys($items) as $item_num)
-					if($items[$item_num]['category_left'] && isset($this->_result[$items[$item_num]['category_left']])){
-						$this->_result[$items[$item_num]['category_left']]['items'][] = $items[$item_num];
+					if($items[$item_num]['category_id'] && isset($this->_result[$num = $categories[$items[$item_num]['category_id']] ])){
+						$this->_result[$num]['items'][] = $items[$item_num];
 						unset($items[$item_num]);
 					}
 				if($items){
@@ -331,7 +330,7 @@ abstract class base_module extends module{
 	}
 	
 	public function category_list($category_condition=NULL){
-		$this->_query->select('left,title,depth,'.$this->category_id_column)->from($this->_category_table_name)->where('draft',1,'!=');
+		$this->_query->select('left,title,depth,'.$this->category_id_field)->from($this->_category_table_name)->where('draft',1,'!=');
 		$this->parse_condition($category_condition,true);
 		$this->_result['_category_list'] = $this->_query->order('left')->query();
 	}
@@ -398,15 +397,15 @@ abstract class base_module extends module{
 		}
 	}
 	
-	public function get($title=NULL, $select=NULL){
-		$this->_get(NULL, $title, $select);
+	public function get($id=NULL, $select=NULL){
+		$this->_get(NULL, $id, $select);
 	}
 	
 	public function _get($field=NULL, $value=NULL, $select=NULL, $condition=array()){
 		if(!$select)
 			$select = $this->_config('item_single_field');
 		if(!$field)
-			$field = $this->category_id_column;
+			$field = $this->category_id_field;
 		$this->_result = $this->_query->select($select)->from($this->_table_name);
 		$where = false;
 		//TODO draft check there
@@ -430,11 +429,13 @@ abstract class base_module extends module{
 	protected function add_item_path(){
 		if($this->_config('need_path')){
 			$this->parent->add_module_path();
-			if(!empty($this->_result['title'])){
-				$this->parent->add_path($this->_result['title']);
-				if(!empty($this->_result['category_left']) && (empty($this->_result['draft']) || $this->_result['draft']=='0') && $this->_config('has_category'))
-					$this->get_path($this->_result['category_left']);
+			if(!empty($this->_result['category_id'])){
+				$left = $this->_query->select('left')->from($this->_table_name)->where($this->category_id_field,$this->_result['category_id'])->query1('left');
+				if($left && (empty($this->_result['draft']) || $this->_result['draft']=='0') && $this->_config('has_category'))
+					$this->get_path($left);
 			}
+			if(!empty($this->_result['title']))
+				$this->parent->add_path($this->_result['title']);
 		}
 	}
 	
@@ -464,33 +465,33 @@ abstract class base_module extends module{
 							$this->parent->unset_path($this->module_path_count);
 						$this->parent->add_path(array(
 							'title'=>$value['title'],
-							'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.'.$method.'&title='.$value[$this->category_id_column]
-							//'/'.$value['translit_title'].'/'
+							'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.'.$method.'&title='.$value[$this->category_id_field]
 						));
 					}
 			}
 			else{
-				$matches = $this->_query->select('title,draft,'.$this->category_id_column)->from($this->_category_table_name)->where('left',$left,'<=')->_and('right',$left,'>=')->order('left')->query();
+				$matches = $this->_query->select('title,draft,'.$this->category_id_field)->from($this->_category_table_name)->where('left',$left,'<=')->_and('right',$left,'>=')->order('left')->query();
 				//TODO href
 				foreach($matches as &$match){
 					if(!($this->_admin_mode || empty($match['draft'])))
 						$this->parent->unset_path($this->module_path_count);
-					$this->parent->add_path(array('title'=>$match['title'],'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.'.$method.'&title='.$match[$this->category_id_column]));
+					$this->parent->add_path(array('title'=>$match['title'],'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.'.$method.'&title='.$match[$this->category_id_field]));
 				}
 			}
 		}
 	}
 	
-	public function edit($title=NULL, $category_left=NULL, $select='*'){
-		if($title){
-			$this->_result = $this->_query->select($select)->from($this->_table_name)->where($this->id_column,$title)->query1();
+	public function edit($id=NULL, $category_id=NULL, $select='*'){
+		if($id){
+			$this->_result = $this->_query->select($select)->from($this->_table_name)->where($this->id_field,$id)->query1();
 			if(!$this->_result)
-				throw new my_exception('object not found by title', array('title'=>$title));
-			$this->add_category_path($this->_result['category_left'],$this->_result['title']);
+				throw new my_exception('object not found by title', array('id'=>$id));
+			$this->add_category_path($this->_result['category_id'],$this->_result['title']);
 		}
-		elseif(!empty($_SESSION['_temp_var'])){
-			$this->_result = $_SESSION['_temp_var'];
-			unset($_SESSION['_temp_var']);
+		elseif(!empty($_SESSION['_user_input'][$this->module_name])){
+			//_user_input - save user input values when error
+			$this->_result = $_SESSION['_user_input'][$this->module_name];
+			unset($_SESSION['_user_input'][$this->module_name]);
 		}
 		$this->category_list();
 		if(!isset($this->_result['create_date'])){
@@ -499,20 +500,20 @@ abstract class base_module extends module{
 		}
 	}
 	
-	public function save($title=NULL, $value = array(), $redirect = 'edit', $output_message = true, $params=array()){
-		$this->_save($title,$value,$redirect,$output_message,$params);
+	public function save($id=NULL, $value = array(), $redirect = 'edit', $output_message = true, $params=array()){
+		$this->_save($id,$value,$redirect,$output_message,$params);
 	}
 	
-	public function _save($title=NULL, $value = array(), $redirect = 'edit', $output_message = true, $params=array()){
+	public function _save($id=NULL, $value = array(), $redirect = 'edit', $output_message = true, $params=array()){
 		if(!$params)
 			$params = array('title'=>$value['title']);
-		if($title){
-			$this->_query->update($this->_table_name)->set($value)->where($this->id_column,$title)->query1();
+		if($id){
+			$this->_query->update($this->_table_name)->set($value)->where($this->id_field,$id)->query1();
 			if($output_message)
 				$this->_message('edited seccessfully',$params);
 		}
 		else{
-			$value[$this->id_column] = $this->get_unique_title($value[$this->id_column]);
+			$value[$this->id_field] = $this->get_unique_title($value[$this->id_field]);
 			$this->_query->insert($this->_table_name)->values($value)->execute();
 			//$id = $this->parent->db->insert_id();
 			if($output_message)
@@ -520,18 +521,18 @@ abstract class base_module extends module{
 		}
 		//$this->edit($id);
 		if($redirect)
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, array('title'=>$value[$this->category_id_column]));
+			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, array('title'=>$value[$this->category_id_field]));
 	}
 	
-	public function remove($title=NULL,$redirect='_admin',$message=true,$param = array()){
+	public function remove($id=NULL,$redirect='_admin',$message=true,$param = array()){
 		$redirect_params = array();
 		if($id){
-			$data = $this->_query->select('title,category_left')->from($this->_table_name)->where($this->id_column,$title)->query1();
-			$this->_query->delete()->from($this->_table_name)->where($this->id_column,$title)->query1();
+			$data = $this->_query->select('title,category_id')->from($this->_table_name)->where($this->id_field,$id)->query1();
+			$this->_query->delete()->from($this->_table_name)->where($this->id_field,$id)->query1();
 			if($message)
 				$this->_message('deleted seccessfully',array('title'=>$data['title']));
 			if($data['category_id']){
-				$redirect_params['title'] = $this->_query->select($this->id_column)->from($this->_category_table_name)->where('left',$data['category_left'])->query1($this->id_column);
+				$redirect_params['id'] = $this->_query->select($this->id_field)->from($this->_category_table_name)->where('left',$data['category_id'])->query1($this->id_field);
 			}
 		}
 		else
@@ -539,46 +540,48 @@ abstract class base_module extends module{
 		$this->parent->redirect('/'.($this->parent->admin_mode?'admin.php':'').'?call='.$this->module_name.($this->parent->admin_mode?'._admin':''),$redirect_params);
 	}
 	
-	public function edit_category($title=NULL, $insert_place=NULL){
+	public function edit_category($id=NULL, $insert_place=NULL){
 		if($id){
-			$this->_result = $this->_query->select()->from($this->_category_table_name)->where($this->category_id_column,$title)->query1();
+			$this->_result = $this->_query->select()->from($this->_category_table_name)->where($this->category_id_field,$id)->query1();
 			if($this->_config('need_path'))
 				$this->parent->add_method_path($this->_result['title']);
 		}
 	}
 	
-	public function save_category($translit_title=NULL,$title=NULL,$insert_place=NULL,$draft=NULL){
-		$value = array('title'=>$title,'translit_title'=>translit::transliterate($title),'draft'=>$draft);
-		$this->_save_category($translit_title,$value,$insert_place,$draft);
+	public function save_category($id=NULL,$title=NULL,$insert_place=NULL,$draft=NULL){
+		$this->_save_category($id,
+			array('title'=>$title,'translit_title'=>$translit_title,'draft'=>$draft),
+			$insert_place
+		);
 	}
 
-	public function _save_category($title=NULL,$value=array(),$insert_place=NULL,$condition = array(),$redirect = '_admin'){
+	public function _save_category($id=NULL,$value=array(),$insert_place=NULL,$condition = array(),$redirect = '_admin'){
 		$redirect_params = array();
 		if(isset($value['draft']))
 			$value['draft'] = (int)$value['draft'];
-		if(empty($value[$this->category_id_column]))
-			$value[$this->category_id_column] = $this->get_unique_title(translit::transliterate($value['title']),$this->_category_table_name,$this->category_id_column);
-		if($title){
-			if(!$item = $this->_query->select('title,left')->from($this->_category_table_name)->where($this->category_id_column,$title)->query1())
+		if(empty($value[$this->category_id_field]) || !$value[$this->category_id_field])
+			$value[$this->category_id_field] = $this->get_unique_title(translit::transliterate($value['title']),$this->_category_table_name,$this->category_id_field);
+		if($id){
+			if(!$item = $this->_query->select('title,left')->from($this->_category_table_name)->where($this->category_id_field,$id)->query1())
 				new my_exception('category not found',array('id'=>$id));
-			$this->_query->update($this->_category_table_name)->set($value)->where($this->category_id_column,$title)->query1();
+			$this->_query->update($this->_category_table_name)->set($value)->where($this->category_id_field,$id)->query1();
 			$this->_message('category edited successfully',array('title'=>$item['title']));
-			if($parent_title = $this->_query->select($this->category_id_column)->from($this->_category_table_name)->where('left',$item['left'],'<')->_and('right',$item['left'],'>')->order('left desc')->query1($this->category_id_column) )
-				$redirect_params['title'] = $parent_title;
+			if($parent_title = $this->_query->select($this->category_id_field)->from($this->_category_table_name)->where('left',$item['left'],'<')->_and('right',$item['left'],'>')->order('left desc')->query1($this->category_id_field) )
+				$redirect_params['id'] = $parent_title;
 		}
 		else{
 			if($insert_place){
-				$destination = $this->_query->select('right,depth')->from($this->_category_table_name)->where($this->category_id_column,$insert_place)->query1();
+				$destination = $this->_query->select('right,depth')->from($this->_category_table_name)->where($this->category_id_field,$insert_place)->query1();
 				if(!$destination)
-					throw new my_exception('parent not found',array($this->category_id_column=>$insert_place));
-				$redirect_params['title'] = $title;
+					throw new my_exception('parent not found',array($this->category_id_field=>$insert_place));
+				$redirect_params['id'] = $id;
 				$value['left'] = $destination['right'];
 				$this->_query->lock($this->_category_table_name)->execute();
 				$this->_query->update($this->_category_table_name)->injection(' SET `right`=`right`+2')->where('right',$value['left'],'>=');
 				$this->parse_condition($condition,true);
 				$this->_query->execute();
 				if($this->_config('has_item'))
-					$this->_query->update($this->_category_table_name)->injection(' SET `category_count`=`category_count`+1')->where($this->category_id_column,$insert_place)->query1();
+					$this->_query->update($this->_category_table_name)->injection(' SET `category_count`=`category_count`+1')->where($this->category_id_field,$insert_place)->query1();
 				$this->_query->update($this->_category_table_name)->injection(' SET `left`=`left`+2')->where('left',$value['left'],'>=');
 				$this->parse_condition($condition,true);
 				$this->_query->execute();
@@ -592,25 +595,23 @@ abstract class base_module extends module{
 			}
 			$value['right'] = $value['left'] + 1;
 			$this->_query->insert($this->_category_table_name)->values($value)->execute();
-			$id = $this->parent->db->insert_id();
 			$this->_message('new category add',array('title'=>$value['title'])); 
 		}
 		if($redirect)
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, $redirect_params);
 	}
 
-	public function move_category($title=NULL, $insert_type=NULL, $insert_place=NULL, $condition = array(),$redirect = '_admin'){
-		$this->_query->echo_sql = 1;
-		if(!$title)
+	public function move_category($id=NULL, $insert_type=NULL, $insert_place=NULL, $condition = array(),$redirect = '_admin'){
+		if(!$id)
 			throw new my_exception('title is empty: nothing to move');
 		if(!$insert_type)
 			throw new my_exception('insert_type not found');
 		elseif(!in_array($insert_type, array('before', 'inside')))
 			throw new my_exception('wrong insert type', array('type'=>$insert_type));
-		if(!$target = $this->_query->select('left,right,depth,title')->from($this->_category_table_name)->where($this->category_id_column,$title)->query1())
+		if(!$target = $this->_query->select('left,right,depth,title')->from($this->_category_table_name)->where($this->category_id_field,$id)->query1())
 			throw new my_exception('not found category to movу',array('id'=>$id));
-		elseif($title==$insert_place)
-			throw new my_exception('can not paste category into itselve',array('title'=>$title));
+		elseif($id==$insert_place)
+			throw new my_exception('can not paste category into itselve',array('id'=>$id));
 		$width = $target['right'] - $target['left'] + 1;
 		$this->_query->lock($this->_category_table_name)->execute();
 		if($this->_config('has_item'))
@@ -627,12 +628,12 @@ abstract class base_module extends module{
 			$target['right'] = $target['right']-$width;
 		}
 		else{
-			$destination = $this->_query->select('left,right,depth,'.$this->category_id_column)->from($this->_category_table_name)->where($this->category_id_column,$insert_place)->query1();
+			$destination = $this->_query->select('left,right,depth,'.$this->category_id_field)->from($this->_category_table_name)->where($this->category_id_field,$insert_place)->query1();
 			if(!$destination){
 				$this->_query->unlock();
 				throw new my_exception('insert place not found',array('insert_place'=>$insert_place));
 			}
-			$redirect_params['title'] = $destination[$this->category_id_column];
+			$redirect_params['id'] = $destination[$this->category_id_field];
 			if($destination['left'] > $target['left'] && $destination['left'] < $target['right'])
 				$this->_message('may not to move category into itself');
 			else{
@@ -653,14 +654,6 @@ abstract class base_module extends module{
 					$difference_depth = $destination['depth'] - $target['depth'];
 				else
 					$difference_depth = $destination['depth'] - $target['depth'] + 1;
-				//
-				if($this->_config('has_item')){
-					$this->_query->update($this->_category_table_name)->injection(' SET `category_count`=`category_count`+1')->where('left',$destination['left'])->query1();
-					if($parent_left = $this->_query->select('left')->from($this->_category_table_name)->where('left',$target['left'],'<')->_and('right',$target['left'],'>')->order('left desc')->query1('left') )
-						$this->_query->update($this->_category_table_name)->injection(' SET `category_count`=`category_count`-1')->where('left',$parent_left)->query1();
-					//FIXME condition???
-					$this->_query->update($this->_table_name)->injection(' SET `category_left`=`category_left`+'.$width)->where('category_left',$place,'>=')->execute();
-				}
 			}
 		}
 		$this->_query->update($this->_category_table_name)->
@@ -668,13 +661,6 @@ abstract class base_module extends module{
 			where('left',array($target['left']+$new_width,$target['right']+$new_width),'between');
 		$this->parse_condition($condition,true);
 		$this->_query->execute();
-		//items
-		if($this->_config('has_item')){
-			$this->_query->update($this->_table_name)->
-			injection(' SET `category_left`=`category_left`+'.$difference)->
-			where('category_left',array($target['left']+$new_width,$target['right']+$new_width),'between')->execute();
-		}
-		//
 		if($this->_config('repair_hole')){
 			$this->_query->update($this->_category_table_name)->
 				injection(' SET `left`= `left`-'.$width)->
@@ -693,18 +679,19 @@ abstract class base_module extends module{
 			//$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, $redirect_params);
 	}
 
-	public function remove_category($title=NULL,$condition = array(), $redirect = '_admin'){
+	public function remove_category($id=NULL,$condition = array(), $redirect = '_admin'){
 		$redirect_params = array();
-		if(!$title)
+		if(!$id)
 			throw new my_exception('title is empty');
-		$target = $this->_query->select('left,right,title')->from($this->_category_table_name)->where($this->category_id_column,$title)->query1();
+		$target = $this->_query->select('left,right,title')->from($this->_category_table_name)->where($this->category_id_field,$id)->query1();
 		if(!$target)
-			throw new my_exception('category not found by title',array('title'=>$title));
-		if($parent_title = $this->_query->select($this->category_id_column)->from($this->_category_table_name)->where('left',$target['left'],'<')->_and('right',$target['left'],'>')->order('left desc')->query1($this->category_id_column) )
-			$redirect_params['title'] = $parent_title;
+			throw new my_exception('category not found by title',array('id'=>$id));
+		if($parent_title = $this->_query->select($this->category_id_field)->from($this->_category_table_name)->where('left',$target['left'],'<')->_and('right',$target['left'],'>')->order('left desc')->query1($this->category_id_field) )
+			$redirect_params['id'] = $parent_title;
+		$category = $this->_query->select($this->category_id_field)->from($this->_category_table_name)->where('left',array($target['left'],$target['right']),'between')->query2assoc_array($this->category_id_field);
 		$this->_query->delete()->from($this->_category_table_name)->where('left',array($target['left'],$target['right']),'between')->query();
 		if($this->_config('has_item'))
-			$this->_query->delete()->from($this->_category_name)->where('category_left',array($target['left'],$target['right']),'between')->query();
+			$this->_query->delete()->from($this->_table_name)->where('category_id',$category,'in')->query();
 		if($this->_config('repair_hole')){
 			$width = $target['right'] - $target['left'] + 1;
 			$this->_query->update($this->_category_table_name)->injection(' SET `left`=`left`-'.$width)->where('left',$target['left'],'>=');
@@ -725,31 +712,31 @@ abstract class base_module extends module{
 		$this->_message('database unlocked');
 	}
 	
-	public function move_item($title=NULL, $insert_after=NULL, $insert_category=NULL, $insert_item=NULL, $redirect='_admin'){
-		//echo "title:'$title' insert_after:'$insert_after' insert_category:'$insert_category' insert_item:'$insert_item'";die;
+	public function move_item($id=NULL, $insert_after=NULL, $insert_category=NULL, $insert_item=NULL, $redirect='_admin'){
+		//echo "id:'$id' insert_after:'$insert_after' insert_category:'$insert_category' insert_item:'$insert_item'";die;
 		$redirect_params = array();
-		if($title){
-			$match = $this->_query->select()->from($this->_table_name)->where($this->id_column,$title)->query1();
+		if($id){
+			$match = $this->_query->select('id,category_id,title')->from($this->_table_name)->where($this->id_field,$id)->query1();
 			if(!$match)
-				throw new my_exception('item not found by title',array('title'=>$title));
+				throw new my_exception('item not found by title',array('title'=>$id));
 			if($insert_after!=$insert_item){
 				$place = NULL;
 				if($insert_item)
-					$place = $this->_query->select('order,category_left')->from($this->_table_name)->where($this->id_column,$insert_item)->query1();
+					$place = $this->_query->select('order,category_id')->from($this->_table_name)->where($this->id_field,$insert_item)->query1();
 				if(!$place)
 					$place = array('order'=>0, 'category_id'=>$match['category_id']);
-				$this->_query->update($this->_table_name)->injection(' SET `order`=`order`+1 ')->where('order',$place['order'],'>')->_and('category_left',$place['category_left'])->query();
-				$this->_query->update($this->_table_name)->set(array('order'=>$place['order']+1))->where($this->id_column,$title)->query1();
+				$this->_query->update($this->_table_name)->injection(' SET `order`=`order`+1 ')->where('order',$place['order'],'>')->_and('category_id',$place['category_id'])->query();
+				$this->_query->update($this->_table_name)->set(array('order'=>$place['order']+1))->where($this->id_field,$id)->query1();
 				$order = $place['order'];
 				if($place['category_id'])
-					$redirect_params['title'] = $this->_query->select($this->category_id_column)->from($this->_category_table_name)->where('left',$place['category_left'])->query1($this->_category_table_name);
+					$redirect_params['id'] = $place['category_id'];
 			}else{
 				if(!$insert_category)
 					$insert_category = NULL;
-				$order = $this->_query->select('order')->from($this->_table_name)->where('category_left',$insert_category)->order('order desc')->query1('order');
-				$this->_query->update($this->_table_name)->set(array('category_left'=>$insert_category, 'order'=>($order?($order+1):1)))->where($this->id_column,$title)->query1();
-				if($insert_category && $title = $this->_query->select($this->category_id_column)->from($this->_category_table_name)->where($this->category_id_column,$insert_category)->query1($this->category_id_column))
-					$redirect_params['title'] = $title;
+				$order = $this->_query->select('order')->from($this->_table_name)->where('category_id',$insert_category)->order('order desc')->query1('order');
+				$this->_query->update($this->_table_name)->set(array('category_id'=>$insert_category, 'order'=>$order+1))->where($this->id_field,$id)->query1();
+				if($insert_category)
+					$redirect_params['id'] = $insert_category;
 			}
 			$this->_message('item moved',array('name'=>$match['title']));
 		}
@@ -786,13 +773,13 @@ abstract class base_module extends module{
 	public function set_translit_title($table=NULL){
 		if(!$table){
 			$table = $this->_table_name;
-			$column = $this->id_column;
+			$column = $this->id_field;
 		}
 		else
-			$column = $this->category_id_column;
+			$column = $this->category_id_field;
 		$category = $this->_query->select('title,id')->from($table)->query();
 		foreach($category as &$item)
-			$this->_query->update($table)->set(array($this->id_column=>$this->get_unique_title(translit::transliterate($item['title']), $table, $column)))->where('id',$item['id'])->query1();
+			$this->_query->update($table)->set(array($this->id_field=>$this->get_unique_title(translit::transliterate($item['title']), $table, $column)))->where('id',$item['id'])->query1();
 		$this->_message("table '$table' updated");
 	}
 	
@@ -806,7 +793,7 @@ abstract class base_module extends module{
 		if(!$value)
 			$value = 1;
 		if(!$column)
-			$column = $this->id_column;
+			$column = $this->id_field;
 		elseif($count = $this->_query->injection('SELECT count(*) as c')->from($table)->where($column,$value.'%','like')->query1('c',false))
 			$value.=$count;
 		return $value;
@@ -817,7 +804,7 @@ abstract class base_module extends module{
 			case 'get':{
 				switch($param_name){
 					case 'title':{
-						$this->_result = $this->_query->select('title,'.$this->category_id_column)->from($this->_table_name)->query2assoc_array($this->category_id_column,'title');
+						$this->_result = $this->_query->select('title,'.$this->id_field)->from($this->_table_name)->query2assoc_array($this->id_field,'title');
 						break;
 					}
 					default: parent::_get_param_value($method_name,$param_name);
@@ -827,7 +814,7 @@ abstract class base_module extends module{
 			case 'get_category':{
 				switch($param_name){
 					case 'title':{
-						$this->_result = $this->_query->select('title,'.$this->category_id_column)->from($this->_category_table_name)->query2assoc_array($this->category_id_column,'title');
+						$this->_result = $this->_query->select('title,'.$this->category_id_field)->from($this->_category_table_name)->query2assoc_array($this->category_id_field,'title');
 						break;
 					}
 					default: parent::_get_param_value($method_name,$param_name);

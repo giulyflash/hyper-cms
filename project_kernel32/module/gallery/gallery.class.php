@@ -14,7 +14,7 @@ class gallery extends base_module{
 			file::remove($id,false);
 			$this->_message('deleted seccessfully',array('title'=>$data['title']));
 			if($data['category_id'])
-				$redirect_params['title'] = $this->_query->select('translit_title')->from($this->_category_table_name)->where('id',$data['category_id'])->query1('translit_title');
+				$redirect_params['id'] = $this->_query->select('translit_title')->from($this->_category_table_name)->where('id',$data['category_id'])->query1('translit_title');
 		}
 		$this->parent->redirect('/'.($this->parent->admin_mode?'admin.php':'').'?call='.$this->module_name.($this->parent->admin_mode?'._admin':''),$redirect_params);
 	}
@@ -49,7 +49,7 @@ class gallery extends base_module{
 		if($id)
 		$redirect_params = array();
 		if($category_id)
-			$redirect_params['title'] = $this->_query->select('translit_title')->from($this->_category_table_name)->where('id',$category_id)->query1('translit_title');
+			$redirect_params['id'] = $this->_query->select('translit_title')->from($this->_category_table_name)->where('id',$category_id)->query1('translit_title');
 		$this->parent->redirect('/'.($this->parent->admin_mode?'admin.php':'').'?call='.$this->module_name.($this->parent->admin_mode?'._admin':''),$redirect_params);
 	}
 	

@@ -391,7 +391,7 @@ class object_sql_query{
 	public function execute($need_num_rows = false){
 		if($this->parent->sql){
 			if(!empty($this->parent->echo_sql))
-				echo $this->parent->sql.'<br/>';
+				echo $this->parent->sql."<br/>\n";
 			$sql_query_class = &$this->parent->sql_query_class;
 			$sql_query_method = $this->parent->sql_query_method;
 			if(!method_exists($sql_query_class, $sql_query_method))
@@ -413,7 +413,7 @@ class object_sql_query{
 	
 	public function query(){
 		$this->parent->execute();
-		return $this->parent->query_result;
+		return $this->parent->query_result?$this->parent->query_result:array();
 	}
 	
 	public function insert_id(){
@@ -430,11 +430,14 @@ class object_sql_query{
 			if($field){
 				if(isset($this->parent->query_result[0][$field]))
 					return $this->parent->query_result[0][$field];
-				return NULL;
 			}
-			return $this->parent->query_result[0];
+			else
+				return $this->parent->query_result[0];
 		}
-		return $this->parent->query_result;
+		if($field)
+			return NULL;
+		else
+			return array();
 	}
 	
 	public function query_page($page=1,$count=NULL){
@@ -454,7 +457,7 @@ class object_sql_query{
 	public function query2assoc_array($name_column, $value_column=NULL, $unset=true){
 		$this->parent->execute();
 		if(!$this->parent->query_result)
-			return;
+			return array();
 		if(isset($this->parent->query_result[0][$name_column])){
 			$new_result = array();
 			foreach($this->parent->query_result as &$result){
