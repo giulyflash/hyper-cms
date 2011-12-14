@@ -10,9 +10,9 @@
 		<xsl:value-of select="text" disable-output-escaping="yes"/>
 	</div>
 	<!-- temp -->
-	<xsl:if test="/root/session/user_info and translit_title">
+	<xsl:if test="/root/session/user_info and id">
 		<p class="article_edit">
-			<a class="edit_article" href="/admin.php?call=article.edit&amp;title={translit_title}" target="_blank" title="редактировать" alt="редактировать">
+			<a class="edit_article" href="/admin.php?call=article.edit&amp;id={id}" target="_blank" title="редактировать" alt="редактировать">
 				<img src="/module/base_module/img/pencil.png"/>&#160;<span>редактировать</span>
 			</a>
 		</p>
@@ -26,14 +26,14 @@
 			<span class="more_input">Дополнительно</span>
 			<table class="more_input">
 				<tbody>
-					<xsl:if test = "translit_title">
+					<xsl:if test = "id">
 						<tr>
 							<td class="table_title">
 								Ссылка:
 							</td>
 							<td>
 								<xsl:variable name="short_href"><xsl:value-of select = "link"/></xsl:variable>
-								<xsl:variable name="long_href">/?call=article.get&amp;name=translit_title&amp;value=<xsl:value-of select = "translit_title"/></xsl:variable>
+								<xsl:variable name="long_href">/?call=article.get&amp;id=<xsl:value-of select = "id"/></xsl:variable>
 								<a href="{$short_href}" target="_blank"><xsl:value-of select="$short_href"/></a>
 							</td>
 						</tr>
@@ -42,13 +42,13 @@
 								Полная ссылка:
 							</td>
 							<td>
-								<xsl:variable name="long_href">/?call=article.get&amp;field=translit_title&amp;value=<xsl:value-of select = "translit_title"/></xsl:variable>
+								<xsl:variable name="long_href">/?call=article.get&amp;id=<xsl:value-of select = "id"/></xsl:variable>
 								<a href="{$long_href}" target="_blank"><xsl:value-of select="$long_href"/></a>
 							</td>
 						</tr>
 						<tr>
 							<td colspan="2">
-								<a href="admin.php?call=module_link.edit&amp;module=article&amp;params[field]=translit_title&amp;params[value]={translit_title}">
+								<a href="admin.php?call=module_link.edit&amp;module=article&amp;params[id]={id}">
 									Редактор связей
 								</a>
 							</td>
@@ -59,7 +59,7 @@
 							Заголовок транслитом:
 						</td>
 						<td>
-							<input type="text" class="translit_title" name="translit_title" value="{translit_title}"/>
+							<input type="text" class="translit_title" name="id" value="{id}"/>
 							<label for="generate_translit">Сгенерировать</label>
 							<input id="generate_translit" type="checkbox"/>
 						</td>
@@ -93,13 +93,13 @@
 							Категория:
 						</td>
 						<td>
-							<xsl:variable name="category_left"><xsl:choose>
-								<xsl:when test="translit_title"><xsl:value-of select="category_left"/></xsl:when>
-								<xsl:otherwise><xsl:value-of select="_argument/category_left"/></xsl:otherwise>
+							<xsl:variable name="category_id"><xsl:choose>
+								<xsl:when test="id"><xsl:value-of select="category_id"/></xsl:when>
+								<xsl:otherwise><xsl:value-of select="_argument/category_id"/></xsl:otherwise>
 							</xsl:choose></xsl:variable>
 							<select name="category_id" autocomplete='off'>
 								<xsl:call-template name="_get_category_list">
-									<xsl:with-param name="category_left" select="$category_left"/>
+									<xsl:with-param name="id" select="$category_id"/>
 								</xsl:call-template>
 							</select>
 						</td>
@@ -152,7 +152,7 @@
 	</xsl:choose>
 </xsl:template>
 
-<xsl:template name="article_base">
+<!-- <xsl:template name="article_base">
 	<xsl:param name="need_ul">1</xsl:param>
 	<xsl:param name="module_name" select="_module_name"/>
 	<xsl:choose>
@@ -250,7 +250,7 @@
 			</ul>
 		</li>
 	</xsl:if>
-</xsl:template>
+</xsl:template>-->
 
 <xsl:template match="root/module/item[_module_name='article' and _method_name='edit_category']">
 	<form class="{_module_name}" method="post" action="admin.php?call={_module_name}.save_category">

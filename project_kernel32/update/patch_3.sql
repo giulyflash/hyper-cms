@@ -54,3 +54,17 @@ ALTER TABLE `article_category` ADD `link` VARCHAR( 255 ) NULL;
 
 UPDATE `article` SET `link`=concat('/',`translit_title`);
 UPDATE `article_category` SET `link`=concat('/',`translit_title`,'/');
+
+ALTER TABLE `article` DROP `id`;
+ALTER TABLE `article` CHANGE `translit_title` `id` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ;
+ALTER TABLE `article` ADD PRIMARY KEY ( `id` );
+ALTER TABLE `article` DROP INDEX `translit_title`;
+ALTER TABLE `article` CHANGE `category_left` `category_id` VARCHAR( 255 ) NULL DEFAULT NULL;
+
+ALTER TABLE `article_category` DROP `id`;
+ALTER TABLE `article_category` CHANGE `translit_title` `id` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ;
+ALTER TABLE `article_category` ADD PRIMARY KEY(`id`);
+ALTER TABLE `article_category` DROP INDEX translit_title`;
+ALTER TABLE `article_category` ADD INDEX ( `draft` );
+
+UPDATE article SET `category_id` = ( SELECT id FROM article_category WHERE id = category_id );
