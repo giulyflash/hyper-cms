@@ -431,7 +431,7 @@ abstract class base_module extends module{
 		if($this->_config('need_path')){
 			$this->parent->add_module_path();
 			if(!empty($this->_result['category_id'])){
-				$left = $this->_query->select('left')->from($this->_table_name)->where($this->category_id_field,$this->_result['category_id'])->query1('left');
+				$left = $this->_query->select('left')->from($this->_category_table_name)->where($this->category_id_field,$this->_result['category_id'])->query1('left');
 				if($left && (empty($this->_result['draft']) || $this->_result['draft']=='0') && $this->_config('has_category'))
 					$this->get_path($left);
 			}
