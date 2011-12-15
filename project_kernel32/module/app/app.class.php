@@ -1086,7 +1086,7 @@ class app extends module{
 		if(!$method)
 			$method = $this->center_method;
 		$this->get_module_path();
-		if($method && $method!=$this->module[0]->get_default_method()){
+		if($method && (!isset($this->module[0]) || $method!=$this->module[0]->get_default_method() )){
 			$admin_mode = $this->admin_mode?'admin.php':'';
 			$method_name = $this->get_lang_title();
 			$this->add_path(array('href'=>'/'.$admin_mode.'?call='.$this->center_module.'.'.$method,'title'=>$method_name));
