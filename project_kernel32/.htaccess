@@ -6,5 +6,10 @@ ErrorDocument 404 /404
 #RewriteRule ^/$ / [L]
 RewriteRule ^admin$ /admin.php [R]
 RewriteRule ^article/?$ /?call=article.get_category [L]
-RewriteRule ^([^/.]+)/(\?.*)?$ /?call=article.get_category&title=$1$2 [L]
-RewriteRule ^([^/.?]+)(\?.*)?$ /?call=article.get&title=$1$2 [L]
+#RewriteRule ^(.*)?$ [$1] [R]
+RewriteRule ^([^\.\?/]+)/(\?.*)?$ /index.php?call=article.get_category&id=$1$2 [R]
+RewriteRule ^[^\.\?/]+(\?.*)?$ /index.php?call=article.get&id=$1$2 [L]
+
+#RewriteRule ^search/mark/([^/]*)/model/([^/]*)/city/(.+) /index.php?call=avtomurmansk.select&mark=$1&model=$2&city=$3
+
+#Notice: Undefined offset: 0 in D:\sites\hyper-cms\module\app\app.class.php on line 1089 Fatal error: Call to a member function get_default_method() on a non-object in D:\sites\hyper-cms\module\app\app.class.php on line 1089
