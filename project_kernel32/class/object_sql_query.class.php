@@ -9,6 +9,7 @@ class object_sql_query{
 	private $parent;
 	private $sql_query_method;
 	public $echo_sql;
+	const field_regexp = '%^[a-zA-Z0-9_\-\.]+$%';
 	
 	//TODO check called methods existence and their order
 	
@@ -42,29 +43,80 @@ class object_sql_query{
 	}
 	
 	public function select($name='*',$quot='`'){
+		$sql = ' SELECT '.($name?$this->check_fields($name,$quot):'');
+		$this->parent->add_sql($sql);
+		return new object_sql_query(NULL, $this->parent);
+	}
+	
+	private function &check_fields($name='*',$quot='`'){
 		$sql = '';
 		if(!is_array($name)){
 			if(strpos($name,',')!==false)
 				$name = explode(',',$name);
 			else
-				$name = array($name);
+				return $this->check_field($name, $quot);
 		}
-		foreach($name as $item){
-			if($item){
-				$item = trim($item);
-				if($item == '*')
-					$sql.= $item.',';
-				elseif(preg_match('%^[a-zA-Z0-9_\-\.]+$%', $item))
-					$sql.= $quot.$item.$quot.',';
-				else
-					throw new my_exception('wrong field');
-			}
+		foreach($name as $item)
+			$sql.= $this->check_field($item,$quot).',';
+		if($sql)
+			$sql = substr($sql, 0, strlen($sql)-1);
+		return $sql;
+	}
+	
+	private function &check_field($item, $quot){
+		if($item = trim($item)){
+			if($item == '*')
+				return $item;
+			elseif(preg_match($this::field_regexp, $item))
+				$item = $quot.$item.$quot;
+			else
+				throw new my_exception('wrong field');
 		}
-		if($sql){
-			$sql = ' SELECT '.substr($sql, 0, strlen($sql)-1);
-			$this->parent->add_sql($sql);
+		else
+			throw new my_exception('empty field');
+		return $item;
+	}
+	
+	public function func($func,$field,$as=NULL,$quot='`'){
+		$this->parent->add_sql(strtoupper(trim($func)).'('.$this->check_field($field,$quot).')');
+		if($as)
+			$this->_as($as,$quot,false);
+		return new object_sql_query(NULL, $this->parent);
+	}
+	
+	public function _as($field,$quot='`',$obj = true){
+		if(!preg_match($this::field_regexp, $as = trim($field)))
+			throw new my_exception('wrong field');
+		else
+			$this->parent->add_sql(' AS '.$quot.$field.$quot);
+		if($obj)
+			return new object_sql_query(NULL, $this->parent);
+	}
+	
+	public function max($field,$as=NULL,$quot='`'){
+		return $this->func('max',$field,$as,$quot);
+	}
+	
+	public function min($field,$as=NULL,$quot='`'){
+		return $this->func('min',$field,$as,$quot);
+	}
+	
+	public function count($field,$as=NULL,$quot='`'){
+		return $this->func('count',$field,$as,$quot);
+	}
+	
+	public function increment($field,$step=1,$first=true, $last=true,$quot='`',$operation='+'){
+		if(!preg_match($this::field_regexp, $as = trim($field)))
+			throw new my_exception('wrong field');
+		else{
+			$sql = ' '.$quot.$field.$quot.' = '.$quot.$field.$quot.$operation.(int)$step;
+			$this->parent->add_sql(($first?' SET':'').$sql.($last?'':','));
 		}
 		return new object_sql_query(NULL, $this->parent);
+	}
+	
+	public function decrement($field,$step=1,$first=true, $last=true,$quot='`'){
+		return $this->increment($field,$step,$first,$last,$quot,'-');
 	}
 	
 	public function from($name=NULL, $quot='`'){
@@ -352,7 +404,7 @@ class object_sql_query{
 	
 	public function unlock(){
 		$this->sql_query_class->lock = false;
-		$this->parent->add_sql(' UNLOCK TABLES ');
+		$this->parent->set_sql(' UNLOCK TABLES ');
 		return new object_sql_query(NULL, $this->parent);
 	}
 	
@@ -473,7 +525,7 @@ class object_sql_query{
 			return $new_result;
 		}
 		else
-			throw new my_exception('column not found in database table',$column); 
+			throw new my_exception('column not found in database table',$name_column); 
 	}
 	
 	public function fetch_field($table){

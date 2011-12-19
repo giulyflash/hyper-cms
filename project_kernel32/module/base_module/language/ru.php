@@ -47,30 +47,35 @@ $language = array(
 );
 
 $error = array(
-	'try to use not existing category' => 'попытка использовать несуществующую категорию: "$title"',
-	'category not found' => 'Категория $field="$value" не найдена',
-	'module has not items' => 'Модуль "$name" не имеет объектов',
+	//exception
 	'condition is not an array' =>  'условие "$condition" не является массивом',
 	'condition field and value must be set' => 'поле и значение условия должны быть заданы',
-	'object not found' => 'Объект "$name" не найден',
-	'object not found by id' => 'Объект не найден по идентивикатору "$id"',
-	'edited seccessfully' => 'Редактирование объекта прошло успешно',
-	'added seccessfully' => 'Объект успешно добавлен',
-	'deleted seccessfully' => 'Объект успешно удален',
-	'id is empty' => 'Идентивикатор объекта пуст',
-	'category edited successfully' => 'Категория "$title" успешно отредактирована',
-	'parent not found' => 'Родитель id="$id" не найден',
-	'new category add' => 'Новая категория "$title" добавлена',
+	'parent not found' => 'Родитель &#171;$id&#187; не найден',
+	'can not move by empty id'=>'Невозможно переместить по пустому идентификатору',
 	'insert_type not found' => 'Тип вставки категории не найден',
 	'wrong insert type' => 'Неверный тип вставки категории "$type"',
-	'not found category to movу' => 'Не найдена категория для перемещения с id="$id"',
-	'insert place not found' => 'Не найдена категория-родитель для вставки с id="$id"',
-	'may not to move category into itselve' => 'Нельзя переместить элемент внутрь самого себя',
-	'category moved successfully' => 'Категория перемещена',
-	'category not found by id' => 'Категория не найдена по идентификатору id="$id"',
-	'category deleted successfully' => 'Категория "$name" уcпешно удалена',
+	'not found category to move' => 'Не найдена категория &#171;$id&#187; для перемещения',
+	'can not move category into itselve' => 'Невозможно переместить категорию внутрь самой себя',
+	'insert place not found' => 'Не найдена категория-родитель &#171;$id&#187; для вставки',
+
+	//error
+	'module has not items' => 'Модуль "$name" не имеет объектов',
 	'database unlocked' => 'База разблокирована',
-	'item moved' => 'Объект "$name" перемещен',
+	'table ids updated' => 'Идентификаторы таблицы "$table" обновлены',
+	
+	'category id is empty' => 'Указано пустое имя категории',
+	'category not found' => 'Категория &#171;$id&#187; не найдена',
+	'category edited successfully' => 'Категория &#171;$title&#187; отредактирована',
+	'category added successfully' => 'Категория &#171;$title&#187; добавлена',
+	'category deleted successfully' => 'Категория &#171;$title&#187; удалена',
+	'category moved successfully' => 'Категория &#171;$title&#187; перемещена',
+	
+	'object id is empty' => 'Указано пустое имя объекта',
+	'object not found' => 'Объект &#171;$id&#187; не найден',
+	'object edited successfully' => 'Объект &#171;$title&#187; отредактирован',
+	'object added successfully' => 'Объект &#171;$title&#187; добавлен',
+	'object deleted successfully' => 'Объект &#171;$title&#187; удален',
+	'object moved successfully' => 'Объект &#171;$title&#187; перемещен',
 );
 
 

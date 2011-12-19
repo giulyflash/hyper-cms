@@ -160,7 +160,7 @@ class article extends base_module{
 			case 'edit':{
 				switch($param_name){
 					case 'id':{
-						return $this->_query->select($this->id_column,',title')->from($this->module_name)->query2assoc_array($this->id_column,'title');
+						return $this->_query->select($this->id_field.',title')->from($this->module_name)->query2assoc_array($this->id_field,'title');
 						break;
 					}
 					default:
@@ -171,10 +171,10 @@ class article extends base_module{
 			case 'get':{
 				switch($param_name){
 					case 'id':{
-						$this->_query->select($this->id_column,',title')->from($this->module_name)->where('draft',1,'!=');
+						$this->_query->select($this->id_field.',title')->from($this->module_name)->where('draft',1,'!=');
 						if($order)
 							$this->_query->order($order);
-						return $this->_query->query2assoc_array($this->id_column,'title');
+						return $this->_query->query2assoc_array($this->id_field,'title');
 						break;
 					}
 					case 'show_title':{

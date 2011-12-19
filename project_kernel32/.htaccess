@@ -8,6 +8,6 @@ RewriteRule ^admin$ /admin.php [R]
 RewriteRule ^article/?$ /?call=article.get_category [L]
 #RewriteRule ^(.*)?$ [$1] [R]
 RewriteRule ^([^\.\?/]+)/(\?.*)?$ /index.php?call=article.get_category&id=$1$2 [L]
-RewriteRule ^([^\.\?/]+)	(\?.*)?$ /index.php?call=article.get&id=$1$2 [L]
+RewriteRule ^([^\.\?/]+)(\?.*)?$ /index.php?call=article.get&id=$1$2 [L]
 
 #RewriteRule ^search/mark/([^/]*)/model/([^/]*)/city/(.+) /index.php?call=avtomurmansk.select&mark=$1&model=$2&city=$3

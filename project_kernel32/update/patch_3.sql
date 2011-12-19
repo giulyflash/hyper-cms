@@ -68,3 +68,7 @@ ALTER TABLE `article_category` DROP INDEX translit_title`;
 ALTER TABLE `article_category` ADD INDEX ( `draft` );
 
 UPDATE article SET `category_id` = ( SELECT id FROM article_category WHERE id = category_id );
+
+UPDATE `module_link_param` SET `name` = 'id' WHERE `name`='title';
+
+UPDATE `module_link` SET `center_method` = 'get' WHERE `center_method`='get_by_title';

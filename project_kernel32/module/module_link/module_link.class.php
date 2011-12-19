@@ -115,14 +115,14 @@ class module_link extends module{
 		$link_value['inactive'] = $menu?1:0;
 		if($id){
 			$this->_query->update($this->module_name)->set($link_value)->where('id',$id)->limit(1)->execute();
-			$message = 'edited seccessfully';
+			$message = 'edited successfully';
 			$this->_query->delete()->from($this->module_name.'_param')->where('link_id',$id)->query();
 		}
 		else{
 			$this->_query->insert($this->module_name)->values($link_value)->execute();
 			if(!$id = $this->_query->insert_id())
 				throw new my_exception('id not found');
-			$message = 'added seccessfully';
+			$message = 'added successfully';
 		}
 		foreach($link as $link_num=>&$link_item){
 			if(isset($link_item['param']))
@@ -219,7 +219,7 @@ class module_link extends module{
 		$this->_query->delete()->from($this->module_name)->where('id',$id)->limit(1)->execute();
 		$this->_query->delete()->from($this->module_name.'_param')->where('link_id',$id)->execute();
 		if($redirect){
-			$this->_message('deleted seccessfully');
+			$this->_message('deleted successfully');
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
 		}
 	}
