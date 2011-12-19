@@ -12,7 +12,7 @@ class gallery extends base_module{
 		if($id){
 			$data = $this->_query->select('title,category_id')->from($this->_table_name)->where('id',$id)->query1();
 			file::remove($id,false);
-			$this->_message('deleted seccessfully',array('title'=>$data['title']));
+			$this->_message('deleted successfully',array('title'=>$data['title']));
 			if($data['category_id'])
 				$redirect_params['id'] = $this->_query->select('translit_title')->from($this->_category_table_name)->where('id',$data['category_id'])->query1('translit_title');
 		}

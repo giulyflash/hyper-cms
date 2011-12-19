@@ -3,7 +3,7 @@ $language = array(
 	'get'=>array(
 		'__title'=>'выбрать статью',
 		'__param'=>array(
-			'title' => 'заголовок',			
+			'id' => 'заголовок',			
 			'show_title' => 'показывать заголовок',
 		),
 	),
@@ -31,15 +31,15 @@ $language = array(
 );
 
 $error = array(
-	'edited seccessfuly' => 'Статья "$title" успешно отредактирована',
-	'added seccessfuly' => 'Статья "$title" успешно добавлена',
-	'deleted seccessfuly' => 'Статья "$title" успешно удалена',
-	'article not found' => 'Статья "$title" не найдена',
-	'id is empty' => 'Указан пустой идентификатор статьи',
 	'category name must not be empty'=>'Имя категории не должно быть пустым',
-	'not found by id' => 'Статья не найдена по номеру "$id"',
-	'title not found' => 'Заголовок статьи не найден',
-	'item moved' => 'Статья &#171;$name&#187; перемещена',
+	'title must not be empty'=>'Заголовок статьи не может быть пустым',
+	
+	'object id is empty' => 'Указано пустое имя статьи',
+	'object not found' => 'Статья &#171;$id&#187; не найдена',
+	'object edited successfully' => 'Статья &#171;$title&#187; отредактирована',
+	'object added successfully' => 'Статья &#171;$title&#187; добавлена',
+	'object deleted successfully' => 'Статья &#171;$title&#187; удалена',
+	'object moved successfully' => 'Статья &#171;$title&#187; перемещена',
 );
 
 
