@@ -53,7 +53,7 @@ class user extends module{
 		if(isset($_SESSION['call'][1]))
 			$redirect = $_SESSION['call'][1];
 		else
-			$redirect = $this->parent->admin_mode?'/admin.php':'/';
+			$redirect = $this->_admin_mode?'/admin.php':'/';
 		if($unset)
 			session_unset();
 		$this->parent->redirect($redirect);

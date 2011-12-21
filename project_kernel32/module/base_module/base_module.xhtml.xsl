@@ -51,7 +51,7 @@
 			</xsl:choose>
 		</xsl:when>
 		<xsl:otherwise>
-			<xsl:if test="active=1 or _module_name">
+			<xsl:if test="active=1 or _method_name">
 				<xsl:choose>
 					<xsl:when test="$need_ul=1">
 						<ul>
@@ -111,6 +111,7 @@
 	</xsl:for-each>
 	<xsl:if test="items">
 		<li class="items">
+			<!-- 
 			<xsl:for-each select="items/item">
 				<div class="item">
 					<xsl:variable name="path"><xsl:choose>
@@ -140,8 +141,52 @@
 					</xsl:call-template>
 				</div>
 			</xsl:for-each>
+			 -->
+			<xsl:apply-templates select="items/item"/>
 		</li>
 	</xsl:if>
+</xsl:template>
+
+<xsl:template match="items/item" priority="0.1" name="_default_item">
+	<div class="item">
+		<xsl:variable name="link"><xsl:choose>
+			<xsl:when test="link"><xsl:value-of select="link"/></xsl:when>
+			<xsl:otherwise><xsl:call-template name="_get_link"/></xsl:otherwise>
+		</xsl:choose></xsl:variable>
+		<xsl:variable name="module_name" select="_module_name"/>
+		<a href="{$link}" alt="{title}" title="{title}">
+			<div>
+				<div>
+					<xsl:if test="not(thumb_path) or thumb_path=''">
+						<xsl:attribute name="class">default_thumb</xsl:attribute>
+					</xsl:if>
+					<xsl:variable name="thumb_path">
+						<xsl:choose>
+							<xsl:when test="thumb_path and thumb_path!=''"><xsl:value-of select="thumb_path"/></xsl:when>
+							<xsl:otherwise><xsl:value-of select="/root/module/item[_module_name=$module_name]/_config/default_thumb"/></xsl:otherwise>
+						</xsl:choose>
+					</xsl:variable>
+					<img src="{$thumb_path}" alt="{title}" title="{title}"/>
+				</div>
+			</div>
+			<xsl:call-template name="base_title"/>
+		</a>
+		<xsl:if test="/root/meta/admin_mode=1">
+			<xsl:call-template name="controls_item">
+				<xsl:with-param name="module_name" select="$module_name"/>
+				<xsl:with-param name="edit_module_name" select="$module_name"/>
+			</xsl:call-template>
+		</xsl:if>
+	</div>
+</xsl:template>
+
+<xsl:template name="_get_link">
+<xsl:variable name="admin_mode"><xsl:if test="/root/meta/admin_mode=1">admin.php</xsl:if></xsl:variable>
+<xsl:variable name="method"><xsl:choose>
+	<xsl:when test="$admin_mode!=''">edit</xsl:when>
+	<xsl:otherwise>get</xsl:otherwise>
+</xsl:choose></xsl:variable>
+/<xsl:value-of select="$admin_mode"/>?call=<xsl:value-of select="concat(_module_name,'.',$method)"/>&amp;id=<xsl:value-of select="id"/>
 </xsl:template>
 
 <xsl:template match="root/module/item[_method_name='_admin']" priority="0">
@@ -228,10 +273,12 @@
 				</xsl:for-each>
 				<option value="last">&#8212;</option>
 			</select>
-			<xsl:call-template name="controls_add">
-				<xsl:with-param name="module_name" select="$module_name"/>
-				<xsl:with-param name="edit_module_name" select="$edit_module_name"/>
-			</xsl:call-template>
+			<xsl:if test="/root/meta/admin_mode=1">
+				<xsl:call-template name="controls_add">
+					<xsl:with-param name="module_name" select="$module_name"/>
+					<xsl:with-param name="edit_module_name" select="$edit_module_name"/>
+				</xsl:call-template>
+			</xsl:if>
 			<input type="hidden" value="{id}" name="id"/>
 			<!-- <a href="/admin.php?call={$module_name}.edit_category&amp;insert_place={id}" class="subitem">добавить подпункт</a>
 			<xsl:if test="/root/module/item[_module_name=$module_name]/_config/has_item">

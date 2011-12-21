@@ -2,7 +2,6 @@
 class article extends base_module{
 	protected $config_class_name = 'article_config';
 	protected $preview_default_count = 200;
-	protected $item_draft = true;
 	
 	private $more_tag = '<!--more-->';
 
@@ -14,9 +13,7 @@ class article extends base_module{
 			$show_title = $this->_config('default_show_title');
 		if($show_title)
 			$select.=',title';
-		$this->_get('id', $id, $select);
-		if(!empty($this->_result['title']))
-			$this->_title = $this->_result['title'];
+		$this->_get($this->id_field, $id, $select);
 	}
 	
 	/*public function get_category($id=false, $show='auto'){
@@ -24,22 +21,7 @@ class article extends base_module{
 	}*/
 	
 	public function save($id=NULL, $title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $category_id=NULL, $create_date=array()){
-		if(!$title){
-			$this->_message('title must not be empty');
-			if(!isset($_SESSION['_user_input']))
-				$_SESSION['_user_input'] = array();
-			$_SESSION['_user_input'][$this->module_name] = array(
-				"id"=>$id,
-				"title"=>$title,
-				"create_date"=>$create_date,
-				"text"=>$text,
-				"keyword"=>$keyword,
-				"description"=>$description,
-				"draft"=>$draft,
-				"category_id"=>$category_id
-			);
-			$this->parent->redirect('/'.($this->parent->admin_mode?'admin.php':'').'?call='.$this->module_name.'.edit');
-		}
+		$date = new DateTime();
 		$value = array(
 			'id'=>$id,
 			'title'=>$title,
@@ -49,14 +31,9 @@ class article extends base_module{
 			'description'=>$description,
 			'draft'=>($draft)?$draft:0,
 			'category_id'=>$category_id?$category_id:NULL,
+			'create_date'=>($user_date = $this->get_date($create_date))?$user_date:$date->format('Y-m-d H:i:s'),
 		);
-		$date = new DateTime();
-		$date = $date->format('Y-m-d H:i:s');
-		if($user_date = $this->get_date($create_date))
-			$value['create_date'] = $user_date;
-		else
-			$value['create_date'] = $date;
-		parent::_save($id, $value, 'edit',true);
+		parent::_save($id, $value);
 	}
 
 	private function get_date($date){
@@ -103,32 +80,9 @@ class article extends base_module{
 		return $preview;
 	}
 	
-	private function mb_strrev(&$text, $encoding = null)
-	{
-	    $funcParams = array($text);
-	    if ($encoding !== null)
-	        $funcParams[] = $encoding;
-	    $length = call_user_func_array('mb_strlen', $funcParams);
-	
-	    $output = '';
-	    $funcParams = array($text, $length, 1);
-	    if ($encoding !== null)
-	        $funcParams[] = $encoding;
-	    while ($funcParams[1]--) {
-	         $output .= call_user_func_array('mb_substr', $funcParams);
-	    }
-	    return $output;
-	}
-	
 	//category
 	public function save_category($id=NULL,$title=NULL,$article_redirect=NULL,$insert_place=NULL,$draft=0){
-		if(!$title){
-			$this->_message('category name must not be empty');
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.edit_category&id='.$id.'&insert_place='.$insert_place);
-			return;
-		}
-		$value = array('title'=>$title,'article_redirect'=>($article_redirect?$article_redirect:NULL),'draft'=>$draft);
-		parent::_save_category($id,$value,$insert_place);
+		parent::_save_category($id,array('title'=>$title,'article_redirect'=>($article_redirect?$article_redirect:NULL),'draft'=>$draft),$insert_place);
 	}
 	
 	public function edit_category($id=NULL, $insert_place=NULL){

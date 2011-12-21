@@ -95,6 +95,7 @@ abstract class base_module extends module{
 	protected $config_class_name = 'base_module_config';
 	public $id_field = 'id';
 	public $category_id_field = 'id';
+	protected $item_draft = true;
 	
 	public function __construct(&$parent=NULL){
 		parent::__construct($parent);
@@ -122,27 +123,26 @@ abstract class base_module extends module{
 			$field = $this->category_id_field;
 		//TODO pages?
 		//$show: all (all categories and subcategories), category (0lvl categories + tree to current category), current (current category content only), auto ('current' for json, 'category' for others)
-		if($value=='')
+		if($value==='')
 			$value = false;
 		if($show=='auto')
 			$show = in_array($this->parent->_config('content_type'), array('json','json_html'/*,'xml'*/))?'current':'category';
 		if($this->_config('has_category')){
-			$bound = $this->get_bound($field,$value);
-			if(!is_array($bound))
+			if(!is_array($bound = $this->get_bound($field,$value)))
 				return;
 			$this->_query->select($this->_config('category_field'));
 			switch($show){
 				case 'category':{
-					$result = $this->get_category_tree($field, $value, $need_item, $category_condition, $bound);
+					$this->get_category_tree($field, $value,$category_condition, $bound);
 					$this->add_category_path($bound?$bound['left']:NULL);
 					break;
 				}
 				case 'all':{
-					$result = $this->get_category_all($field, $value, $need_item, $category_condition, $bound);
+					$this->get_category_all($field, $value, $category_condition, $bound);
 					break;
 				}
 				default:{
-					$result = $this->get_category_current($field, $value, $need_item, $category_condition, $bound);
+					$this->get_category_current($field, $value, $category_condition, $bound);
 					$this->add_category_path($bound?$bound['left']:NULL);
 				}
 			}
@@ -166,16 +166,16 @@ abstract class base_module extends module{
 			$this->_result = $this->_query->limit_page($page,$count)->query();
 		}
 		//TODO remove this temp code below
-		if($this->parent->admin_mode){
+		if($this->_admin_mode){
 			$this->category_list($category_condition);
 		}
 	}
 	
-	private function get_category_all($field=false, $value=false, $need_item=true, $category_condition=array(), &$bound=array()){
+	private function get_category_all($field=false, $value=false, $category_condition=array(), &$bound=array()){
 		$where = false;
 		if($value!==false && $bound){
 			$this->get_category_sql_active($bound);
-			if(!$this->parent->admin_mode){
+			if(!$this->_admin_mode){
 				$this->_query->where('draft',0);
 				$where = true;
 			}
@@ -193,7 +193,7 @@ abstract class base_module extends module{
 	private function get_category_sql_default($category_condition=NULL, $query = NULL){
 		$where = false;
 		$this->_query->from($this->_category_table_name);
-		if(!$this->parent->admin_mode){
+		if(!$this->_admin_mode){
 			$this->_query->where('draft',0);
 			$where = true;
 		}
@@ -205,7 +205,7 @@ abstract class base_module extends module{
 	}
 	
 	
-	private function get_category_current($field=false, $value=false, $need_item=true, $category_condition=array(), &$bound=array()){	
+	private function get_category_current($field=false, $value=false, $category_condition=array(), &$bound=array()){	
 		$where = $this->get_category_sql_default();
 		if($bound)
 			$this->_query->clause($where?'AND':'WHERE','left', $bound['left'], '>')->_and('right', $bound['right'],'<')->_and('depth',$bound['depth']+1);
@@ -216,11 +216,11 @@ abstract class base_module extends module{
 		//TODO limit page query
 	}
 	
-	private function get_category_tree($field=false, $value=false, $need_item=true, $category_condition=array(), &$bound=array()){
+	private function get_category_tree($field=false, $value=false, $category_condition=array(), &$bound=array()){
 		$where = false;
 		if($value!==false && $bound){
 			$this->get_category_sql_active($bound);
-			if(!$this->parent->admin_mode){
+			if(!$this->_admin_mode){
 				$this->_query->where('draft',0);
 				$where = true;
 			}
@@ -244,7 +244,7 @@ abstract class base_module extends module{
 			$this->_query->close_bracket();
 		}
 		else{
-			$where =$this->get_category_sql_default();
+			$where = $this->get_category_sql_default();
 			if($where)
 				$this->_query->_and('depth',0,'=','`',true);
 			else{
@@ -254,7 +254,9 @@ abstract class base_module extends module{
 			$this->_query->close_bracket();
 		}
 		$this->parse_condition($category_condition,$where);
+		//$this->_query->echo_sql = 1;
 		$this->_result = $this->_query->order('left')->query2assoc_array('left',NULL,false);
+		//$this->_query->echo_sql = 0;
 	}
 	
 	private function get_bound($field=NULL,$value=false){
@@ -264,9 +266,9 @@ abstract class base_module extends module{
 			$bound_query = new object_sql_query($this->parent->db);
 			if($this->module_name=='article'){
 				$bound = $bound_query->select($bound_select.',title,article_redirect,'.$this->category_id_field)->from($this->_category_table_name)->where($field,$value)->query1();
-				if(!$this->parent->admin_mode && $this->parent->_config('content_type')=='xsl' && !empty($bound['article_redirect'])){
+				if(!$this->_admin_mode && $this->parent->_config('content_type')=='xsl' && !empty($bound['article_redirect'])){
 					$this->_query->set_sql();
-					//$this->add_category_path($bound['left'],$bound['title']);
+					$this->add_category_path($bound['left'],$bound['title']);
 					$this->config->set('need_path',false);
 					$this->get($bound['article_redirect']);
 					$this->_result['article_redirect'] = $bound['article_redirect'];
@@ -283,9 +285,9 @@ abstract class base_module extends module{
 	public function get_category_items($show,$item_condition,$value,$bound){
 		if($this->_config('has_item')){
 			$item_field = $this->_config('item_field');
-			if($this->parent->admin_mode && $this->item_draft)
+			if($this->_admin_mode && $this->item_draft)
 				$item_field.= ',draft';
-			$this->_query->select($item_field)->from($this->_table_name);
+			$this->_query->select($item_field)->injection(',"'.$this->module_name.'" as _module_name')->from($this->_table_name);//temp hack for xsl-tree builder
 			$categories = array();
 			$null_categories = false;
 			if($show!='current' || $show=='all_sub' && !$value)
@@ -406,7 +408,7 @@ abstract class base_module extends module{
 		if(!$select)
 			$select = $this->_config('item_single_field');
 		if(!$field)
-			$field = $this->category_id_field;
+			$field = $this->id_field;
 		$this->_result = $this->_query->select($select)->from($this->_table_name);
 		$where = false;
 		//TODO draft check there
@@ -425,6 +427,8 @@ abstract class base_module extends module{
 		if(!$this->_result)
 			$this->_message('object not found',array('id'=>$value));
 		$this->add_item_path();
+		if($this->position==$this->parent->_config('main_position_name') && !empty($this->_result['title']))
+			$this->_title = $this->_result['title'];
 	}
 	
 	protected function add_item_path(){
@@ -455,8 +459,8 @@ abstract class base_module extends module{
 	}
 	
 	protected function get_path($left=NULL,$path_from_result=NULL){
-		if($left && !in_array($this->parent->_config('content_type'), array('json','json_html')) && (empty($this->_result['draft']) || $this->_result['draft']=='0' || $this->parent->admin_mode) && $this->_config('has_category')){
-			$admin_mode = $this->parent->admin_mode?'admin.php':'';
+		if($left && !in_array($this->parent->_config('content_type'), array('json','json_html')) && (empty($this->_result['draft']) || $this->_result['draft']=='0' || $this->_admin_mode) && $this->_config('has_category')){
+			$admin_mode = $this->_admin_mode?'admin.php':'';
 			$method = $admin_mode?$this->_config('admin_method'):'get_category';
 			$this->module_path_count = $this->parent->get_path_count()-1;
 			if($path_from_result){
@@ -501,25 +505,24 @@ abstract class base_module extends module{
 		}
 	}
 	
-	public function save($id=NULL, $value = array(), $redirect = 'edit', $output_message = true, $params=array()){
-		$this->_save($id,$value,$redirect,$output_message,$params);
+	public function save($id=NULL, $value = array(), $redirect = 'edit', $params=array()){
+		$this->_save($id,$value,$redirect,$params);
 	}
 	
-	public function _save($id=NULL, $value = array(), $redirect = 'edit', $output_message = true, $params=array()){
+	public function _save($id=NULL, $value = array(), $redirect = 'edit', $params=array()){
+		$this->check_title($value);
 		if(!$params)
 			$params = array('title'=>$value['title']);
 		if($id){
 			$this->_query->update($this->_table_name)->set($value)->where($this->id_field,$id)->query1();
-			if($output_message)
-				$this->_message('object edited successfully',$params);
+			$this->_message('object edited successfully',$params);
 		}
 		else{
 			$this->get_unique_title($value, $id);
 			if(empty($value['order']))
 				$value['order'] = $this->get_order(isset($value['category_id'])?$value['category_id']:NULL);
 			$this->_query->insert($this->_table_name)->values($value)->execute();
-			if($output_message)
-				$this->_message('object added successfully',$params);
+			$this->_message('object added successfully',$params);
 		}
 		if($redirect)
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, array('id'=>$value[$this->category_id_field]));
@@ -542,7 +545,7 @@ abstract class base_module extends module{
 		}
 		else
 			$this->_message('object id is empty');
-		$this->parent->redirect('/'.($this->parent->admin_mode?'admin.php':'').'?call='.$this->module_name.($this->parent->admin_mode?'._admin':''),$redirect_params);
+		$this->parent->redirect('/'.($this->_admin_mode?'admin.php':'').'?call='.$this->module_name.($this->_admin_mode?'._admin':''),$redirect_params);
 	}
 	
 	public function edit_category($id=NULL, $insert_place=NULL){
@@ -550,6 +553,11 @@ abstract class base_module extends module{
 			$this->_result = $this->_query->select()->from($this->_category_table_name)->where($this->category_id_field,$id)->query1();
 			if($this->_config('need_path'))
 				$this->parent->add_method_path($this->_result['title']);
+		}
+		elseif(!empty($_SESSION['_user_input'][$this->module_name])){
+			//_user_input - save user input values when error
+			$this->_result = $_SESSION['_user_input'][$this->module_name];
+			unset($_SESSION['_user_input'][$this->module_name]);
 		}
 	}
 	
@@ -559,8 +567,19 @@ abstract class base_module extends module{
 			$insert_place
 		);
 	}
+	
+	public function check_title(&$value,$category=false){
+		if(empty($value['title'])){
+			$this->_message('title must not be empty');
+			if(!isset($_SESSION['_user_input']))
+				$_SESSION['_user_input'] = array();
+			$_SESSION['_user_input'][$this->module_name] = $value;
+			$this->parent->redirect('/'.($this->_admin_mode?'admin.php':'').'?call='.$this->module_name.'.edit'.$category?'_category':'');
+		}
+	}
 
 	public function _save_category($id=NULL,$value=array(),$insert_place=NULL,$condition = array(),$redirect = false){
+		$this->check_title($value,true);
 		if($redirect === false)
 			$redirect = $this->_config('admin_method');
 		$redirect_params = array();
@@ -704,7 +723,7 @@ abstract class base_module extends module{
 		if($parent_title = $this->_query->select($this->category_id_field)->from($this->_category_table_name)->where('left',$target['left'],'<')->_and('right',$target['left'],'>')->order('left desc')->query1($this->category_id_field) )
 			$redirect_params['id'] = $parent_title;
 		if($this->_config('has_item')){
-			$category = $this->_query->select($this->category_id_field)->from($this->_category_table_name)->where('left',array($target['left'],$target['right']),'between')->query2assoc_array($this->category_id_field);
+			$category = $this->_query->select($this->category_id_field)->from($this->_category_table_name)->where('left',array($target['left'],$target['right']),'between')->query1($this->category_id_field);
 			$this->_query->delete()->from($this->_category_table_name)->where($this->category_id_field,$category,'in')->query();
 			$this->_query->delete()->from($this->_table_name)->where('category_id',$category,'in')->query();
 		}
@@ -720,7 +739,7 @@ abstract class base_module extends module{
 			$this->_query->execute();
 		}
 		$this->_query->unlock()->execute();
-		$this->_message('category deleted successfully',array('ttile'=>$target['title']));
+		$this->_message('category deleted successfully',array('title'=>$target['title']));
 		if($redirect)
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, $redirect_params);
 	}
@@ -761,7 +780,7 @@ abstract class base_module extends module{
 		else
 			throw new my_exception('can not move by empty id');
 		if($redirect){
-			if($this->parent->admin_mode)
+			if($this->_admin_mode)
 				$redirect = $this->_config('admin_method');
 			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, $redirect_params);
 		}
@@ -820,15 +839,22 @@ abstract class base_module extends module{
 			}	
 		}
 		//TODO trigger
-		//
-		/*if(!empty(value['id']) && ())
-		if(!empty($value['id']))
-			$check = $value['id']&;
-		if(!$column)
-			$column = $this->id_field;
-		elseif($count = $this->_query->injection('SELECT count(*) as c')->from($category?$this->_table_name:$this->_category_table_name)->where($column,$value.'%','like')->query1('c',false))
-			$value.=$count;
-		return $value;*/
+	}
+	
+	public function mb_strrev(&$text, $encoding = null)
+	{
+		$funcParams = array($text);
+		if ($encoding !== null)
+			$funcParams[] = $encoding;
+		$length = call_user_func_array('mb_strlen', $funcParams);
+		$output = '';
+		$funcParams = array($text, $length, 1);
+		if ($encoding !== null)
+			$funcParams[] = $encoding;
+		while ($funcParams[1]--) {
+			$output .= call_user_func_array('mb_substr', $funcParams);
+		}
+		return $output;
 	}
 	
 	private function check_unique_title($value = NULL, $category = false){

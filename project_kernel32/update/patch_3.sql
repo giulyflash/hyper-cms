@@ -44,10 +44,9 @@ UPDATE `article` SET `category_left` = (select `left` from article_category wher
 ALTER TABLE `article` DROP `category_id`;
 
 ALTER TABLE `article_category` ADD `category_count` INT NULL DEFAULT NULL;
-
-CREATE TEMPORARY TABLE `temp_category` (`left` int(11),`right` int(11));
-INSERT INTO temp_category (SELECT `left`,`right` FROM `article_category`);
-UPDATE `article_category` SET `category_count` = (SELECT count(*) FROM `temp_category` WHERE `temp_category`.`left`>`article_category`.`left` AND `temp_category`.`right`>`article_category`.`right`);
+CREATE TEMPORARY TABLE `temp_category` (`left` int(11),`right` int(11),`depth` int(11));
+INSERT INTO temp_category (SELECT `left`,`right`,`depth` FROM `article_category`);
+UPDATE `article_category` SET `category_count` = (SELECT count(*) FROM `temp_category` WHERE `temp_category`.`left`>`article_category`.`left` AND `temp_category`.`right`>`article_category`.`right` AND `temp_category`.`depth`=`article_category`.`depth`+1);
 
 ALTER TABLE `article` ADD `link` VARCHAR( 255 ) NULL;
 ALTER TABLE `article_category` ADD `link` VARCHAR( 255 ) NULL;
@@ -72,3 +71,15 @@ UPDATE article SET `category_id` = ( SELECT id FROM article_category WHERE id = 
 UPDATE `module_link_param` SET `name` = 'id' WHERE `name`='title';
 
 UPDATE `module_link` SET `center_method` = 'get' WHERE `center_method`='get_by_title';
+
+#menu
+
+ALTER TABLE `menu_item` ADD `category_count` INT NULL DEFAULT NULL;
+CREATE TEMPORARY TABLE `temp_category` (`left` int(11),`right` int(11),`depth` int(11));
+INSERT INTO temp_category (SELECT `left`,`right`,`depth` FROM `menu_item`);
+UPDATE `menu_item` SET `category_count` = (SELECT count(*) FROM `temp_category` WHERE `temp_category`.`left`>`menu_item`.`left` AND `temp_category`.`right`>`menu_item`.`right` AND `temp_category`.`depth`=`menu_item`.`depth`+1);
+
+ALTER TABLE `menu_item` DROP `id`;
+ALTER TABLE `menu_item` CHANGE `translit_title` `id` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ;
+ALTER TABLE `menu_item` ADD PRIMARY KEY ( `id` );
+ALTER TABLE `menu_item` DROP INDEX `translit_title`;

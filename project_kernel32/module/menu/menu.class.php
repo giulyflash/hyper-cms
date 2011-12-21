@@ -9,11 +9,11 @@ class menu extends base_module{
 			$this->parent->menu_module = $this;
 	}
 	
-	public function _admin($title=NULL,$menu_id=NULL){
+	public function _admin($id=NULL,$menu_id=NULL){
 		if(!$menu_id){
 			$this->_result = $this->_query->select()->from($this->module_name)->query();
 		}else{
-			$this->_get_category('translit_title',$title,false,'all_sub',array('menu_id',$menu_id));
+			$this->_get_category($this->category_id_field,$id,false,'all_sub',array('menu_id',$menu_id));
 		}
 	}
 	
@@ -243,7 +243,7 @@ class menu_config extends base_module_config{
 	protected $output_new_argument = true;
 	protected $default_link = '#';
 	protected $category_table = 'menu_item';
-	protected $category_field='id,title,translit_title,left,right,depth,link,menu_id,draft';
+	protected $category_field='id,title,left,right,depth,link,menu_id,draft';
 	
 	public $has_item = false;
 	public $has_category = true;
