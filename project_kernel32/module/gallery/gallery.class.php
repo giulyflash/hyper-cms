@@ -16,7 +16,7 @@ class gallery extends base_module{
 			if($data['category_id'])
 				$redirect_params['id'] = $this->_query->select('translit_title')->from($this->_category_table_name)->where('id',$data['category_id'])->query1('translit_title');
 		}
-		$this->parent->redirect('/'.($this->parent->admin_mode?'admin.php':'').'?call='.$this->module_name.($this->parent->admin_mode?'._admin':''),$redirect_params);
+		$this->parent->redirect('/'.($this->_admin_mode?'admin.php':'').'?call='.$this->module_name.($this->_admin_mode?'._admin':''),$redirect_params);
 	}
 	
 	public function _admin($title=NULL){
@@ -50,7 +50,7 @@ class gallery extends base_module{
 		$redirect_params = array();
 		if($category_id)
 			$redirect_params['id'] = $this->_query->select('translit_title')->from($this->_category_table_name)->where('id',$category_id)->query1('translit_title');
-		$this->parent->redirect('/'.($this->parent->admin_mode?'admin.php':'').'?call='.$this->module_name.($this->parent->admin_mode?'._admin':''),$redirect_params);
+		$this->parent->redirect('/'.($this->_admin_mode?'admin.php':'').'?call='.$this->module_name.($this->_admin_mode?'._admin':''),$redirect_params);
 	}
 	
 	/*

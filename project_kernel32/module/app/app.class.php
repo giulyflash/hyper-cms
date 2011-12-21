@@ -14,7 +14,7 @@ class app_config extends config{
 	public $content_type = 'xsl';
 	public $language = 'ru';
 	public $default_language = 'en';
-	protected $default_module = 'article';
+	public $default_module = 'article';
 	public $charset = 'utf-8';
 	protected $position = '__app__';
 	public $main_position_name = 'center';
@@ -1061,7 +1061,7 @@ class app extends module{
 			$method = $this->center_method;
 		if(!$param)
 			$param = $this->parent->_config('language_title_name');
-		$admin_mode = $this->parent->admin_mode?'admin.php':'';
+		$admin_mode = $this->admin_mode?'admin.php':'';
 		if($method)
 			$name = isset($this->parent->language_cache[$module][$method][$param])?$this->parent->language_cache[$module][$method][$param]:$method;
 		else

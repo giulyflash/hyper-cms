@@ -81,9 +81,18 @@
 /*gallery*/
 
 .nested_items.dropdown .items .item{
-	float: left;
+	/*float: left;*/
+	display: inline-block;
 	text-align: center;
 	min-width: 180px;
 	min-height: 210px;
 	padding:5px;
+}
+
+.nested_items.dropdown .items .item .default_thumb{
+	border: none;
+}
+
+.nested_items.dropdown._admin .items .item{
+	display: block;
 }

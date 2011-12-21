@@ -37,7 +37,6 @@ abstract class module{
 	public $_query;//object allow to do sql query easy
 	public $argument = array();//call args
 	protected $config_class_name = 'module_config';//if defined config will be created from this class
-	protected $item_draft = false;
 	public $_admin_mode;
 	
 	public function __construct(&$parent=NULL){

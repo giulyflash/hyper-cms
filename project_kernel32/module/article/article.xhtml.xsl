@@ -148,7 +148,34 @@
 				<xsl:call-template name="article_base"/>
 			</div>
 		</xsl:otherwise> -->
-		<xsl:call-template name="nested_items_category"/>
+		<xsl:otherwise>
+			<xsl:call-template name="nested_items_category"/>
+		</xsl:otherwise>
+	</xsl:choose>
+</xsl:template>
+
+<xsl:template match="items/item[_module_name='article']">
+	<xsl:choose>
+		<xsl:when test="/root/meta/admin_mode=1">
+			<xsl:call-template name="_default_item"/>
+		</xsl:when>
+		<xsl:otherwise>
+			<div>
+				<a href="/?call=article.get&amp;title={translit_title}" alt="{title}" title="{title}">
+					<h4><xsl:value-of select="title"/></h4>
+				</a>
+				<xsl:if test="thumb_path">
+					<img class="article_thumb" src="thumb_path"/>
+				</xsl:if>
+				<div class="text">
+					<xsl:value-of select="preview"/>
+					<xsl:if test="preview!='' and substring(string-length(preview)-1, 1, preview)!='.'">...</xsl:if>
+					<a href="/?call=article.get&amp;title={translit_title}" alt="{title}" title="{title}">
+						читать полностью &#8594;
+					</a>
+				</div>
+			</div>
+		</xsl:otherwise>
 	</xsl:choose>
 </xsl:template>
 
