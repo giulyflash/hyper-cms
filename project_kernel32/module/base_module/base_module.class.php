@@ -96,6 +96,7 @@ abstract class base_module extends module{
 	public $id_field = 'id';
 	public $category_id_field = 'id';
 	protected $item_draft = true;
+	protected $_need_message = true;
 	
 	public function __construct(&$parent=NULL){
 		parent::__construct($parent);
@@ -487,16 +488,16 @@ abstract class base_module extends module{
 	}
 	
 	public function edit($id=NULL, $category_id=NULL, $select='*'){
-		if($id){
+		if(!empty($_SESSION['_user_input'][$this->module_name])){
+			//_user_input - save user input values when error
+			$this->_result = $_SESSION['_user_input'][$this->module_name];
+			unset($_SESSION['_user_input'][$this->module_name]);
+		}
+		elseif($id){
 			$this->_result = $this->_query->select($select)->from($this->_table_name)->where($this->id_field,$id)->query1();
 			if(!$this->_result)
 				throw new my_exception('object not found', array($this->id_field=>$id));
 			$this->add_category_path($this->_result['category_id'],$this->_result['title']);
-		}
-		elseif(!empty($_SESSION['_user_input'][$this->module_name])){
-			//_user_input - save user input values when error
-			$this->_result = $_SESSION['_user_input'][$this->module_name];
-			unset($_SESSION['_user_input'][$this->module_name]);
 		}
 		$this->category_list();
 		if(!isset($this->_result['create_date'])){
@@ -505,8 +506,8 @@ abstract class base_module extends module{
 		}
 	}
 	
-	public function save($id=NULL, $value = array(), $redirect = 'edit', $params=array()){
-		$this->_save($id,$value,$redirect,$params);
+	public function save($id=NULL, $value = array()){
+		$this->_save($id,$value);
 	}
 	
 	public function _save($id=NULL, $value = array(), $redirect = 'edit', $params=array()){
@@ -515,17 +516,18 @@ abstract class base_module extends module{
 			$params = array('title'=>$value['title']);
 		if($id){
 			$this->_query->update($this->_table_name)->set($value)->where($this->id_field,$id)->query1();
-			$this->_message('object edited successfully',$params);
+			if($this->_need_message)
+				$this->_message('object edited successfully',$params);
 		}
 		else{
 			$this->get_unique_title($value, $id);
 			if(empty($value['order']))
 				$value['order'] = $this->get_order(isset($value['category_id'])?$value['category_id']:NULL);
 			$this->_query->insert($this->_table_name)->values($value)->execute();
-			$this->_message('object added successfully',$params);
+			if($this->_need_message)
+				$this->_message('object added successfully',$params);
 		}
-		if($redirect)
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, array('id'=>$value[$this->category_id_field]));
+		$this->redirect(array('id'=>$value[$this->category_id_field]),$redirect);
 	}
 	
 	private function &get_order($category=NULL){
@@ -533,31 +535,39 @@ abstract class base_module extends module{
 		return $order;
 	}
 	
-	public function remove($id=NULL,$redirect='_admin',$message=true,$param = array()){
+	public function remove($id=NULL,$redirect=false,$param = array()){
 		$redirect_params = array();
 		if($id){
 			$data = $this->_query->select('title,category_id')->from($this->_table_name)->where($this->id_field,$id)->query1();
 			$this->_query->delete()->from($this->_table_name)->where($this->id_field,$id)->query1();
-			if($message)
+			if($this->_need_message)
 				$this->_message('object deleted successfully',array('title'=>$data['title']));
 			if($data['category_id'])
 				$redirect_params['id'] = $data['category_id'];
 		}
 		else
 			$this->_message('object id is empty');
-		$this->parent->redirect('/'.($this->_admin_mode?'admin.php':'').'?call='.$this->module_name.($this->_admin_mode?'._admin':''),$redirect_params);
+		$this->redirect($redirect_params,$redirect);
+	}
+	
+	private function redirect($redirect_params,$redirect=false){
+		if($redirect === false)
+			$redirect = $this->_config('admin_method');
+		elseif(!$redirect)
+			$return;
+		$this->parent->redirect('/'.($this->_admin_mode?'admin.php':'').'?call='.$this->module_name.'.'.$redirect,$redirect_params);
 	}
 	
 	public function edit_category($id=NULL, $insert_place=NULL){
-		if($id){
-			$this->_result = $this->_query->select()->from($this->_category_table_name)->where($this->category_id_field,$id)->query1();
-			if($this->_config('need_path'))
-				$this->parent->add_method_path($this->_result['title']);
-		}
-		elseif(!empty($_SESSION['_user_input'][$this->module_name])){
+		if(!empty($_SESSION['_user_input'][$this->module_name])){
 			//_user_input - save user input values when error
 			$this->_result = $_SESSION['_user_input'][$this->module_name];
 			unset($_SESSION['_user_input'][$this->module_name]);
+		}
+		elseif($id){
+			$this->_result = $this->_query->select()->from($this->_category_table_name)->where($this->category_id_field,$id)->query1();
+			if($this->_config('need_path'))
+				$this->parent->add_method_path($this->_result['title']);
 		}
 	}
 	
@@ -574,14 +584,15 @@ abstract class base_module extends module{
 			if(!isset($_SESSION['_user_input']))
 				$_SESSION['_user_input'] = array();
 			$_SESSION['_user_input'][$this->module_name] = $value;
-			$this->parent->redirect('/'.($this->_admin_mode?'admin.php':'').'?call='.$this->module_name.'.edit'.$category?'_category':'');
+			$redirect_params = array();
+			if(!empty($value['id']))
+				$redirect_params['id'] = $value['id'];
+			$this->redirect($redirect_params, 'edit'.$category?'_category':'');
 		}
 	}
 
 	public function _save_category($id=NULL,$value=array(),$insert_place=NULL,$condition = array(),$redirect = false){
 		$this->check_title($value,true);
-		if($redirect === false)
-			$redirect = $this->_config('admin_method');
 		$redirect_params = array();
 		if(isset($value['draft']))
 			$value['draft'] = (int)$value['draft'];
@@ -591,16 +602,17 @@ abstract class base_module extends module{
 			if(!$item = $this->_query->select('title,left')->from($this->_category_table_name)->where($this->category_id_field,$id)->query1())
 				new my_exception('category not found',array($this->category_id_field=>$id));
 			$this->_query->update($this->_category_table_name)->set($value)->where($this->category_id_field,$id)->query1();
-			$this->_message('category edited successfully',array('title'=>$item['title']));
+			if($this->_need_message)
+				$this->_message('category edited successfully',array('title'=>$item['title']));
 			if($parent_title = $this->_query->select($this->category_id_field)->from($this->_category_table_name)->where('left',$item['left'],'<')->_and('right',$item['left'],'>')->order('left desc')->query1($this->category_id_field))
 				$redirect_params['id'] = $parent_title;
 		}
 		else{
 			if($insert_place){
-				$destination = $this->_query->select('right,depth')->from($this->_category_table_name)->where($this->category_id_field,$insert_place)->query1();
+				$destination = $this->_query->select('right,depth,'.$this->category_id_field)->from($this->_category_table_name)->where($this->category_id_field,$insert_place)->query1();
 				if(!$destination)
 					throw new my_exception('parent not found',array($this->category_id_field=>$insert_place));
-				$redirect_params['id'] = $id;
+				$redirect_params['id'] = $destination[$this->category_id_field];
 				$value['left'] = $destination['right'];
 				$this->_query->lock($this->_category_table_name)->execute();
 				$this->_query->update($this->_category_table_name)->increment('right',2)->where('right',$value['left'],'>=');
@@ -621,10 +633,10 @@ abstract class base_module extends module{
 			}
 			$value['right'] = $value['left'] + 1;
 			$this->_query->insert($this->_category_table_name)->values($value)->execute();
-			$this->_message('category edited successfully',array('title'=>$value['title'])); 
+			if($this->_need_message)
+				$this->_message('category added successfully',array('title'=>$value['title'])); 
 		}
-		if($redirect)
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, $redirect_params);
+		$this->redirect($redirect_params,$redirect);
 	}
 
 	public function move_category($id=NULL, $insert_type=NULL, $insert_place=NULL, $condition = array(),$redirect = false){
@@ -636,8 +648,6 @@ abstract class base_module extends module{
 			throw new my_exception('wrong insert type', array('type'=>$insert_type));
 		if(!$target = $this->_query->select('left,right,depth,title')->from($this->_category_table_name)->where($this->category_id_field,$id)->query1())
 			throw new my_exception('not found category to move',array($this->category_id_field=>$id));
-		if($redirect === false)
-			$redirect = $this->_config('admin_method');
 		if($id==$insert_place){
 			$this->_message('can not move category into itselve');
 			$redirect_params['id'] = $id;
@@ -705,10 +715,10 @@ abstract class base_module extends module{
 				$this->_query->execute();;
 			}
 			$this->_query->unlock()->execute();
-			$this->_message('category moved successfully',array('title'=>$target['title']));
+			if($this->_need_message)
+				$this->_message('category moved successfully',array('title'=>$target['title']));
 		}
-		if($redirect)
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, $redirect_params);
+		$this->redirect($redirect_params,$redirect);
 	}
 
 	public function remove_category($id=NULL,$condition = array(), $redirect = false){
@@ -718,8 +728,6 @@ abstract class base_module extends module{
 		$target = $this->_query->select('left,right,title')->from($this->_category_table_name)->where($this->category_id_field,$id)->query1();
 		if(!$target)
 			throw new my_exception('category not found',array($this->category_id_field=>$id));
-		if($redirect === false)
-			$redirect = $this->_config('admin_method');
 		if($parent_title = $this->_query->select($this->category_id_field)->from($this->_category_table_name)->where('left',$target['left'],'<')->_and('right',$target['left'],'>')->order('left desc')->query1($this->category_id_field) )
 			$redirect_params['id'] = $parent_title;
 		if($this->_config('has_item')){
@@ -739,9 +747,9 @@ abstract class base_module extends module{
 			$this->_query->execute();
 		}
 		$this->_query->unlock()->execute();
-		$this->_message('category deleted successfully',array('title'=>$target['title']));
-		if($redirect)
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, $redirect_params);
+		if($this->_need_message)
+			$this->_message('category deleted successfully',array('title'=>$target['title']));
+		$this->redirect($redirect_params, $redirect);
 	}
 	
 	public function unlock_database(){
@@ -749,7 +757,7 @@ abstract class base_module extends module{
 		$this->_message('database unlocked');
 	}
 	
-	public function move_item($id=NULL, $insert_after=NULL, $insert_category=NULL, $insert_item=NULL, $redirect='_admin'){
+	public function move_item($id=NULL, $insert_after=NULL, $insert_category=NULL, $insert_item=NULL, $redirect=false){
 		//echo "id:'$id' insert_after:'$insert_after' insert_category:'$insert_category' insert_item:'$insert_item'";die;
 		$redirect_params = array();
 		if($id){
@@ -775,15 +783,12 @@ abstract class base_module extends module{
 				if($insert_category)
 					$redirect_params['id'] = $insert_category;
 			}
-			$this->_message('object moved successfully',array('title'=>$match['title']));
+			if($this->_need_message)
+				$this->_message('object moved successfully',array('title'=>$match['title']));
 		}
 		else
 			throw new my_exception('can not move by empty id');
-		if($redirect){
-			if($this->_admin_mode)
-				$redirect = $this->_config('admin_method');
-			$this->parent->redirect('admin.php?call='.$this->module_name.'.'.$redirect, $redirect_params);
-		}
+		$this->redirect($redirect_params,$redirect);
 	}
 	
 	public function backtrace(){

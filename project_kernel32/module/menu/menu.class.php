@@ -42,8 +42,11 @@ class menu extends base_module{
 	}
 	
 	public function remove($id=NULL){
-		parent::remove($id, NULL, true, array('name'=>$this->_query->select('title')->from($this->module_name)->where('id',$id)->query1('title')));
+		//parent::remove($id, NULL, array('name'=>$this->_query->select('title')->from($this->_table_name)->where('id',$id)->query1('title')));
+		$title = $this->_query->select('title')->from($this->_table_name)->where('id',$id)->query1('title');
 		$this->_query->delete()->from($this->_category_table_name)->where('menu_id',$id)->query();
+		$this->_query->delete()->from($this->_table_name)->where('id',$id)->query1();
+		$this->_message('object deleted successfully',array('title'=>$title));
 		$this->parent->redirect('/admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
 	}
 	

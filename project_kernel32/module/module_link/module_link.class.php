@@ -168,6 +168,7 @@ class module_link extends module{
 				$this->_result[$param['link_id']]['params'][] = $param;
 			$title_field = $this->parent->_config('language_title_name');
 			$param_field =  $this->parent->_config('language_param_name');
+			//TODO once load params and etc config to $this obj when init
 			$position = $this->_query->select('translit_title,title')->from('position')->query2assoc_array('translit_title','title');
 			foreach($this->_result as &$link){
 				$link['position_title'] = (!empty($position[$link['position']]))?$position[$link['position']]:$link['position'];
@@ -199,18 +200,19 @@ class module_link extends module{
 			return;
 		$module = new $module_name($this->parent);
 		$link[$module_trans_title] = (!empty($this->parent->language_cache[$link[$module_param]][$title_field]))?
-		$this->parent->language_cache[$link[$module_param]][$title_field]:$link[$module_param];
+			$this->parent->language_cache[$link[$module_param]][$title_field]:$link[$module_param];
 		$link[$method_trans_title] = (!empty($this->parent->language_cache[$link[$module_param]][$link[$method_param]][$title_field]))?
-		$this->parent->language_cache[$link[$module_param]][$link[$method_param]][$title_field]:$link[$method_param];
+			$this->parent->language_cache[$link[$module_param]][$link[$method_param]][$title_field]:$link[$method_param];
 		if(isset($link['params']))
-		foreach($link['params'] as &$param)
-			if($param['type']==$type_param){
-				$param['title'] = (!empty($this->parent->language_cache[$link[$module_param]][$link[$method_param]][$param_field][$param['name']]))?
-				$this->parent->language_cache[$link[$module_param]][$link[$method_param]][$param_field][$param['name']]:$param['name'];
-				if($param_values = $module->_get_param_value($link[$method_param],$param['name']))
-					if(!empty($param_values[$param['value']]))
-						$param['value'] = $param_values[$param['value']];
-			}
+			foreach($link['params'] as &$param)
+				if($param['type']==$type_param){
+					$param['title'] = (!empty($this->parent->language_cache[$link[$module_param]][$link[$method_param]][$param_field][$param['name']]))?
+						$this->parent->language_cache[$link[$module_param]][$link[$method_param]][$param_field][$param['name']]:$param['name'];
+					if($param_values = $module->_get_param_value($link[$method_param],$param['name'])){
+						if(!empty($param_values[$param['value']]))
+							$param['value'] = $param_values[$param['value']];
+					}
+				}
 	}
 	
 	public function remove($id=NULL,$redirect=true){
