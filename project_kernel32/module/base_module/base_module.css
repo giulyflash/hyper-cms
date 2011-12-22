@@ -45,7 +45,7 @@
 .nested_items.dropdown li a{
 	text-decoration: none;
 }
-.nested_items.dropdown ul ul{
+.nested_items.dropdown ul.ready_style ul{
 	list-style: none;
 	padding: 0 0 7px 5px;
 	margin: 0 0 10px 7px;

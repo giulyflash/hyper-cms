@@ -89,6 +89,7 @@ class base_module_config extends module_config{
 	public $category_type = 'dropdown';
 	
 	public $default_thumb = 'template/admin/images/_document.png';
+	public $simple_category_style = 0;
 }
 
 abstract class base_module extends module{
@@ -100,6 +101,8 @@ abstract class base_module extends module{
 	
 	public function __construct(&$parent=NULL){
 		parent::__construct($parent);
+		if($this->_admin_mode)
+			$this->config->set('simple_category_style',0);
 		$this->_inherit_language('base_module');
 	}
 	
@@ -132,6 +135,7 @@ abstract class base_module extends module{
 			if(!is_array($bound = $this->get_bound($field,$value)))
 				return;
 			$this->_query->select($this->_config('category_field'));
+			$this->_query->injection(',"'.$this->module_name.'" as _module_name, "'.$show.'" as _show');//hack for xslt
 			switch($show){
 				case 'category':{
 					$this->get_category_tree($field, $value,$category_condition, $bound);
@@ -206,7 +210,7 @@ abstract class base_module extends module{
 	}
 	
 	
-	private function get_category_current($field=false, $value=false, $category_condition=array(), &$bound=array()){	
+	private function get_category_current($field=false, $value=false, $category_condition=array(), &$bound=array()){
 		$where = $this->get_category_sql_default();
 		if($bound)
 			$this->_query->clause($where?'AND':'WHERE','left', $bound['left'], '>')->_and('right', $bound['right'],'<')->_and('depth',$bound['depth']+1);

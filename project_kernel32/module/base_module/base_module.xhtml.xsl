@@ -32,10 +32,13 @@
 			<xsl:choose>
 				<xsl:when test="$need_ul=1">
 					<ul>
+						<xsl:if test="/root/module/item[_module_name=$module_name]/_config/simple_category_style=0">
+							<xsl:attribute name="class">ready_style</xsl:attribute>
+						</xsl:if>
 						<xsl:call-template name="nested_items_category_core">
 							<xsl:with-param name="module_name" select="$module_name"/>
 						</xsl:call-template>
-						<xsl:if test="active=1 and not(items)">
+						<xsl:if test="active=1 and not(items) and /root/module/item[_module_name=$module_name]/_config/has_item=1">
 							<xsl:call-template name="base_no_items"/>
 						</xsl:if>
 					</ul>
@@ -44,17 +47,17 @@
 					<xsl:call-template name="nested_items_category_core">
 						<xsl:with-param name="module_name" select="$module_name"/>
 					</xsl:call-template>
-					<xsl:if test="not(items)">
+					<xsl:if test="not(items) and /root/module/item[_module_name=$module_name]/_config/has_item=1">
 						<xsl:call-template name="base_no_items"/>
 					</xsl:if>
 				</xsl:otherwise>
 			</xsl:choose>
 		</xsl:when>
 		<xsl:otherwise>
-			<xsl:if test="active=1 or _method_name">
+			<xsl:if test="(active=1 or _method_name) and (/root/module/item[_module_name=$module_name]/_config/simple_category_style=0)">
 				<xsl:choose>
 					<xsl:when test="$need_ul=1">
-						<ul>
+						<ul class="ready_style">
 							<xsl:call-template name="base_no_items"/>
 						</ul>
 					</xsl:when>
@@ -69,7 +72,7 @@
 
 <xsl:template name="base_no_items">
 	<li class="empty">
-		<xsl:value-of select="/root/language/*/no_obj_msg"/>
+		<!-- <xsl:value-of select="/root/language/*/no_obj_msg"/>-->
 	</li>
 </xsl:template>
 
@@ -85,25 +88,37 @@
 	<span class="text"><xsl:value-of select="concat($bracket_l,title,$bracket_r)"/></span>
 </xsl:template>
 
+<xsl:template match="_show" priority="0.1">
+	<a href="{../link}" alt="{../title}" title="{../title}">
+		<xsl:value-of select="../title"/>
+	</a>
+</xsl:template>
+
 <xsl:template name="nested_items_category_core">
-	<xsl:param name="module_name" select="_module_name"/>
+	<xsl:variable name="module_name" select="_module_name"/>
 	<xsl:variable name="admin_mode"><xsl:if test="/root/meta/admin_mode=1">admin.php</xsl:if></xsl:variable>
 	<xsl:variable name="method" select="/root/module/item[_module_name=$module_name]/_method_name"/>
 	<xsl:for-each select="item">
 		<li>
-			<xsl:if test="active=1">
-				<xsl:attribute name="class">active</xsl:attribute>
-			</xsl:if>
-			<div class="item_cont">
-				<a class="_ajax" href="/{$admin_mode}?call={$module_name}.{$method}&amp;id={id}" alt="{title}" title="{title}">
-					<span class="folder_icon"></span>
-					<xsl:call-template name="base_title"/>
-				</a>
-				<xsl:call-template name="controls_category">
-					<xsl:with-param name="module_name" select="$module_name"/>
-					<xsl:with-param name="edit_module_name" select="$module_name"/>
-				</xsl:call-template>
-			</div>
+			<xsl:choose>
+				<xsl:when test="/root/module/item[_module_name=$module_name]/_config/simple_category_style=0">
+					<div class="item_cont">
+						<a class="_ajax" href="/{$admin_mode}?call={$module_name}.{$method}&amp;id={id}" alt="{title}" title="{title}">
+							<span class="folder_icon"></span>
+							<xsl:call-template name="base_title"/>
+						</a>
+						<xsl:if test="/root/meta/admin_mode=1">
+							<xsl:call-template name="controls_category">
+								<xsl:with-param name="module_name" select="$module_name"/>
+								<xsl:with-param name="edit_module_name" select="$module_name"/>
+							</xsl:call-template>
+						</xsl:if>
+					</div>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:apply-templates select="_show"/>
+				</xsl:otherwise>
+			</xsl:choose>
 			<xsl:call-template name="nested_items_category_base">
 				<xsl:with-param name="module_name" select="$module_name"/>
 			</xsl:call-template>
