@@ -3,27 +3,10 @@
 <xsl:output method="html" encoding="utf-8" doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" />
 
 <xsl:template match="root/module/item[_module_name='menu' and _method_name='get']">
-	<div id="menu" class="menu {_argument/type}">
-		<xsl:call-template name="menu_items"/>
-	</div>
-</xsl:template>
-
-<xsl:template name="menu_items">
-	<xsl:if test="item">
-		<ul>
-			<xsl:for-each select="item">
-				<li>
-					<xsl:if test="active=1">
-						<xsl:attribute name="class">active</xsl:attribute>
-					</xsl:if>
-					<a href="{link}">
-						<xsl:value-of select="title"/>
-					</a>
-					<xsl:call-template name="menu_items"/>
-				</li>
-			</xsl:for-each>
-		</ul>
-	</xsl:if>
+	<xsl:call-template name="nested_items_category"/>
+	<!--<div id="menu" class="menu {_argument/type}">
+ 		<xsl:call-template name="menu_items"/>
+	</div> -->
 </xsl:template>
 
 <xsl:template match="root/module/item[_module_name='menu' and _method_name='edit']">
@@ -37,42 +20,6 @@
 				</xsl:if>
 			</form>
 			<br/>
-			<!-- <ul>
-				<xsl:for-each select="item">
-					<xsl:call-template name="nested_tag_before"/>
-					<div class="item_cont">
-						<img class="nested_item_img" src="template/admin/images/folder_opened.png"/>
-						<a href="#">
-							<xsl:value-of select="title"/>
-						</a>
-						<form class="controls" method="post" action="admin.php?call=menu.move_item&amp;menu_id={menu_id}&amp;id={id}">
-							<a href="/admin.php?call=menu.remove_item&amp;menu_id={menu_id}&amp;id={id}" class="remove">удалить</a>
-							<a href="/admin.php?call=menu.edit_item&amp;menu_id={menu_id}&amp;id={id}" class="edit">редактировать</a>
-							Вставить: 
-							<select name="insert_type" autocomplete='off'>
-								<option value="0" selected="1">-</option>
-								<option value="before">перед</option>
-								<option value="inside">в</option>
-							</select>
-							<select class="insert_place" name="insert_place" autocomplete='off'>
-								<option value="0" selected="1">-</option>
-								<xsl:variable name="current_id" select="id"/>
-								<xsl:for-each select="../item">
-									<xsl:if test="id!=$current_id">
-										<option value="{id}">
-											<xsl:call-template name="menu_print_level"/>
-											<xsl:value-of select="title"/>
-										</option>
-									</xsl:if>
-								</xsl:for-each>
-								<option value="last">-</option>
-							</select>
-							<a href="/admin.php?call=menu.edit_item&amp;menu_id={menu_id}&amp;insert_place={id}" class="subitem">добавить подпункт</a>
-						</form>
-					</div>
-				</xsl:for-each>
-				<xsl:call-template name="nested_tag_after"/>
-			</ul> -->
 		</xsl:if>
 	</div>
 	<xsl:if test="id">
@@ -82,25 +29,12 @@
 
 <xsl:template match="root/module/item[_module_name='menu' and _method_name='edit_item']">
 	<xsl:if test ="data"> 
-	<!--
-	$this->result['data'] = $module_link->_result['data'];
-		if(isseet($module_link->_result['link_data']))
-			$this->result['link_data'] = $module_link->_result['link_data'];
-		if(isseet($module_link->_result['link']))
-			$this->result['link0'] = $module_link->_result['link']; 
-	 -->
 	 	<script type="text/javascript">
 			document.module_data=<xsl:value-of select="data" disable-output-escaping="yes"/>
 			<xsl:if test="link_data">
 				document.link_data=<xsl:value-of select="link_data" disable-output-escaping="yes"/>;
 			</xsl:if>
 		</script>
-		<!-- <script type="text/javascript">
-			document.module_data=<xsl:value-of select="data"/>
-			<xsl:if test="link0">
-				document.link_data="<xsl:value-of select="link0"/>";
-			</xsl:if>
-		</script> -->
 	</xsl:if>
 	<form class="menu menu_editor link_form" method="post" action="admin.php?call=menu.save_item">
 		<xsl:if test="id">
@@ -188,6 +122,24 @@
 	</xsl:choose>
 </xsl:template>
 
+<!-- <xsl:template name="menu_items">
+	<xsl:if test="item">
+		<ul>
+			<xsl:for-each select="item">
+				<li>
+					<xsl:if test="active=1">
+						<xsl:attribute name="class">active</xsl:attribute>
+					</xsl:if>
+					<a href="{link}">
+						<xsl:value-of select="title"/>
+					</a>
+					<xsl:call-template name="menu_items"/>
+				</li>
+			</xsl:for-each>
+		</ul>
+	</xsl:if>
+</xsl:template>
+
 <xsl:template name="menu_base">
 	<xsl:param name="need_ul">1</xsl:param>
 	<xsl:param name="module_name" select="_module_name"/>
@@ -255,6 +207,6 @@
 			</xsl:if>
 		</li>
 	</xsl:for-each>
-</xsl:template>
+</xsl:template> -->
 
 </xsl:stylesheet>

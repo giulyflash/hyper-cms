@@ -250,5 +250,7 @@ class menu_config extends base_module_config{
 	
 	public $has_item = false;
 	public $has_category = true;
+	
+	public $simple_category_style = 1;
 }
 ?>
