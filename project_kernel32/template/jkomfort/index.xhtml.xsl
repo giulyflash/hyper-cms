@@ -11,6 +11,7 @@
 		<tbody>
 			<tr>
 				<td colspan="2">
+					<div class="new_year"></div>
 					<a href="/">
 						<div id="header" alt="На главную" title="На главную">
 							<div id="logo1">

@@ -154,7 +154,7 @@
 	</xsl:choose>
 </xsl:template>
 
-<xsl:template match="items/item[_module_name='article']">
+<xsl:template match="items/item[_module_name='article' and _admin=0]">
 	<xsl:choose>
 		<xsl:when test="/root/meta/admin_mode=1">
 			<xsl:call-template name="_default_item"/>

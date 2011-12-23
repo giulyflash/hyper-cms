@@ -4,9 +4,12 @@
 .nested_items.menu .no_controls form.controls>*.always{
 	display: inline;
 }
-.nested_items.menu .empty{
+/*.nested_items.menu .empty{
 	display: none;
 }
+.nested_items.menu._admin .empty{
+	display: block;
+}*/
 .nested_items.dropdown ul ul {
 	background: none;
 	border-left: none;

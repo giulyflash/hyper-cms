@@ -27,6 +27,15 @@
 	</xsl:if>
 </xsl:template>
 
+<xsl:template match="_show[../_admin=1 and ../_module_name='menu']">
+	<xsl:param name="method"/>
+	<xsl:variable name="admin_mode"><xsl:if test="/root/module/item[_module_name='menu']/_config/admin_mode=1">admin.php</xsl:if></xsl:variable>
+	<a class="_ajax" href="/{$admin_mode}?call=menu.{$method}&amp;id={../id}&amp;menu_id={/root/module/item[_module_name='menu']/_argument/menu_id}" alt="{../title}" title="{../title}">
+		<span class="folder_icon"></span>
+		<xsl:call-template name="base_title"/>
+	</a>
+</xsl:template>
+
 <xsl:template match="root/module/item[_module_name='menu' and _method_name='edit_item']">
 	<xsl:if test ="data"> 
 	 	<script type="text/javascript">
@@ -84,20 +93,8 @@
 
 <xsl:template match="root/module/item[_module_name='menu' and _method_name='_admin']">
 	<xsl:choose>
-		<xsl:when test="/root/meta/content_type='json_html'">
-			<xsl:call-template name="menu_base">
-				<xsl:with-param name="need_ul">0</xsl:with-param>
-			</xsl:call-template>
-		</xsl:when>
 		<xsl:when test="_argument/menu_id!=''">
-			<div class="nested_items {_module_name} {_method_name} {_config/category_type}">
-				<xsl:call-template name="menu_base"/>
-				<p>
-					<a href="/admin.php?call={_module_name}.edit_item&amp;menu_id={_argument/menu_id}">
-						<xsl:value-of select="/root/language/menu/_admin/add_category"/>
-					</a>
-				</p>
-			</div>
+			<xsl:call-template name="nested_items_category"/>
 		</xsl:when>
 		<xsl:otherwise>
 			<xsl:if test="item">
@@ -111,7 +108,8 @@
 							</li>
 						</xsl:for-each>
 					</ul>
-					<p>
+					<!-- <xsl:call-template name="controls_add"/> -->
+					<p class="controls_add">
 						<a href="/admin.php?call=menu.edit">
 							<xsl:value-of select="/root/language/menu/_admin/add_menu"/>
 						</a>

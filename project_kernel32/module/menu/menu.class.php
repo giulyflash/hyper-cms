@@ -239,6 +239,8 @@ class menu_config extends base_module_config{
 			<script src="/module/module_link/wizard.js" type="text/javascript"></script>
 			<script src="/module/menu/admin.js" type="text/javascript"></script>',
 		'_admin,edit_item,edit_category'=>'<link href="/module/menu/admin.css" rel="stylesheet" type="text/css"/>',
+		'get'=>
+			'<link href="/module/menu/menu.css" rel="stylesheet" type="text/css"/>',
 	);
 	
 	protected $alias_table = 'menu_link_alias';

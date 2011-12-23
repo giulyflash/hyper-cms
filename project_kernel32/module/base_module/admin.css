@@ -5,7 +5,8 @@
 }
 
 .nested_items .item .controls{
-	padding: 0 0 0 110px;
+	margin: 0 0 0 110px;
+	padding: 0;
 }
 
 .nested_items .item_cont:hover>.controls,
