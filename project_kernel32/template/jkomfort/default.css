@@ -4,6 +4,16 @@ Published by Free CSS Templates <http://www.freecsstemplates.org/>
 Released for free under a Creative Commons Attribution 2.5 License
 */
 
+.new_year{
+	position: absolute;
+	height: 170px;
+	width: 868px;
+	background: url("/template/jkomfort/images/new_year.png") no-repeat right -5px;
+	z-index: 10;
+}
+.new_year div{
+}
+
 html, body{
 	height: 100%;
 }
@@ -93,9 +103,11 @@ img.right {
 	background: url(images/apatit-arms.png) no-repeat right;
 	height: 115px;
 	width: 100%;
+	z-index: 100;
 }
 #logo2 img{
 	padding: 20px 0 0 260px;
+	z-index: 100;
 }
 #header h1, #header h2{
 	color: white;

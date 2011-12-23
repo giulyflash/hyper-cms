@@ -96,3 +96,7 @@
 .nested_items.dropdown._admin .items .item{
 	display: block;
 }
+
+p.controls_add{
+	text-indent: 0px;
+}

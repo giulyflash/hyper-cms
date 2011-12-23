@@ -210,6 +210,8 @@ class site_jkomfort extends module{
 				$text.= $sheet->getCellByColumnAndRow($column,2)->getValue().'<br/>';
 				//
 				$street = trim($sheet->getCellByColumnAndRow($column+2,3)->getFormattedValue());
+				if(!$street)
+					throw new my_exception('Неверный формат таблиц: название улицы не найдено');
 				if(strpos('.',$street)==false)
 					$street = ucfirst($street);
 				$house = trim($sheet->getCellByColumnAndRow($column+4,3)->getFormattedValue());
@@ -252,8 +254,11 @@ class site_jkomfort extends module{
 				$text.='</table><table class="jkomfort_house">';
 				//
 				$row=14;
+				while(!$sheet->getCellByColumnAndRow($column,$row) && $row<100)
+					$row++;
+				$row00 = $row;
 				while($value = $sheet->getCellByColumnAndRow($column,$row)->getCalculatedValue()){
-					$tag = ($row==14)?'th':'td';
+					$tag = ($row==$row00)?'th':'td';
 					$text.="<tr><th>".$sheet->getCellByColumnAndRow($column,$row)->getCalculatedValue().
 						"</th><$tag>".$sheet->getCellByColumnAndRow($column+$col_count-1,$row)->getCalculatedValue()."</$tag></tr>";
 					$row++;

@@ -101,7 +101,7 @@ abstract class base_module extends module{
 	
 	public function __construct(&$parent=NULL){
 		parent::__construct($parent);
-		if($this->_admin_mode)
+		if($this->admin_mode)
 			$this->config->set('simple_category_style',0);
 		$this->_inherit_language('base_module');
 	}
@@ -135,7 +135,7 @@ abstract class base_module extends module{
 			if(!is_array($bound = $this->get_bound($field,$value)))
 				return;
 			$this->_query->select($this->_config('category_field'));
-			$this->_query->injection(',"'.$this->module_name.'" as _module_name, "'.$show.'" as _show');//hack for xslt
+			$this->_query->injection(',"'.$this->module_name.'" as _module_name, "'.$this->admin_mode.'" as _admin, "'.$show.'" as _show');//hack for xslt
 			switch($show){
 				case 'category':{
 					$this->get_category_tree($field, $value,$category_condition, $bound);
@@ -171,7 +171,7 @@ abstract class base_module extends module{
 			$this->_result = $this->_query->limit_page($page,$count)->query();
 		}
 		//TODO remove this temp code below
-		if($this->_admin_mode){
+		if($this->admin_mode){
 			$this->category_list($category_condition);
 		}
 	}
@@ -180,7 +180,7 @@ abstract class base_module extends module{
 		$where = false;
 		if($value!==false && $bound){
 			$this->get_category_sql_active($bound);
-			if(!$this->_admin_mode){
+			if(!$this->admin_mode){
 				$this->_query->where('draft',0);
 				$where = true;
 			}
@@ -198,7 +198,7 @@ abstract class base_module extends module{
 	private function get_category_sql_default($category_condition=NULL, $query = NULL){
 		$where = false;
 		$this->_query->from($this->_category_table_name);
-		if(!$this->_admin_mode){
+		if(!$this->admin_mode){
 			$this->_query->where('draft',0);
 			$where = true;
 		}
@@ -225,7 +225,7 @@ abstract class base_module extends module{
 		$where = false;
 		if($value!==false && $bound){
 			$this->get_category_sql_active($bound);
-			if(!$this->_admin_mode){
+			if(!$this->admin_mode){
 				$this->_query->where('draft',0);
 				$where = true;
 			}
@@ -271,7 +271,7 @@ abstract class base_module extends module{
 			$bound_query = new object_sql_query($this->parent->db);
 			if($this->module_name=='article'){
 				$bound = $bound_query->select($bound_select.',title,article_redirect,'.$this->category_id_field)->from($this->_category_table_name)->where($field,$value)->query1();
-				if(!$this->_admin_mode && $this->parent->_config('content_type')=='xsl' && !empty($bound['article_redirect'])){
+				if(!$this->admin_mode && $this->parent->_config('content_type')=='xsl' && !empty($bound['article_redirect'])){
 					$this->_query->set_sql();
 					$this->add_category_path($bound['left'],$bound['title']);
 					$this->config->set('need_path',false);
@@ -290,9 +290,10 @@ abstract class base_module extends module{
 	public function get_category_items($show,$item_condition,$value,$bound){
 		if($this->_config('has_item')){
 			$item_field = $this->_config('item_field');
-			if($this->_admin_mode && $this->item_draft)
+			if($this->admin_mode && $this->item_draft)
 				$item_field.= ',draft';
-			$this->_query->select($item_field)->injection(',"'.$this->module_name.'" as _module_name')->from($this->_table_name);//temp hack for xsl-tree builder
+			//',"'.$this->module_name.'" as _module_name, "'.$this->admin_mode.'" as _admin,
+			$this->_query->select($item_field)->injection(',"'.$this->module_name.'" as _module_name, "'.$this->admin_mode.'" as _admin')->from($this->_table_name);//temp hack for xsl-tree builder
 			$categories = array();
 			$null_categories = false;
 			if($show!='current' || $show=='all_sub' && !$value)
@@ -421,7 +422,7 @@ abstract class base_module extends module{
 			$this->_query->where($field,$value);
 			$where = true;
 		}
-		if(!$this->_admin_mode){
+		if(!$this->admin_mode){
 			if($where)
 				$this->_query->_and('draft','1','!=');
 			else
@@ -464,14 +465,14 @@ abstract class base_module extends module{
 	}
 	
 	protected function get_path($left=NULL,$path_from_result=NULL){
-		if($left && !in_array($this->parent->_config('content_type'), array('json','json_html')) && (empty($this->_result['draft']) || $this->_result['draft']=='0' || $this->_admin_mode) && $this->_config('has_category')){
-			$admin_mode = $this->_admin_mode?'admin.php':'';
+		if($left && !in_array($this->parent->_config('content_type'), array('json','json_html')) && (empty($this->_result['draft']) || $this->_result['draft']=='0' || $this->admin_mode) && $this->_config('has_category')){
+			$admin_mode = $this->admin_mode?'admin.php':'';
 			$method = $admin_mode?$this->_config('admin_method'):'get_category';
 			$this->module_path_count = $this->parent->get_path_count()-1;
 			if($path_from_result){
 				foreach($this->_result as $name=>&$value)
 					if($value['left']<=$left && $value['right']>$left){
-						if(!($this->_admin_mode || empty($match['draft'])))
+						if(!($this->admin_mode || empty($match['draft'])))
 							$this->parent->unset_path($this->module_path_count);
 						$this->parent->add_path(array(
 							'title'=>$value['title'],
@@ -483,7 +484,7 @@ abstract class base_module extends module{
 				$matches = $this->_query->select('title,draft,'.$this->category_id_field)->from($this->_category_table_name)->where('left',$left,'<=')->_and('right',$left,'>=')->order('left')->query();
 				//TODO href
 				foreach($matches as &$match){
-					if(!($this->_admin_mode || empty($match['draft'])))
+					if(!($this->admin_mode || empty($match['draft'])))
 						$this->parent->unset_path($this->module_path_count);
 					$this->parent->add_path(array('title'=>$match['title'],'href'=>'/'.$admin_mode.'?call='.$this->module_name.'.'.$method.'&title='.$match[$this->category_id_field]));
 				}
@@ -559,7 +560,7 @@ abstract class base_module extends module{
 			$redirect = $this->_config('admin_method');
 		elseif(!$redirect)
 			$return;
-		$this->parent->redirect('/'.($this->_admin_mode?'admin.php':'').'?call='.$this->module_name.'.'.$redirect,$redirect_params);
+		$this->parent->redirect('/'.($this->admin_mode?'admin.php':'').'?call='.$this->module_name.'.'.$redirect,$redirect_params);
 	}
 	
 	public function edit_category($id=NULL, $insert_place=NULL){

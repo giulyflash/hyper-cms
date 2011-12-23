@@ -37,7 +37,7 @@ abstract class module{
 	public $_query;//object allow to do sql query easy
 	public $argument = array();//call args
 	protected $config_class_name = 'module_config';//if defined config will be created from this class
-	public $_admin_mode;
+	public $admin_mode;
 	
 	public function __construct(&$parent=NULL){
 		$this->_set_call_time();
@@ -71,7 +71,8 @@ abstract class module{
 			$this->_table_name = $this->module_name;
 		if(!($this->_category_table_name = $this->_config('category_table')))
 			$this->_category_table_name = $this->_table_name.'_category';
-		$this->_admin_mode = $this->parent->admin_mode;
+		$this->admin_mode = $this->parent->admin_mode;
+		$this->config->set('admin_mode',$this->admin_mode);
 	}
 	
 	private function _get_module_language($module){

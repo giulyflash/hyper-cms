@@ -17,7 +17,9 @@
 			<div class="nested_items {_module_name} {_method_name} {_config/category_type}">
 				<xsl:call-template name="nested_items_category_base"/>
 				<xsl:if test="/root/meta/admin_mode=1">
-					<xsl:call-template name="controls_add"/>
+					<p class="controls_add">
+						<xsl:call-template name="controls_add"/>
+					</p>
 				</xsl:if>
 			</div>
 		</xsl:otherwise>
@@ -77,37 +79,48 @@
 </xsl:template>
 
 <xsl:template name="base_title">
+	<xsl:param name="draft" select="../draft"/>
+	<xsl:param name="title" select="../title"/>
 	<xsl:variable name="bracket_l"><xsl:choose>
-		<xsl:when test="draft=1">(</xsl:when>
-		<xsl:when test="draft=2">[</xsl:when>
+		<xsl:when test="$draft=1">(</xsl:when>
+		<xsl:when test="$draft=2">[</xsl:when>
 	</xsl:choose></xsl:variable>
 	<xsl:variable name="bracket_r"><xsl:choose>
-		<xsl:when test="draft=1">)</xsl:when>
-		<xsl:when test="draft=2">]</xsl:when>
+		<xsl:when test="$draft=1">)</xsl:when>
+		<xsl:when test="$draft=2">]</xsl:when>
 	</xsl:choose></xsl:variable>
-	<span class="text"><xsl:value-of select="concat($bracket_l,title,$bracket_r)"/></span>
+	<span class="text"><xsl:value-of select="concat($bracket_l,$title,$bracket_r)"/></span>
+</xsl:template>
+
+<xsl:template match="_show[../_admin=1]" priority="0.2">
+	<xsl:param name="module_name"/>
+	<xsl:param name="method"/>
+	<xsl:variable name="admin_mode"><xsl:if test="/root/module/item[_module_name=$module_name]/_config/admin_mode=1">admin.php</xsl:if></xsl:variable>
+	<a class="_ajax" href="/{$admin_mode}?call={$module_name}.{$method}&amp;id={../id}" alt="{../title}" title="{../title}">
+		<span class="folder_icon"></span>
+		<xsl:call-template name="base_title"/>
+	</a>
 </xsl:template>
 
 <xsl:template match="_show" priority="0.1">
 	<a href="{../link}" alt="{../title}" title="{../title}">
-		<xsl:value-of select="../title"/>
+		<xsl:call-template name="base_title"/>
 	</a>
 </xsl:template>
 
 <xsl:template name="nested_items_category_core">
 	<xsl:variable name="module_name" select="_module_name"/>
-	<xsl:variable name="admin_mode"><xsl:if test="/root/meta/admin_mode=1">admin.php</xsl:if></xsl:variable>
 	<xsl:variable name="method" select="/root/module/item[_module_name=$module_name]/_method_name"/>
 	<xsl:for-each select="item">
 		<li>
 			<xsl:choose>
 				<xsl:when test="/root/module/item[_module_name=$module_name]/_config/simple_category_style=0">
 					<div class="item_cont">
-						<a class="_ajax" href="/{$admin_mode}?call={$module_name}.{$method}&amp;id={id}" alt="{title}" title="{title}">
-							<span class="folder_icon"></span>
-							<xsl:call-template name="base_title"/>
-						</a>
-						<xsl:if test="/root/meta/admin_mode=1">
+						<xsl:apply-templates select="_show[../_admin=1]">
+							<xsl:with-param name="module_name" select="$module_name"/>
+							<xsl:with-param name="method" select="$method"/>
+						</xsl:apply-templates>
+						<xsl:if test="/root/module/item[_module_name=$module_name]/_config/admin_mode=1">
 							<xsl:call-template name="controls_category">
 								<xsl:with-param name="module_name" select="$module_name"/>
 								<xsl:with-param name="edit_module_name" select="$module_name"/>
@@ -126,43 +139,20 @@
 	</xsl:for-each>
 	<xsl:if test="items">
 		<li class="items">
-			<!-- 
-			<xsl:for-each select="items/item">
-				<div class="item">
-					<xsl:variable name="path"><xsl:choose>
-						<xsl:when test="path"><xsl:value-of select="path"/></xsl:when>
-						<xsl:otherwise>/<xsl:value-of select="$admin_mode"/>?call=<xsl:value-of select="$module_name"/>.edit&amp;id=<xsl:value-of select="id"/></xsl:otherwise>
-					</xsl:choose></xsl:variable>
-					<a href="{$path}" alt="{title}" title="{title}">
-						<div>
-							<div>
-								<xsl:if test="not(thumb_path) or thumb_path=''">
-									<xsl:attribute name="class">default_thumb</xsl:attribute>
-								</xsl:if>
-								<xsl:variable name="thumb_path">
-									<xsl:choose>
-										<xsl:when test="thumb_path and thumb_path!=''"><xsl:value-of select="thumb_path"/></xsl:when>
-										<xsl:otherwise><xsl:value-of select="/root/module/item[_module_name=$module_name]/_config/default_thumb"/></xsl:otherwise>
-									</xsl:choose>
-								</xsl:variable>
-								<img src="{$thumb_path}" alt="{title}" title="{title}"/>
-							</div>
-						</div>
-						<xsl:call-template name="base_title"/>
-					</a>
-					<xsl:call-template name="controls_item">
-						<xsl:with-param name="module_name" select="$module_name"/>
-						<xsl:with-param name="edit_module_name" select="$module_name"/>
-					</xsl:call-template>
-				</div>
-			</xsl:for-each>
-			 -->
 			<xsl:apply-templates select="items/item"/>
 		</li>
 	</xsl:if>
 </xsl:template>
 
 <xsl:template match="items/item" priority="0.1" name="_default_item">
+	<div class="item">
+		<a href="{link}" alt="{title}" title="{title}">
+			<xsl:value-of select="title"/>
+		</a>
+	</div>
+</xsl:template>
+
+<xsl:template match="items/item[_admin=1]" priority="0.2">
 	<div class="item">
 		<xsl:variable name="link"><xsl:choose>
 			<xsl:when test="link"><xsl:value-of select="link"/></xsl:when>
@@ -184,7 +174,10 @@
 					<img src="{$thumb_path}" alt="{title}" title="{title}"/>
 				</div>
 			</div>
-			<xsl:call-template name="base_title"/>
+			<xsl:call-template name="base_title">
+				<xsl:with-param name="title" select="title"/>
+				<xsl:with-param name="draft" select="draft"/>
+			</xsl:call-template>
 		</a>
 		<xsl:if test="/root/meta/admin_mode=1">
 			<xsl:call-template name="controls_item">
