@@ -17,7 +17,7 @@ class article extends base_module{
 	}
 	
 	/*public function get_category($id=false, $show='auto'){
-		parent::_get_category('translit_title',$id,true,'auto',NULL,array('draft',0));
+		$this->get_category('translit_title',$id,true,'auto',NULL,array('draft',0));
 	}*/
 	
 	public function save($id=NULL, $title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $category_id=NULL, $create_date=array()){
@@ -33,7 +33,7 @@ class article extends base_module{
 			'category_id'=>$category_id?$category_id:NULL,
 			'create_date'=>($user_date = $this->get_date($create_date))?$user_date:$date->format('Y-m-d H:i:s'),
 		);
-		parent::_save($id, $value);
+		$this->save($id, $value);
 	}
 
 	private function get_date($date){
@@ -82,7 +82,7 @@ class article extends base_module{
 	
 	//category
 	public function save_category($id=NULL,$title=NULL,$article_redirect=NULL,$insert_place=NULL,$draft=0){
-		parent::_save_category($id,array('title'=>$title,'article_redirect'=>($article_redirect?$article_redirect:NULL),'draft'=>$draft),$insert_place);
+		$this->save_category($id,array('title'=>$title,'article_redirect'=>($article_redirect?$article_redirect:NULL),'draft'=>$draft),$insert_place);
 	}
 	
 	public function edit_category($id=NULL, $insert_place=NULL){
