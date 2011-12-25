@@ -576,9 +576,9 @@ abstract class base_module extends module{
 		}
 	}
 	
-	public function save_category($id=NULL,$title=NULL,$insert_place=NULL,$draft=NULL){
+	public function save_category($id=NULL,$title=NULL,$insert_place=NULL,$draft=NULL,$new_id=NULL){
 		$this->_save_category($id,
-			array('title'=>$title,'translit_title'=>$translit_title,'draft'=>$draft),
+			array('title'=>$title,'draft'=>$draft,'id'=>$new_id),
 			$insert_place
 		);
 	}
@@ -596,9 +596,8 @@ abstract class base_module extends module{
 		}
 	}
 
-	public function _save_category($id=NULL,$value=array(),$insert_place=NULL,$condition = array(),$redirect = false){
+	public function _save_category($id=NULL,$value=array(),$insert_place=NULL,$condition = array(),$redirect = false,$redirect_params = array()){
 		$this->check_title($value,true);
-		$redirect_params = array();
 		if(isset($value['draft']))
 			$value['draft'] = (int)$value['draft'];
 		if(empty($value[$this->category_id_field]) || !$value[$this->category_id_field])

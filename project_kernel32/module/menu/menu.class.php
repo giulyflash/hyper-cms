@@ -64,7 +64,7 @@ class menu extends base_module{
 		//TODO drag-n-drop edit alias order of aliases
 	}
 
-	public function save_item($id=NULL,$title=NULL,$insert_place=NULL,$input_type=NULL,$link_text=NULL,$link=array(),$menu_id=NULL,$draft=0){
+	public function save_category($id=NULL,$title=NULL,$insert_place=NULL,$input_type=NULL,$link_text=NULL,$link=array(),$menu_id=NULL,$draft=0){
 		//var_dump($link);die;
 		if(!$menu_id && !($menu_id = $this->_query->select('menu_id')->from($this->_category_table_name)->where('id',$id)->query1('menu_id')))
 			throw new my_exception('menu_id not found');
@@ -110,7 +110,7 @@ class menu extends base_module{
 			'menu_id'=>$menu_id,
 			'draft'=>$draft
 		);
-		parent::_save_category($id,$value,$insert_place,array('menu_id',$menu_id),NULL);
+		$this->_save_category($id,$value,$insert_place,array('menu_id',$menu_id),NULL);
 		$this->parent->redirect('/admin.php?call=menu._admin&menu_id='.$menu_id);
 	}
 

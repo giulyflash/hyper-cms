@@ -4,7 +4,7 @@ class gallery extends base_module{
 
 	public function get_category($title = false){ 
 		//sleep(100500);
-		parent::_get_category('translit_title', $title, true, 'auto', NULL, array(array('module',$this->module_name), array('internal_type','image')));
+		$this->get_category('translit_title', $title, true, 'auto', NULL, array(array('module',$this->module_name), array('internal_type','image')));
 	}
 	
 	public function remove($id=NULL){
