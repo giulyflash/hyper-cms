@@ -57,14 +57,12 @@ $error = array(
 	'menu name must not be empty'=>'Имя пункта меню не должно быть пустым',
 	'menu list is empty'=>'Список меню пуст',
 	//
-	'category not found' => 'Пункт меню "$title" не найден',
 	'object not found' => 'Меню "$name" не найдено',
 	'object not found by id' => 'Меню не найдено по идентивикатору "$id"',
 	'edited successfully' => 'Редактирование меню "$name" прошло успешно',
 	'added successfully' => 'Меню "$name" успешно добавлено',
 	'deleted successfully' => 'Меню "$name" успешно удалено',
 	'id is empty' => 'Идентивикатор объекта пуст',
-	'category edited successfully' => 'Пункт меню "$title" успешно отредактирован',
 	'parent not found' => 'Родитель id="$id" не найден',
 	'new category add' => 'Новый пункт меню "$title" добавлен',
 	'insert_type not found' => 'Тип вставки пункта меню не найден',
@@ -73,9 +71,14 @@ $error = array(
 	'insert place not found' => 'Не найден пункт меню для вставки с id="$id"',
 	'may not to move category into itselve' => 'Нельзя переместить пункт меню внутрь самого себя',
 	'category moved successfully' => 'Пункт меню перемещен',
-	'category not found by id' => 'Пункт меню не найден по идентификатору id="$id"',
-	'category deleted successfully' => 'Пункт меню "$name" уcпешно удален',
-	'database unlocked' => 'База разблокирована',
+	
 	'menu item name must not be empty'=>'Имя пункта меню не должно быть пустым',
+	
+	'category id is empty' => 'Указано пустое имя категории',
+	'category not found' => 'Пункт меню  &#171;$id&#187; не найден',
+	'category edited successfully' => 'Пункт меню &#171;$title&#187; отредактирован',
+	'category added successfully' => 'Пункт меню  &#171;$title&#187; добавлен',
+	'category deleted successfully' => 'Пункт меню &#171;$title&#187; удален',
+	'category moved successfully' => 'Пункт меню &#171;$title&#187; перемещен',
 )
 ?>

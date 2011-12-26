@@ -6,7 +6,7 @@ Released for free under a Creative Commons Attribution 2.5 License
 
 .new_year{
 	position: absolute;
-	height: 170px;
+	height: 150px;
 	width: 868px;
 	background: url("/template/jkomfort/images/new_year.png") no-repeat right -5px;
 	z-index: 10;

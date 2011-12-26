@@ -29,7 +29,5 @@ function autoload($class_name){
 		echo 'index.php error: class "'.$class_name.' ('.$class_file.') " not found<br/>';
 }
 
-if(!isset($admin_mode))
-	$admin_mode = NULL;
-$app = new app($admin_mode);
+new app(isset($admin_mode)?$admin_mode:NULL);
 ?>

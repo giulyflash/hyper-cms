@@ -4,39 +4,22 @@
 
 <xsl:template match="root/module/item[_module_name='menu' and _method_name='get']">
 	<xsl:call-template name="nested_items_category"/>
-	<!--<div id="menu" class="menu {_argument/type}">
- 		<xsl:call-template name="menu_items"/>
-	</div> -->
 </xsl:template>
 
-<xsl:template match="root/module/item[_module_name='menu' and _method_name='edit']">
-	<div class="menu nested_tree">
-		<xsl:if test="_argument/id='' or id">
-			<form method="post" action="admin.php?call=menu.save&amp;id={id}">
-				Заголовок: <input value="{title}" type="text" name="title"/>
-				<input type = "submit" value="ок"/>
-				<xsl:if test = "id">
-					<a class="remove_menu" href="admin.php?call=menu.remove&amp;id={id}">Удалить меню</a>
-				</xsl:if>
-			</form>
-			<br/>
-		</xsl:if>
-	</div>
-	<xsl:if test="id">
-		<a href="admin.php?call=menu.edit_item&amp;menu_id={id}">Новый пункт меню</a>
-	</xsl:if>
+<xsl:template match="root/module/item[_module_name='menu' and _method_name='get_category']">
+	<xsl:choose>
+		<xsl:when test="_argument/menu_id!=''">
+			<xsl:call-template name="nested_items_category">
+				<xsl:with-param name="param">&amp;menu_id=<xsl:value-of select="_argument/menu_id"/></xsl:with-param>
+			</xsl:call-template>
+		</xsl:when>
+		<xsl:otherwise>
+			<xsl:call-template name="nested_items_category"/>
+		</xsl:otherwise>
+	</xsl:choose>
 </xsl:template>
 
-<xsl:template match="_show[../_admin=1 and ../_module_name='menu']">
-	<xsl:param name="method"/>
-	<xsl:variable name="admin_mode"><xsl:if test="/root/module/item[_module_name='menu']/_config/admin_mode=1">admin.php</xsl:if></xsl:variable>
-	<a class="_ajax" href="/{$admin_mode}?call=menu.{$method}&amp;id={../id}&amp;menu_id={/root/module/item[_module_name='menu']/_argument/menu_id}" alt="{../title}" title="{../title}">
-		<span class="folder_icon"></span>
-		<xsl:call-template name="base_title"/>
-	</a>
-</xsl:template>
-
-<xsl:template match="root/module/item[_module_name='menu' and _method_name='edit_item']">
+<xsl:template match="root/module/item[_module_name='menu' and _method_name='edit_category']">
 	<xsl:if test ="data"> 
 	 	<script type="text/javascript">
 			document.module_data=<xsl:value-of select="data" disable-output-escaping="yes"/>
@@ -45,7 +28,7 @@
 			</xsl:if>
 		</script>
 	</xsl:if>
-	<form class="menu menu_editor link_form" method="post" action="admin.php?call=menu.save_item">
+	<form class="menu menu_editor link_form" method="post" action="admin.php?call=menu.save_category">
 		<xsl:if test="id">
 			<input type="hidden" value="{id}" name="id"/>
 			<input type="hidden" value="{menu_id}" name="menu_id"/>
@@ -94,7 +77,16 @@
 <xsl:template match="root/module/item[_module_name='menu' and _method_name='_admin']">
 	<xsl:choose>
 		<xsl:when test="_argument/menu_id!=''">
-			<xsl:call-template name="nested_items_category"/>
+			<xsl:choose>
+				<xsl:when test="_argument/menu_id!=''">
+					<xsl:call-template name="nested_items_category">
+						<xsl:with-param name="param">&amp;menu_id=<xsl:value-of select="_argument/menu_id"/></xsl:with-param>
+					</xsl:call-template>
+				</xsl:when>
+				<xsl:otherwise>
+					<xsl:call-template name="nested_items_category"/>
+				</xsl:otherwise>
+			</xsl:choose>
 		</xsl:when>
 		<xsl:otherwise>
 			<xsl:if test="item">
@@ -119,92 +111,5 @@
 		</xsl:otherwise>
 	</xsl:choose>
 </xsl:template>
-
-<!-- <xsl:template name="menu_items">
-	<xsl:if test="item">
-		<ul>
-			<xsl:for-each select="item">
-				<li>
-					<xsl:if test="active=1">
-						<xsl:attribute name="class">active</xsl:attribute>
-					</xsl:if>
-					<a href="{link}">
-						<xsl:value-of select="title"/>
-					</a>
-					<xsl:call-template name="menu_items"/>
-				</li>
-			</xsl:for-each>
-		</ul>
-	</xsl:if>
-</xsl:template>
-
-<xsl:template name="menu_base">
-	<xsl:param name="need_ul">1</xsl:param>
-	<xsl:param name="module_name" select="_module_name"/>
-	<xsl:choose>
-		<xsl:when test="item or items">
-			<xsl:choose>
-				<xsl:when test="$need_ul=1">
-					<ul>
-						<xsl:call-template name="menu_core">
-							<xsl:with-param name="module_name" select="$module_name"/>
-						</xsl:call-template>
-					</ul>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:call-template name="menu_core">
-						<xsl:with-param name="module_name" select="$module_name"/>
-					</xsl:call-template>
-				</xsl:otherwise>
-			</xsl:choose>
-		</xsl:when>
-		<xsl:otherwise>
-			<xsl:if test="active=1 or _module_name">
-				<xsl:choose>
-					<xsl:when test="$need_ul=1">
-						<ul>
-							<xsl:call-template name="base_no_items"/>
-						</ul>
-					</xsl:when>
-					<xsl:otherwise>
-						<xsl:call-template name="base_no_items"/>
-					</xsl:otherwise>
-				</xsl:choose>
-			</xsl:if>
-		</xsl:otherwise>
-	</xsl:choose>
-</xsl:template>
-
-<xsl:template name="menu_core">
-	<xsl:param name="module_name" select="_module_name"/>
-	<xsl:variable name="admin_mode"><xsl:if test="/root/meta/admin_mode=1">admin.php</xsl:if></xsl:variable>
-	<xsl:variable name="method_name"><xsl:value-of select="/root/module/item[_module_name=$module_name]/_method_name"/></xsl:variable>
-	<xsl:variable name="menu_id"><xsl:value-of select="/root/module/item[_module_name=$module_name]/_argument/menu_id"/></xsl:variable>
-	<xsl:for-each select="item">
-		<li>
-			<xsl:if test="active=1">
-				<xsl:attribute name="class">active</xsl:attribute>
-			</xsl:if>
-			<div class="item_cont">
-				<a class="_ajax" href="/{$admin_mode}?call={$module_name}.{$method_name}&amp;menu_id={$menu_id}&amp;title={translit_title}" alt="{title}" title="{title}">
-					<span class="folder_icon"></span>
-					<span class="text"><xsl:value-of select="title"/></span>
-				</a>
-				<xsl:call-template name="controls_category">
-					<xsl:with-param name="module_name" select="$module_name"/>
-					<xsl:with-param name="edit_module_name" select="$module_name"/>
-					<xsl:with-param name="edit_category_method">edit_item</xsl:with-param>
-				</xsl:call-template>
-			</div>
-			<xsl:if test="item">
-				<ul>
-					<xsl:call-template name="menu_core">
-						<xsl:with-param name="module_name" select="$module_name"/>
-					</xsl:call-template>
-				</ul>
-			</xsl:if>
-		</li>
-	</xsl:for-each>
-</xsl:template> -->
 
 </xsl:stylesheet>

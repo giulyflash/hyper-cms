@@ -49,6 +49,7 @@ class module_link extends module{
 		}
 		else
 			throw new exception('module directory not found',_module_path);
+		//var_dump($obj_list); die();
 		return $obj_list;
 	}
 	

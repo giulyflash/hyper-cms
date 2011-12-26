@@ -39,12 +39,15 @@ abstract class module{
 	protected $config_class_name = 'module_config';//if defined config will be created from this class
 	public $admin_mode;
 	
-	public function __construct(&$parent=NULL){
+	public function __construct(&$parent = NULL){
 		$this->_set_call_time();
 		$this->module_name = get_class($this);//get_called_class();
 		if(!$parent)
 			throw new my_exception('app object not found',$this->module_name);
-		$this->parent = $parent;//TODO parent to _parent
+		$this->parent = &$parent;//TODO parent to _parent*/
+		//global $app;$this->parent = &$app;
+		if(!$this->parent)
+			throw new my_exception('app object not found',$this->module_name);
 		$config_class_name = $this->config_class_name;
 		if(isset($this->parent->compiled_config_cache[$this->module_name])){
 			$this->config = $this->parent->compiled_config_cache[$this->module_name];

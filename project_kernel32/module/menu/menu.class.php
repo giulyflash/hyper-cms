@@ -50,13 +50,14 @@ class menu extends base_module{
 		$this->parent->redirect('/admin.php?call='.$this->module_name.'.'.$this->_config('admin_method'));
 	}
 	
-	public function edit_item($id=NULL, $insert_place=NULL, $menu_id=NULL, $link=NULL){
+	public function edit_category($id=NULL, $insert_place=NULL, $menu_id=NULL, $link=NULL){
 		if(!$menu_id && !$menu_id = $this->_query->select('menu_id')->from($this->_category_table_name)->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
 		parent::edit_category($id);
 		$module_link = new module_link($this->parent);
-		$module_link->edit(isset($this->_result['link_id'])?$this->_result['link_id']:NULL, $id?NULL:$link);
+		$module_link->edit(isset($this->_result['link_id'])?$this->_result['link_id']:NULL, $link?NULL:$link);
 		$this->_result['data'] = $module_link->_result['data'];
+		//var_dump($this->_result['data']);
 		if(isset($module_link->_result['link']))
 			$this->_result['link_data'] = $module_link->_result['link'];
 		//TODO draft
@@ -110,15 +111,13 @@ class menu extends base_module{
 			'menu_id'=>$menu_id,
 			'draft'=>$draft
 		);
-		$this->_save_category($id,$value,$insert_place,array('menu_id',$menu_id),NULL);
-		$this->parent->redirect('/admin.php?call=menu._admin&menu_id='.$menu_id);
+		$this->_save_category($id,$value,$insert_place,array('menu_id',$menu_id),false,array('menu_id'=>$menu_id));
 	}
 
 	public function move_category($id=NULL, $insert_type=NULL, $insert_place=NULL){
 		if(!$menu_id = $this->_query->select('menu_id')->from($this->_category_table_name)->where('id',$id)->query1('menu_id'))
 			throw new my_exception('menu_id not found');
-		parent::move_category($id,$insert_type,$insert_place,array('menu_id',$menu_id),NULL);
-		$this->parent->redirect('/admin.php?call=menu._admin&menu_id='.$menu_id);
+		parent::move_category($id,$insert_type,$insert_place,array('menu_id',$menu_id),false,array('menu_id'=>$menu_id));
 	}
 
 	public function remove_category($id=NULL){
@@ -128,13 +127,12 @@ class menu extends base_module{
 			$module_link = new module_link($this->parent);
 			$module_link->remove($link_id,false);
 		}
-		parent::remove_category($id, array(), NULL);
-		$this->parent->redirect('/admin.php?call=menu._admin&menu_id='.$menu_id);
+		parent::remove_category($id, array(),false,array('menu_id'=>$menu_id));
 	}
 	
 	public function save($id, $title){
 		$value = array('title'=>$title, 'translit_title'=>translit::transliterate($title));
-		parent::save($id, $value, 'edit', true, array('name'=>$title));
+		parent::save($id, $value);
 	}
 	
 	public function check_alias($link){
@@ -234,11 +232,11 @@ class menu_config extends base_module_config{
 	);
 	
 	protected $include = array(
-		'edit_item'=>
+		'edit_category'=>
 			'<link href="/module/module_link/wizard.css" rel="stylesheet" type="text/css"/>
 			<script src="/module/module_link/wizard.js" type="text/javascript"></script>
 			<script src="/module/menu/admin.js" type="text/javascript"></script>',
-		'_admin,edit_item,edit_category'=>'<link href="/module/menu/admin.css" rel="stylesheet" type="text/css"/>',
+		'_admin,edit_category'=>'<link href="/module/menu/admin.css" rel="stylesheet" type="text/css"/>',
 		'get'=>
 			'<link href="/module/menu/menu.css" rel="stylesheet" type="text/css"/>',
 	);

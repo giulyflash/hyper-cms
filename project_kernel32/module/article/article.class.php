@@ -170,13 +170,13 @@ class article_config extends base_module_config{
 	protected $object = array(
 		'article'=>array(
 			'method'=>'get',
-			'param'=>'title',
+			'param'=>'id',
 			//'db_param'=>'translit_title',
 		),
 		'article_category'=>array(
 			'method'=>'get_category',
 			'type'=>'category',
-			'param'=>'title',
+			'param'=>'id',
 			//'db_param'=>'translit_title',
 		),
 	);
