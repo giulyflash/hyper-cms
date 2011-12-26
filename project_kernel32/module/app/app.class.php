@@ -116,6 +116,7 @@ class app extends module{
 	public $menu_module = NULL;
 	
 	public function __construct($admin_mode = NULL){
+		//$GLOBALS['app'] = &$this;
 		//set_error_handler("app::error_handler");
 		//set_exception_handler("app::exception_handler");
 		$this->check_session();

@@ -515,10 +515,9 @@ abstract class base_module extends module{
 		$this->_save($id,$value);
 	}
 	
-	public function _save($id=NULL, $value = array(), $redirect = 'edit', $params=array()){
+	public function _save($id=NULL, $value = array(), $redirect = 'edit', $redirect_params=array()){
 		$this->check_title($value);
-		if(!$params)
-			$params = array('title'=>$value['title']);
+		$params = array('title'=>$value['title']);
 		if($id){
 			$this->_query->update($this->_table_name)->set($value)->where($this->id_field,$id)->query1();
 			if($this->_need_message)
@@ -532,7 +531,8 @@ abstract class base_module extends module{
 			if($this->_need_message)
 				$this->_message('object added successfully',$params);
 		}
-		$this->redirect(array('id'=>$value[$this->category_id_field]),$redirect);
+		$redirect_params['id'] = $value[$this->category_id_field];
+		$this->redirect($redirect_params, $redirect);
 	}
 	
 	private function &get_order($category=NULL){
@@ -540,8 +540,7 @@ abstract class base_module extends module{
 		return $order;
 	}
 	
-	public function remove($id=NULL,$redirect=false,$param = array()){
-		$redirect_params = array();
+	public function remove($id=NULL,$redirect=false,$redirect_params = array()){
 		if($id){
 			$data = $this->_query->select('title,category_id')->from($this->_table_name)->where($this->id_field,$id)->query1();
 			$this->_query->delete()->from($this->_table_name)->where($this->id_field,$id)->query1();
@@ -643,7 +642,7 @@ abstract class base_module extends module{
 		$this->redirect($redirect_params,$redirect);
 	}
 
-	public function move_category($id=NULL, $insert_type=NULL, $insert_place=NULL, $condition = array(),$redirect = false){
+	public function move_category($id=NULL, $insert_type=NULL, $insert_place=NULL, $condition = array(),$redirect = false, $redirect_params = array()){
 		if(!$id)
 			throw new my_exception('can not move by empty id');
 		if(!$insert_type)
@@ -659,7 +658,6 @@ abstract class base_module extends module{
 		else{
 			$width = $target['right'] - $target['left'] + 1;
 			$this->_query->lock($this->_category_table_name)->execute();
-			$redirect_params = array();
 			if($insert_place=='last'){
 				$this->_query->select(NULL)->max('right','right')->from($this->_category_table_name);
 				$this->parse_condition($condition);
@@ -725,8 +723,7 @@ abstract class base_module extends module{
 		$this->redirect($redirect_params,$redirect);
 	}
 
-	public function remove_category($id=NULL,$condition = array(), $redirect = false){
-		$redirect_params = array();
+	public function remove_category($id=NULL,$condition = array(), $redirect = false, $redirect_params = array()){
 		if(!$id)
 			throw new my_exception('category id is empty');
 		$target = $this->_query->select('left,right,title')->from($this->_category_table_name)->where($this->category_id_field,$id)->query1();
@@ -761,9 +758,8 @@ abstract class base_module extends module{
 		$this->_message('database unlocked');
 	}
 	
-	public function move_item($id=NULL, $insert_after=NULL, $insert_category=NULL, $insert_item=NULL, $redirect=false){
+	public function move_item($id=NULL, $insert_after=NULL, $insert_category=NULL, $insert_item=NULL, $redirect=false, $redirect_params = array()){
 		//echo "id:'$id' insert_after:'$insert_after' insert_category:'$insert_category' insert_item:'$insert_item'";die;
-		$redirect_params = array();
 		if($id){
 			$match = $this->_query->select('id,category_id,title')->from($this->_table_name)->where($this->id_field,$id)->query1();
 			if(!$match)
