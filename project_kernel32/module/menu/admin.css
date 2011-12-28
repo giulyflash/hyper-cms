@@ -30,3 +30,7 @@
 .menu .method, .menu .params{
 	display: none;
 }
+
+.menu._admin a:hover{
+	text-decoration: underline;
+}

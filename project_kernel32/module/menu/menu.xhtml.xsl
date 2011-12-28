@@ -72,21 +72,26 @@
 	</form>
 </xsl:template>
 
-<!--  -->
-
-<xsl:template match="root/module/item[_module_name='menu' and _method_name='_admin']">
+<xsl:template match="root/module/item[_module_name='menu' and _method_name='_admin' or _method_name='edit']"><xsl:apply-imports/>
 	<xsl:choose>
-		<xsl:when test="_argument/menu_id!=''">
-			<xsl:choose>
-				<xsl:when test="_argument/menu_id!=''">
-					<xsl:call-template name="nested_items_category">
-						<xsl:with-param name="param">&amp;menu_id=<xsl:value-of select="_argument/menu_id"/></xsl:with-param>
-					</xsl:call-template>
-				</xsl:when>
-				<xsl:otherwise>
-					<xsl:call-template name="nested_items_category"/>
-				</xsl:otherwise>
-			</xsl:choose>
+		<xsl:when test="_argument/menu_id!='' or _method_name='edit'">
+			<form method="post" action="admin.php?call=menu.save">
+				<input type="hidden" value="{_argument/menu_id}" name="id"/>
+				Заголовок: <input type="text" value="{title}" name="title"/><input type="submit" value="сохранить"/>
+				<a href="/admin.php?call={_module_name}.remove&amp;id={_argument/menu_id}" class="remove_menu">удалить</a>
+			</form>
+			<xsl:if test="_argument/menu_id!=''">
+				<xsl:choose>
+					<xsl:when test="_argument/menu_id!=''">
+						<xsl:call-template name="nested_items_category">
+							<xsl:with-param name="param">&amp;menu_id=<xsl:value-of select="_argument/menu_id"/></xsl:with-param>
+						</xsl:call-template>
+					</xsl:when>
+					<xsl:otherwise>
+						<xsl:call-template name="nested_items_category"/>
+					</xsl:otherwise>
+				</xsl:choose>
+			</xsl:if>
 		</xsl:when>
 		<xsl:otherwise>
 			<xsl:if test="item">
