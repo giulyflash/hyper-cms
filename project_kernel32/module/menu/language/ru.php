@@ -59,8 +59,6 @@ $error = array(
 	//
 	'object not found' => 'Меню "$name" не найдено',
 	'object not found by id' => 'Меню не найдено по идентивикатору "$id"',
-	'edited successfully' => 'Редактирование меню "$name" прошло успешно',
-	'added successfully' => 'Меню "$name" успешно добавлено',
 	'deleted successfully' => 'Меню "$name" успешно удалено',
 	'id is empty' => 'Идентивикатор объекта пуст',
 	'parent not found' => 'Родитель id="$id" не найден',
@@ -80,5 +78,9 @@ $error = array(
 	'category added successfully' => 'Пункт меню  &#171;$title&#187; добавлен',
 	'category deleted successfully' => 'Пункт меню &#171;$title&#187; удален',
 	'category moved successfully' => 'Пункт меню &#171;$title&#187; перемещен',
+	
+	'object edited successfully' => 'Меню &#171;$title&#187; отредактировано',
+	'object added successfully' => 'Меню &#171;$title&#187; добавлено',
+	'object deleted successfully' => 'Меню &#171;$title&#187; удалено',
 )
 ?>

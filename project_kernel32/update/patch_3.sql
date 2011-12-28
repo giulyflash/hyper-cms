@@ -83,3 +83,6 @@ ALTER TABLE `menu_item` DROP `id`;
 ALTER TABLE `menu_item` CHANGE `translit_title` `id` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ;
 ALTER TABLE `menu_item` ADD PRIMARY KEY ( `id` );
 ALTER TABLE `menu_item` DROP INDEX `translit_title`;
+
+ALTER TABLE `menu` ADD `order` INT NOT NULL DEFAULT '0';
+UPDATE `menu` SET `order` = `id`;

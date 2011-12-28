@@ -7,4 +7,8 @@ $(function(){
 		$('.input_article').css('display','block');
 		$('.input_text').css('display','none');
 	});
+	$('.remove_menu').click(function(){
+		if(!confirm('Удалить это меню безвозвратно?'))
+			return false;
+	});
 });

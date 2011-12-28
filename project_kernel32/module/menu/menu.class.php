@@ -14,15 +14,20 @@ class menu extends base_module{
 			$this->_result = $this->_query->select()->from($this->module_name)->query();
 		}else{
 			$this->_get_category($this->category_id_field,$id,false,'all_sub',array('menu_id',$menu_id));
+			$this->_result['title']=$this->_query->select('title')->from($this->_table_name)->where($this->id_field,$menu_id)->query1('title');
 		}
 	}
 	
 	public function get($id = 1, $show_title=NULL, $type=NULL){
 		$this->_get_category('link', $link = ($_SESSION['call'][0]=='/'?false:$_SESSION['call'][0]), NULL, 'all', array('menu_id',$id));
 		if($show_title)
-			$this->_result['title'] = $this->_query->select('title')->from($this->module_name)->where('id',$id)->query1('title');
+			$this->_result['title'] = $this->_query->select('title')->from($this->module_name)->where($this->id_field,$id)->query1('title');
 		if($type)
 			$this->parent->include[] = '<link href="/module/menu/'.$type.'.css" rel="stylesheet" type="text/css"/>';
+	}
+	
+	public function get_category($id=false, $menu_id=NULL){
+		$this->_get_category($this->category_id_field, $id, true, 'auto');
 	}
 	
 	/*function build_menu(&$src, &$result_node, $parent_id=NULL){
@@ -35,14 +40,9 @@ class menu extends base_module{
 		}
 	}*/
 	
-	public function edit($id=NULL){
-		parent::edit($id);
-		if($id)
-			$this->_result = array_merge($this->_result,$this->_query->select()->from($this->_category_table_name)->where('menu_id',$id)->order('left')->query());
-	}
+	public function edit($id=NULL){}
 	
 	public function remove($id=NULL){
-		//parent::remove($id, NULL, array('name'=>$this->_query->select('title')->from($this->_table_name)->where('id',$id)->query1('title')));
 		$title = $this->_query->select('title')->from($this->_table_name)->where('id',$id)->query1('title');
 		$this->_query->delete()->from($this->_category_table_name)->where('menu_id',$id)->query();
 		$this->_query->delete()->from($this->_table_name)->where('id',$id)->query1();
@@ -131,8 +131,22 @@ class menu extends base_module{
 	}
 	
 	public function save($id, $title){
-		$value = array('title'=>$title, 'translit_title'=>translit::transliterate($title));
-		parent::save($id, $value);
+		if(!$title)
+			$this->_message('menu name must not be empty');
+		else{
+			$params = array('title'=>$title);
+			if($id){
+				$this->_query->update($this->_table_name)->set($params)->where($this->id_field,$id)->query1();
+				if($this->_need_message)
+					$this->_message('object edited successfully',$params);
+			}
+			else{
+				$this->_query->insert($this->_table_name)->values($params)->execute();
+				if($this->_need_message)
+					$this->_message('object added successfully',$params);
+			}
+		}
+		$this->redirect(array('menu_id'=>$id),'_admin');
 	}
 	
 	public function check_alias($link){
@@ -234,9 +248,9 @@ class menu_config extends base_module_config{
 	protected $include = array(
 		'edit_category'=>
 			'<link href="/module/module_link/wizard.css" rel="stylesheet" type="text/css"/>
-			<script src="/module/module_link/wizard.js" type="text/javascript"></script>
+			<script src="/module/module_link/wizard.js" type="text/javascript"></script>',
+		'_admin,edit_category'=>'<link href="/module/menu/admin.css" rel="stylesheet" type="text/css"/>
 			<script src="/module/menu/admin.js" type="text/javascript"></script>',
-		'_admin,edit_category'=>'<link href="/module/menu/admin.css" rel="stylesheet" type="text/css"/>',
 		'get'=>
 			'<link href="/module/menu/menu.css" rel="stylesheet" type="text/css"/>',
 	);

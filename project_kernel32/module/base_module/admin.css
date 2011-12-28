@@ -37,12 +37,16 @@
 	margin-left: 20px;
 }
 
-.nested_items .controls .remove, .nested_tree .remove_menu{
+.nested_items .controls .remove, .remove_menu{
 	color: #993333;
 }
 
-.nested_items .controls .remove:hover, .nested_tree .remove_menu:hover{
+.nested_items .controls .remove:hover, .remove_menu:hover{
 	color: red;
+}
+
+.remove_menu{
+	padding-left: 10px;
 }
 
 .nested_items .controls select{

@@ -63,7 +63,7 @@
 			</xsl:choose>
 		</xsl:when>
 		<xsl:otherwise>
-			<xsl:if test="(active=1 or _method_name) and (/root/module/item[_module_name=$module_name]/_config/simple_category_style=0)">
+			<xsl:if test="(active=1 or _method_name and /root/meta/content_type!='xsl') and (/root/module/item[_module_name=$module_name]/_config/simple_category_style=0)">
 				<xsl:choose>
 					<xsl:when test="$need_ul=1">
 						<ul class="ready_style">

@@ -554,7 +554,7 @@ abstract class base_module extends module{
 		$this->redirect($redirect_params,$redirect);
 	}
 	
-	private function redirect($redirect_params,$redirect=false){
+	protected function redirect($redirect_params,$redirect=false){
 		if($redirect === false)
 			$redirect = $this->_config('admin_method');
 		elseif(!$redirect)
