@@ -100,3 +100,14 @@
 p.controls_add{
 	text-indent: 0px;
 }
+
+.message_box {
+    color: #FF7A00;
+}
+
+.error_box {
+    color: #FF0000;
+}
+.message_box, .error_box{
+	padding: 10px 0;
+}

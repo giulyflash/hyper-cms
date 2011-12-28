@@ -1,6 +1,11 @@
 .breadcrumbs span{
 	padding: 0 3px 0 0;
-	font-size: 0.65em;
+	font-size: 65%;
+}
+
+.breadcrumbs span {
+    position: relative;
+    top: -1px;
 }
 
 .breadcrumbs a{

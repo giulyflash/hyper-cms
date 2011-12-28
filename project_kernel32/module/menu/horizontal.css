@@ -1,25 +1,25 @@
-.menu.horysontal{
-	height: 1em;
+.menu.horizontal{
+	min-height: 1em;
 }
-.menu.horysontal ul{
+.menu.horizontal ul{
 	padding:0;
 	margin: 0;
 	list-style: none;
 }
-.menu.horysontal>ul>li{
+.menu.horizontal>ul>li{
 	float: left;
 	padding: 0 10px;
 }
-.menu.horysontal>ul>li:FIRST-CHILD{
+.menu.horizontal>ul>li:FIRST-CHILD{
 	padding-left: 0px;
 }
-.menu.horysontal>ul>li:LAST-CHILD{
+.menu.horizontal>ul>li:LAST-CHILD{
 	padding-right: 0px;
 }
-.menu.horysontal ul ul{
+.menu.horizontal ul ul{
 	display: none;
 	position: absolute;
 }
-.menu.horysontal ul li:hover>ul{
+.menu.horizontal ul li:hover>ul{
 	display: block;
 }
