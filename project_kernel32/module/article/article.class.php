@@ -33,7 +33,7 @@ class article extends base_module{
 			'category_id'=>$category_id?$category_id:NULL,
 			'create_date'=>($user_date = $this->get_date($create_date))?$user_date:$date->format('Y-m-d H:i:s'),
 		);
-		$this->save($id, $value);
+		$this->_save($id, $value);
 	}
 
 	private function get_date($date){

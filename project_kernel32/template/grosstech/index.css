@@ -213,22 +213,8 @@ div.img_preload{
 	background: url("/template/grosstech/images/icon/small_button_on.png") no-repeat top left;
 }
 
-/*message*/
-
-.message_box {
-    color: #FF7A00;
-}
-
-.error_box {
-    color: #FF0000;
-}
-
 /*breadcrumbs*/
 
 .breadcrumbs{
 	padding-left: 30px;
-}
-.breadcrumbs span{
-	position: relative;
-	top:-1px;
 }

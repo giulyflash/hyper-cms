@@ -18,12 +18,14 @@ class menu extends base_module{
 		}
 	}
 	
-	public function get($id = 1, $show_title=NULL, $type=NULL){
+	public function get($id = 1, $show_title=NULL, $align=NULL){
 		$this->_get_category('link', $link = ($_SESSION['call'][0]=='/'?false:$_SESSION['call'][0]), NULL, 'all', array('menu_id',$id));
 		if($show_title)
 			$this->_result['title'] = $this->_query->select('title')->from($this->module_name)->where($this->id_field,$id)->query1('title');
-		if($type)
-			$this->parent->include[] = '<link href="/module/menu/'.$type.'.css" rel="stylesheet" type="text/css"/>';
+		if($align){
+			$this->parent->include[] = '<link href="/module/menu/'.$align.'.css" rel="stylesheet" type="text/css"/>';
+			$this->_result['_block_class'] = $align;
+		}
 	}
 	
 	public function get_category($id=false, $menu_id=NULL){

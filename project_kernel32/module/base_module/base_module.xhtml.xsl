@@ -16,7 +16,7 @@
 			</xsl:call-template>
 		</xsl:when>
 		<xsl:otherwise>
-			<div class="nested_items {_module_name} {_method_name} {_config/category_type}">
+			<div class="nested_items {_module_name} {_method_name} {_config/category_type} {_block_class}">
 				<xsl:call-template name="nested_items_category_base">
 					<xsl:with-param name="param" select="$param"/>
 				</xsl:call-template>

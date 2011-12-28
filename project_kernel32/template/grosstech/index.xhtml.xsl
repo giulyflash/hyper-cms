@@ -38,11 +38,9 @@
 							</xsl:call-template>
 						</div>
 					</div>
-					<div class="breadcrumbs">
-						<xsl:call-template name="_call">
-							<xsl:with-param name="position">breadcrumbs</xsl:with-param>
-						</xsl:call-template>
-					</div>
+					<xsl:call-template name="_call">
+						<xsl:with-param name="position">breadcrumbs</xsl:with-param>
+					</xsl:call-template>
 				</td>
 			</tr>
 			<tr class="content">
