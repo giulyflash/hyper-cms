@@ -60,6 +60,11 @@
 					<div>
 						<div>
 							<div>
+								<span class="metrika">
+									<xsl:variable name="onclick">try{Ya.Metrika.informer({i:this,id:11615119,type:0,lang:'ru'});return false}catch(e){}</xsl:variable>
+									<a href="http://metrika.yandex.ru/stat/?id=11157355&amp;from=informer" target="_blank" rel="nofollow"><img src="//bs.yandex.ru/informer/11157355/3_0_FFFFFFFF_EFEFEFFF_0_pageviews" style="width:88px; height:31px; border:0;" alt="Яндекс.Метрика" title="Яндекс.Метрика: данные за сегодня (просмотры, визиты и уникальные посетители)" onclick="{$onclick}"/></a>
+									<div style="display:none;"><script type="text/javascript">(function(w, c) { (w[c] = w[c] || []).push(function() { try { w.yaCounter11157355 = new Ya.Metrika({id:11157355, enableAll: true}); } catch(e) { } }); })(window, "yandex_metrika_callbacks");</script></div><script src="//mc.yandex.ru/metrika/watch.js" type="text/javascript" defer="defer"></script><noscript><div><img src="//mc.yandex.ru/watch/11157355" style="position:absolute; left:-9999px;" alt="" /></div></noscript><script type='text/javascript'>  var _gaq = _gaq || [];  _gaq.push(['_setAccount', 'UA-27520759-1']);  _gaq.push(['_trackPageview']);  (function() {    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);  })();</script>
+								</span>
 								<a target="_blank" class="kasperski" href="http://www.kaspersky.ru/" alt="http://www.kaspersky.ru/" title="http://www.kaspersky.ru/"></a>
 								<p>
 									&#169; 2011 <a href="http://grosstech.ru">Grosstech</a>, <a href="mailto:kulakov.serg@gmail.com">Кулаков Сергей</a>
@@ -71,7 +76,7 @@
 			</tr>
 		</tbody>
 	</table>
-	<script type="text/javascript">var _gaq = _gaq || []; _gaq.push(['_setAccount', 'UA-26570427-1']); _gaq.push(['_setDomainName', 'grosstech.ru']); _gaq.push(['_trackPageview']); (function() { var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true; ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'; var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s); })();</script>
+	<!-- <script type="text/javascript">var _gaq = _gaq || []; _gaq.push(['_setAccount', 'UA-26570427-1']); _gaq.push(['_setDomainName', 'grosstech.ru']); _gaq.push(['_trackPageview']); (function() { var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true; ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'; var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s); })();</script>-->
 </body>
 </html>
 </xsl:template>

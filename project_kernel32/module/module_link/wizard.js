@@ -159,12 +159,12 @@ $(function(){
 		if(object){
 			parent.find('.params').css('display','none');
 			if(document.module_data[module] && document.module_data[module]['_method'] && document.module_data[module]['param']){
-				$('.method input').val(document.module_data[module]['_method']);
+				parent.find('.method input').val(document.module_data[module]['_method']);
 				if(document.module_data[module]['method'][document.module_data[module]['_method']] && document.module_data[module]['method'][document.module_data[module]['_method']]['_module'])
 					data_module_name = document.module_data[module]['method'][document.module_data[module]['_method']]['_module'];
 				else
 					data_module_name = document.module_data[module]['module'];
-				$('.module input').val(data_module_name);
+				parent.find('.module input').val(data_module_name);
 			}
 			else{
 				alert('wrong data: '+module+'._method not found');

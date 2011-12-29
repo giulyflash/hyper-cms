@@ -68,7 +68,6 @@ class menu extends base_module{
 	}
 
 	public function save_category($id=NULL,$title=NULL,$insert_place=NULL,$input_type=NULL,$link_text=NULL,$link=array(),$menu_id=NULL,$draft=0){
-		//var_dump($link);die;
 		if(!$menu_id && !($menu_id = $this->_query->select('menu_id')->from($this->_category_table_name)->where('id',$id)->query1('menu_id')))
 			throw new my_exception('menu_id not found');
 		if(!$title){
@@ -89,14 +88,13 @@ class menu extends base_module{
 			}
 		}
 		$link_id = $id?($this->_query->select('link_id')->from($this->_category_table_name)->where('id',$id)->query1('link_id')):NULL;
-		if($input_type=='wizard'){
+		$link_text = '';
+		if($input_type=='wizard' && !empty($link[0]['module_name'])){
 			if($link){
 				$link = $link[0];
-				if(!$link['module'])
-					throw new my_exception('module name not found');
 				$module_link = new module_link($this->parent);
 				$link_id = $module_link->save($link_id,array(0=>$link),false,1);
-				$link_text = '/?call='.$link['module'].'.'.$link['method'];
+				$link_text = '/?call='.$link['module_name'].'.'.$link['method_name'];
 				if(isset($link['param']))
 					foreach($link['param'] as &$param)
 						$link_text.= '&'.$param['name'].'='.$param['value'];
@@ -113,6 +111,8 @@ class menu extends base_module{
 			'menu_id'=>$menu_id,
 			'draft'=>$draft
 		);
+		//$this->_save_category()
+		//public function _save_category($id=NULL,$value=array(),$insert_place=NULL,$condition = array(),$redirect = false,$redirect_params = array()){
 		$this->_save_category($id,$value,$insert_place,array('menu_id',$menu_id),false,array('menu_id'=>$menu_id));
 	}
 
@@ -231,7 +231,7 @@ class menu_config extends base_module_config{
 		'edit_item'=>array(
 			'insert_place'=>'_exclude',
 		),
-		'save_item'=>array(
+		'save_category'=>array(
 			'link'=>'_disable_filter',
 		),
 	);

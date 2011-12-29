@@ -82,7 +82,7 @@ class article extends base_module{
 	
 	//category
 	public function save_category($id=NULL,$title=NULL,$article_redirect=NULL,$insert_place=NULL,$draft=0){
-		$this->save_category($id,array('title'=>$title,'article_redirect'=>($article_redirect?$article_redirect:NULL),'draft'=>$draft),$insert_place);
+		$this->_save_category($id,array('title'=>$title,'article_redirect'=>($article_redirect?$article_redirect:NULL),'draft'=>$draft),$insert_place);
 	}
 	
 	public function edit_category($id=NULL, $insert_place=NULL){

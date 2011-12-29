@@ -218,3 +218,9 @@ div.img_preload{
 .breadcrumbs{
 	padding-left: 30px;
 }
+
+.metrika{
+	display: none;
+	float: right;
+	padding: 15px 0 0 5px;
+}
