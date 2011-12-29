@@ -6,7 +6,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-		<link href="/template/dekre/style/style.css" rel="stylesheet" type="text/css" />
+		<link href="/template/dekre/style.css" rel="stylesheet" type="text/css" />
 		<xsl:call-template name="_head"/>
 	</head>
 
@@ -15,11 +15,13 @@
 			<tbody>
 				<tr>
 					<td colspan="2">
-						<div id="logo-bg">
-							<div class="name">Декре</div>
-							<div class="tag">Услуги нотариусов</div>
-						</div>
-						<div id="headimage"></div>
+						<a href="/" title="На главную" alt="На главную">
+							<div id="logo-bg">
+								<div class="name">DeКре</div>
+								<div class="tag">Ведение бухгалтерии и налогового учета</div>
+							</div>
+							<div id="headimage"></div>
+						</a>
 					</td>
 				</tr>
 				<tr>
