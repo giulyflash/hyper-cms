@@ -487,8 +487,11 @@ class app extends module{
 						//TODO recursive merge
 						if(isset($include_src[$new_name])){
 							foreach($include_src[$name] as $param_name=>&$value)
-								if(isset($include_src[$new_name][$param_name]) && is_array($include_src[$new_name][$param_name]))
-									$include_src[$new_name][$param_name] = array_merge($include_src[$new_name][$param_name],$value);
+								if(isset($include_src[$new_name][$param_name])){
+									//FIXME wtf is this? Replace, or merge: that is the question...
+									if(is_array($include_src[$new_name][$param_name]))
+										$include_src[$new_name][$param_name] = array_merge($include_src[$new_name][$param_name],$value);
+								}
 								else
 									$include_src[$new_name][$param_name] = $value;
 						}
@@ -880,9 +883,8 @@ class app extends module{
 						$filter = $default_argument_filter;
 					if(!$filter)
 						$value = false;
-					elseif($filter!=$disable_php_filter){
+					elseif($filter!=$disable_php_filter)
 						$value = filter_var($value, $filter);
-					}
 				}
 			}
 			if($value===false){

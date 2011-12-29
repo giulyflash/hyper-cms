@@ -101,15 +101,16 @@ class module_link extends module{
 	}
 	
 	public function save($id=NULL,$link=NULL,$redirect=true,$menu=NULL,$position=NULL,$order=NULL,$draft=NULL){
-		if(isset($link[0]) && empty($link[0]['module']))
+		var_dump($link);
+		if(isset($link[0]) && empty($link[0]['module_name']))
 			throw new my_exception('module name not found');
-		$link_value = array('module_name'=>empty($link[0]['module'])?'*':$link[0]['module']);
-		if(!empty($link[0]['method']))
-			$link_value['method_name'] = $link[0]['method'];
+		$link_value = array('module_name'=>empty($link[0]['module_name'])?'*':$link[0]['module_name']);
+		if(!empty($link[0]['method_name']))
+			$link_value['method_name'] = $link[0]['method_name'];
 		if(!empty($link[1]['module']))
-			$link_value['center_module'] = $link[1]['module'];
+			$link_value['center_module'] = $link[1]['module_name'];
 		if(!empty($link[1]['module']))
-			$link_value['center_method'] = $link[1]['method'];
+			$link_value['center_method'] = $link[1]['method_name'];
 		$link_value['position'] = $position?$position:$this->parent->_config('main_position_name');
 		$link_value['order'] = $order?$order:1;
 		$link_value['exclude'] = $draft?1:0;

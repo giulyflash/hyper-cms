@@ -74,7 +74,7 @@
 			</xsl:if>
 		</script>
 	</xsl:if>
-	<form class="link_form" action="/admin.php?call=module_link.save" method="post">
+	<form class="link_form" action="/admin.php?call=module_link.save" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="id" value="{link_data/id}"/>
 		<input type="hidden" name="menu" value="{link_data/menu}"/>
 		<table class="link_controls">

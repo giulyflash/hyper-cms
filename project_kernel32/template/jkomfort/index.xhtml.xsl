@@ -11,9 +11,9 @@
 		<tbody>
 			<tr>
 				<td colspan="2">
-					<div class="new_year"></div>
-					<a href="/">
-						<div id="header" alt="На главную" title="На главную">
+					<a href="/" alt="На главную" title="На главную">
+						<div class="new_year"></div>
+						<div id="header">
 							<div id="logo1">
 								<xsl:variable name="domain" select="/root/meta/domain"/>
 									<xsl:variable name="img_prefix">/template/jkomfort/domain/<xsl:value-of select="$domain"/><xsl:if test="substring($domain,string-length($domain)-2,3)!='.ru'">.ru</xsl:if>_</xsl:variable>
