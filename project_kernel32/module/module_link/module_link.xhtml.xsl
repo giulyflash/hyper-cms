@@ -11,10 +11,15 @@
 	<xsl:if test="item">
 		<table class="module_link_list">
 			<thead>
-				<th>Позиция</th>
-				<th>Что связываем</th>
-				<th>С чем связываем</th>
-				<th>Удалить</th>
+				<xsl:variable name="link"><xsl:if test="_argument/link!=''">&amp;link=<xsl:value-of select="_argument/link"/></xsl:if></xsl:variable>
+				<xsl:variable name="admin"><xsl:if test="_config/admin_mode=1">admin.php</xsl:if></xsl:variable>
+				<xsl:variable name="sort_position"></xsl:variable>
+				<xsl:variable name="sort_obj"></xsl:variable>
+				<xsl:variable name="sort_target"></xsl:variable>
+				<th><a href="/{$admin}?call=module_link._admin{$link}">Позиция</a></th>
+				<th><a href="">Что связываем</a></th>
+				<th><a href="">С чем связываем</a></th>
+				<th><a href="">Удалить</a></th>
 			</thead>
 			<xsl:for-each select="item">
 				<xsl:variable name="href" select="concat('admin.php?call=module_link.edit&amp;id=',id)"/>

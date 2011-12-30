@@ -53,7 +53,7 @@ BODY{margin:0px;font-size:13px;font-family:arial;color:#3d3d3d; background-image
 .sap
 {width:1px; float:left; height:50px; font-family:tahoma; font-size:11px; line-height:50px; color:#ffffff;}
 #left-nav
-{width:220px; float:left;}
+{width:190px; float:left;}
 
   .leftlinks{
   width:150px;
@@ -87,8 +87,11 @@ padding-left: 5px;
 text-decoration:underline; font-weight:bold;
 }
 
-#news-bg
-{width:180px; padding-top:10px; text-align:justify; border-bottom:1px solid #D2D2D2; margin:0 auto 5px 15px}
+#news-bg {
+	text-align: justify;
+	border-bottom: 1px solid #D2D2D2;
+}
+
 .gap
 {height:0px; font-size:1px; clear:left;}
 .date
@@ -98,8 +101,19 @@ text-decoration:underline; font-weight:bold;
 
 #content
 {width:710px; float:left; border-right:1px dashed #990000; float:left;}
-.heading
-{ font-size:16px;font-weight:bold; color:#ff7700; padding-left:15px; height:35px; line-height:40px;}
+.heading {
+	font-size: 16px;
+	font-weight: bold;
+	color: #ff7700;
+	padding-left: 15px;
+	height: 35px;
+	line-height: 40px;
+}
+.article h1, .article h2, .article h3, .article h4, .article h5{
+	color: #FF7700;
+	margin-top: 0px;
+}
+
 #credit
 { text-align:center;width:500px; color:#CCCCCC; float:right; height:20px;}
 #main
@@ -169,4 +183,8 @@ table.outer>tbody>tr>td{
 }
 #bottom{
 	padding: 5px 15px;
+}
+
+#left-nav{
+	padding: 15px;
 }
