@@ -143,7 +143,7 @@ class module_link extends module{
 		return $id;
 	}
 	
-	public function _admin($link=NULL){
+	public function _admin($link=NULL,$order='id'){
 		$this->_query->select()->from('module_link')->where('inactive',0);
 		if($link){
 			$link_arr = json_decode($this->convert_link($link), true);
@@ -163,7 +163,7 @@ class module_link extends module{
 				$this->_query->injection(') = '.count($link_arr['param']).')');
 			}
 		}
-		$this->_result = $this->_query->order('position,order,id')->query2assoc_array('id',NULL,false);
+		$this->_result = $this->_query->order($order)->query2assoc_array('id',NULL,false);
 		if($this->_result){
 			$params = $this->_query->select()->from('module_link_param')->where('link_id',array_keys($this->_result),'in')->query();
 			foreach($params as &$param)
