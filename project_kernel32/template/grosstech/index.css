@@ -69,11 +69,10 @@ body, html {
 	float: left;
 	height: 60px;
 }
-.menu_cont .menu ul li:hover, .menu_cont .menu>ul>li.active{
+.menu_cont .menu>ul>li:hover, .menu_cont .menu>ul>li.active{
 	background: url("/template/grosstech/images/round/round_on_left.png") no-repeat 0px -11px;
 }
 .menu_cont .menu ul ul{
-	display: none;
 	position: absolute;
 	padding: 0;
 	margin: 0;
@@ -96,42 +95,43 @@ body, html {
 	position: relative;
 	right: -29px;
 }
-.menu_cont .menu ul li:hover a, .menu_cont .menu ul li.active a{
+.menu_cont .menu>ul>li:hover>a, .menu_cont .menu>ul>li.active>a{
 	background: url("/template/grosstech/images/round/round_on_right.png") no-repeat right -11px;
 }
 .menu_cont .menu ul ul li{
-	background: url("/template/grosstech/images/button2_center_left.png") repeat-y left;
 	padding: 0px;
 	height: auto;
 	margin: 0;
-}
-.menu_cont .menu ul ul li:hover{
-	background: url("/template/grosstech/images/button2_center_left.png") repeat-y left;
 }
 .menu_cont .menu ul ul a{
 	height: auto;
 	min-width: 170px;
 	color: #2669A8!important;
 	font-weight: normal;
-	background: url("/template/grosstech/images/button2_center_right.png") repeat-y right;
-	padding: 5px 20px 0;
 	right: 0px;
 	font-size: 1.1em;
-}
-.menu_cont .menu ul li:hover ul a{
-	background: url("/template/grosstech/images/button2_center_right.png") repeat-y right;
 }
 .menu_cont .menu ul ul a:hover, .menu_cont .menu ul ul li.active>a{
 	text-decoration: underline;
 }
-.menu_cont .menu ul ul li:FIRST-CHILD a{
+.menu_cont .menu ul ul li:FIRST-CHILD a span{
 	padding-top: 4px;
 }
-.menu_cont .menu ul ul li:LAST-CHILD{
-	background: url("/template/grosstech/images/button2_bottom_left.png") no-repeat bottom left;
+.menu_cont .menu ul ul li a{
+	background: url("/template/grosstech/images/button2_center_right.png") repeat-y right;
+	padding: 0 26px 0 0;
 }
-.menu_cont .menu ul ul li:LAST-CHILD a{
+.menu_cont .menu ul ul li a span{
+	display: block;
+	background: url("/template/grosstech/images/button2_center_left.png") repeat-y left;
+	padding: 0 0 5px 26px;
+	margin: 0px;
+}
+.menu_cont .menu ul ul li:last-child a{
 	background: url("/template/grosstech/images/button2_bottom_right.png") no-repeat bottom right;
+}
+.menu_cont .menu ul ul li:last-child a span{
+	background: url("/template/grosstech/images/button2_bottom_left.png") no-repeat bottom left;
 	padding-bottom: 22px;
 }
 div.img_preload{
