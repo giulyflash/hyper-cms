@@ -2,6 +2,7 @@
 class article extends base_module{
 	protected $config_class_name = 'article_config';
 	protected $preview_default_count = 200;
+	protected $show_module_path = false;
 	
 	private $more_tag = '<!--more-->';
 

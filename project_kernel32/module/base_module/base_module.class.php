@@ -98,6 +98,7 @@ abstract class base_module extends module{
 	public $category_id_field = 'id';
 	protected $item_draft = true;
 	protected $_need_message = true;
+	protected $show_module_path = true;
 	
 	public function __construct(&$parent=NULL){
 		parent::__construct($parent);
@@ -439,7 +440,10 @@ abstract class base_module extends module{
 	
 	protected function add_item_path(){
 		if($this->_config('need_path')){
-			$this->parent->add_module_path();
+			if($this->show_module_path)
+				$this->parent->add_module_path();
+			else
+				$this->parent->check_default_path();
 			if(!empty($this->_result['category_id'])){
 				$left = $this->_query->select('left')->from($this->_category_table_name)->where($this->category_id_field,$this->_result['category_id'])->query1('left');
 				if($left && (empty($this->_result['draft']) || $this->_result['draft']=='0') && $this->_config('has_category'))
@@ -452,7 +456,10 @@ abstract class base_module extends module{
 	
 	protected function add_category_path($left=NULL,$title=NULL,$path_from_result=true){
 		if($this->_config('need_path')){
-			$this->parent->add_module_path();
+			if($this->show_module_path)
+				$this->parent->add_module_path();
+			else
+				$this->parent->check_default_path();
 			if($left){
 				if($title){
 					$this->get_path($left);
