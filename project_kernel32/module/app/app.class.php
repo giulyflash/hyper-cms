@@ -1073,16 +1073,22 @@ class app extends module{
 	}
 	
 	public function get_module_path(){
-		if($this->center_module == $this->_config('default_module') && !$this->center_method){
-			if(!$this->admin_mode)
-				$this->_path = array();
-		}
-		else{
+		if(!$this->check_default_path()){
 			$module_name = $this->get_lang_title(NULL,false);
 			$admin_mode = $this->admin_mode?'admin.php':'';
 			if(isset($this->module[0]))
 				$this->add_path(array('href'=>'/'.$admin_mode.'?call='.$this->center_module.'.'.$this->module[0]->get_default_method(),'title'=>$module_name));
 		}
+	}
+	
+	public function check_default_path(){
+		if($this->center_module == $this->_config('default_module') && !$this->center_method){
+			if(!$this->admin_mode)
+			$this->_path = array();
+			return true;
+		}
+		else
+			return false;
 	}
 	
 	public function get_method_path($method=NULL){
