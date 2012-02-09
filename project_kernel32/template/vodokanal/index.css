@@ -1,0 +1,111 @@
+html, body{
+	height: 100%;
+	padding: 0;
+	margin: 0;
+}
+
+.wrapper{
+	border-collapse: collapse;
+	height: 100%;
+	width: 100%;
+	vertical-align: top;
+}
+
+.header{
+	height: 136px;
+}
+
+.header td div{
+	padding: 20px 30px;
+	background-color: #999999;
+	border-radius: 50px 10px;
+	background-image: -moz-linear-gradient(top, #F5F5F5, #AAAAAA);
+	margin: 70px 10px 10px;
+	box-shadow: 2px 5px 5px #555555;
+	height: 16px;
+}
+
+.crane{
+	background: url("/template/vodokanal/img/crane.png") no-repeat 30px;
+	height: 120px;
+	width: 100%;
+	position: absolute;
+	top: 5px;
+}
+
+.crane h1{
+	padding: 12px 0 0 140px;
+	margin: 0;
+	font-family: arial;
+	font-style: italic;
+	font-size: 2.2em;
+	width: 300px;
+	text-shadow: #7da0b5 3px 2px 2px;
+}
+
+.crane>a:FIRST-CHILD, .crane h1{
+	color: #13a6ff;
+	text-decoration: none;
+}
+
+.menu>ul{
+	padding: 24px 0 0 47px;
+	margin: 0;
+}
+.menu li{
+	float: left;
+	margin-left: 30px;
+	list-style: none;
+	height: 32px;
+	padding: 5px 0 0 32px;
+}
+
+.menu li a, .menu li a:visited{
+	color: #1285cc;
+	text-decoration: none;
+	font-size: 1.1em;
+}
+
+.menu li a:hover{
+	text-decoration: underline;
+}
+
+.menu li.i1{background: url("/template/vodokanal/img/icon_document.png") no-repeat top left;}
+.menu li.i2{background: url("/template/vodokanal/img/icon_crane.png") no-repeat top left;}
+.menu li.i3{background: url("/template/vodokanal/img/icon_nosign.png") no-repeat top left;}
+.menu li.i4{background: url("/template/vodokanal/img/icon_camera.png") no-repeat top left;}
+.menu li.i5{background: url("/template/vodokanal/img/icon_showel.png") no-repeat top left;}
+.menu li.i6{background: url("/template/vodokanal/img/icon_question.png") no-repeat top left;}
+.menu li.i7{background: url("/template/vodokanal/img/icon_phone.png") no-repeat top left;}
+
+.crane .search img{
+	padding-left: 20px;
+}
+
+.footer{
+	height: 40px;
+}
+
+.footer td div{
+	padding: 10px 30px 15px;
+	background-color: #999999;
+	border-radius: 10px 50px;
+	background-image: -moz-linear-gradient(top, #F1F1F1, #AAAAAA);
+	margin: 10px 10px 7px;
+	box-shadow: 2px 5px 5px #555555;
+	height: 1em;
+}
+
+.left{
+	width: 300px;
+	height: 100%;
+}
+
+.left div{
+	height: 100%;
+	border-right: 2px solid #999999;
+	border-radius: 0px 30px 30px 0;
+}
+
+.center{
+}
