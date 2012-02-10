@@ -250,6 +250,9 @@ table.wrap{
 	vertical-align: top;
 	padding: 0;
 }
+.wrap .article td{
+	padding: 5px;
+}
 .wrap > tbody > tr:FIRST-CHILD, .wrap > tr:FIRST-CHILD td{
 	height: 135px;
 }
@@ -545,6 +548,7 @@ div.timetable{
 
 .jilvopros{
 	float: right;
+	margin-right: 13px;
 }
 
 #footer{
@@ -555,10 +559,10 @@ div.timetable{
 .jilvopros a:first-child{
 	display: none;
 	position: absolute;
-	background: url("/template/jkomfort/images/jilishniy_vopros.jpg") #FFF;
+	background: url("/template/jkomfort/images/jilishniy_vopros.jpg") no-repeat top;
 	width: 300px;
-	height: 149px;
-	bottom: 30px;
+	height: 159px;
+	bottom: -100px;
 }
 
 .jilvopros:hover a:first-child{
