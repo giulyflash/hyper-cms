@@ -48,7 +48,6 @@
 			<tr>
 				<td id="footer" colspan="2">
 					<div>&#169; 2011 <a target="_blank" href="http://grosstech.ru">Гросcтех</a>.<!--  УК состоит в Некоммерческом Партнёрстве СРО «Жилищно-строительное объединение Мурмана» -->
-						&#160;&#160;<div class="jilvopros"><a target="_blank" href="http://gkh51.ru/"></a>Наш информационный партнер - <a target="_blank" href="http://gkh51.ru/">газета «Жилищный вопрос»</a></div>
 						<span class="metrika">
 							<xsl:choose>
 								<xsl:when test="/root/meta/domain='jkomfort.ru'">
@@ -88,6 +87,7 @@
 								</xsl:when>
 							</xsl:choose>
 						</span>
+						&#160;&#160;<div class="jilvopros"><a target="_blank" href="http://gkh51.ru/"></a>Наш информационный партнер - <a target="_blank" href="http://gkh51.ru/">газета «Жилищный вопрос»</a></div>
 					</div>
 				</td>
 			</tr>
