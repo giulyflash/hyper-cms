@@ -4,6 +4,11 @@ Published by Free CSS Templates <http://www.freecsstemplates.org/>
 Released for free under a Creative Commons Attribution 2.5 License
 */
 
+
+h1, h2{
+	font-family: Times New Roman;
+}
+
 .new_year{
 	position: absolute;
 	height: 150px;
@@ -534,4 +539,28 @@ div.timetable{
 
 .article .timetable table.time{
 	width: 243px;
+}
+
+/*jilvopros*/
+
+.jilvopros{
+	float: right;
+}
+
+#footer{
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+.jilvopros a:first-child{
+	display: none;
+	position: absolute;
+	background: url("/template/jkomfort/images/jilishniy_vopros.jpg") #FFF;
+	width: 300px;
+	height: 149px;
+	bottom: 30px;
+}
+
+.jilvopros:hover a:first-child{
+	display: block;
 }
