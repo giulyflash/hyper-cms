@@ -253,15 +253,14 @@ table.wrap{
 .wrap .article td{
 	padding: 5px;
 }
-.wrap > tbody > tr:FIRST-CHILD, .wrap > tr:FIRST-CHILD td{
+.header, .header>td{
 	height: 135px;
 }
 
 #page > td{
 	background: url(images/img06.jpg) no-repeat left bottom;
 }
-#page > td:last-child{
-	height: 100%;
+#page > td.sidebar{
 	background: url(images/img06.jpg) no-repeat right bottom;
 	width: 274px;
 }
@@ -555,6 +554,9 @@ div.timetable{
 	padding-left: 20px;
 	padding-right: 20px;
 }
+#footer>div{
+	clear: both;
+}
 
 .jilvopros a:first-child{
 	display: none;
@@ -562,9 +564,11 @@ div.timetable{
 	background: url("/template/jkomfort/images/jilishniy_vopros.jpg") no-repeat top;
 	width: 300px;
 	height: 159px;
-	bottom: -100px;
+	bottom: 30px;
 }
-
+ p.meta:last-child{
+ 	clear: both;
+ }
 .jilvopros:hover a:first-child{
 	display: block;
 }

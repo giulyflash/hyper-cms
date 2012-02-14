@@ -56,25 +56,26 @@
 	margin-right: 0px;
 }
 
-.nested_items.dropdown._admin .item_cont:hover>a>span.text,
-.nested_items.dropdown._admin .item:hover>a>span.text{
+.nested_items.dropdown.admin .item_cont:hover>a>span.text,
+.nested_items.dropdown.admin .item:hover>a>span.text{
 	text-decoration: underline;
 }
 
-.nested_items.dropdown._admin .items .item{
+.nested_items.dropdown.admin .items .item{
 	float: none;
 	min-height: 65px;
 	text-align: left;
+	display: block;
 }
 
-.nested_items.dropdown._admin .items .item>a>div{
+.nested_items.dropdown.admin .items .item>a>div{
 	min-width: 65px;
 	display: inline;
 	float: left;
 	margin-right: 7px;
 }
 
-.nested_items.dropdown._admin .items .item img{
+.nested_items.dropdown.admin .items .item img{
 	height: 60px;
 }
 
@@ -104,7 +105,7 @@
 	width: 100%;
 }
 
-.nested_items.gallery._admin li{
+.nested_items.gallery.admin li{
 	min-height: 2.2em;
 }
 
@@ -120,6 +121,6 @@ table.edit_item tr:last-child input{
 	padding: 7px 10px;
 }
 
-.nested_items._admin.dropdown select{
+.nested_items.admin.dropdown select{
 	width: 80px;
 }

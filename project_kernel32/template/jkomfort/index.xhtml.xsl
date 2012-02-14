@@ -4,15 +4,16 @@
 <xsl:template match="/">
 <html><head>
 	<link href="/template/jkomfort/default.css" rel="stylesheet" type="text/css"/>
+	<xsl:comment><![CDATA[[if lt IE 9]><link href="/template/jkomfort/ie7.css" rel="stylesheet" type="text/css"/><![endif]]]></xsl:comment>
 	<xsl:call-template name="_head"/>
 </head>
 <body>
 	<table class="wrap">
 		<tbody>
-			<tr>
+			<tr class="header">
 				<td colspan="2">
 					<a href="/" alt="На главную" title="На главную">
-						<div class="new_year"></div>
+						<!-- <div class="new_year"></div> -->
 						<div id="header">
 							<div id="logo1">
 								<xsl:variable name="domain" select="/root/meta/domain"/>
@@ -37,7 +38,7 @@
 						</div>
 					</div>
 				</td>
-				<td>
+				<td class="sidebar">
 					<div id="sidebar">
 						<xsl:call-template name="_call">
 							<xsl:with-param name="position">right</xsl:with-param>
@@ -45,7 +46,7 @@
 					</div>
 				</td>
 			</tr>
-			<tr>
+			<tr class="footer">
 				<td id="footer" colspan="2">
 					<div>&#169; 2011 <a target="_blank" href="http://grosstech.ru">Гросcтех</a>.<!--  УК состоит в Некоммерческом Партнёрстве СРО «Жилищно-строительное объединение Мурмана» -->
 						<span class="metrika">
