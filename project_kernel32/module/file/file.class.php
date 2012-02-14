@@ -147,7 +147,7 @@ class file extends module{
 		return $file;
 	}
 	
-	public function remove($id, $die=true, $delete_sql=true, $throw_error = true){
+	public function remove($id, $die=true, $delete_sql=true, $throw_error = false){
 		$path = $this->_query->select('path,thumb_path')->from('file')->where('id',$id)->query1();
 		if(!$path)
 			throw new my_exception('file not found','id='.$id);
