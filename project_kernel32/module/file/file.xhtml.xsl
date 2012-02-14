@@ -20,27 +20,29 @@
 	</script>
 	<div id="_background" tabindex="-1"></div>
 	<form id="_wysiwyg_form" method="post" onsubmit="return false;">
-		<div>
-			<p>
-				<span>Вставить в текстовый редактор:</span>
-			</p>
-			<p id="_href2wisiwig">
-				<input type="text"></input><button>Ссылка</button>
-			</p>
-			<p id="_pdf2wisiwig">
-				<input type="text"></input><button>PDF</button>
-			</p>
-			<p id="_img2wisiwig">
-				<button>Картинка</button>
-			</p>
-			<p id="_preview2wisiwig">
-				<button>Маленькая картинка</button>
-			</p>
-			<p id="_video2wisiwig">
-				<button>Видеоплеер</button>
-			</p>
-		</div>
-		<button class="cancel">Отмена</button>
+		<center>
+			<div>
+				<p>
+					<span>Вставить в текстовый редактор:</span>
+				</p>
+				<p id="_href2wisiwig">
+					<input type="text"></input><button>вставть ссылку</button>
+				</p>
+				<p id="_pdf2wisiwig">
+					<input type="text"></input><button>вставть PDF</button>
+				</p>
+				<p id="_img2wisiwig">
+					<button>вставть картинку</button>
+				</p>
+				<p id="_preview2wisiwig">
+					<button>вставть маленькуя картинку</button>
+				</p>
+				<p id="_video2wisiwig">
+					<button>Видеоплеер</button>
+				</p>
+			</div>
+			<button class="cancel">Отмена</button>
+		</center>
 	</form>
 	<div id="article_file_list">
 		<xsl:choose>
@@ -76,16 +78,16 @@
 	<xsl:if test="position()!=1">
 		<p class="delimiter"></p>
 	</xsl:if>
-	<xsl:if test="name">
+	<xsl:if test="title">
 		<h3>
-			<xsl:value-of select="concat(name,'.',extension)"/>
+			<xsl:value-of select="concat(title,'.',extension)"/>
 		</h3>
 	</xsl:if>
-	<xsl:if test="thumb_path" >
-		<img ondragend="javascript:file2wysiwyg_dialog('{path}','{thumb_path}','{internal_type}','{name}'); return false;" src="{thumb_path}" title="{path}" alt="{path}"/>
+	<xsl:if test="thumb_path">
+		<img ondragend="javascript:file2wysiwyg_dialog('{path}','{thumb_path}','{internal_type}','{title}'); return false;" src="{thumb_path}" title="{path}" alt="{path}"/>
 		<br/>
 	</xsl:if>
-	<a href="#" onclick="javascript:file2wysiwyg_dialog('{path}','{thumb_path}','{internal_type}','{name}'); return false;">В редактор</a>|
+	<a href="#" onclick="javascript:file2wysiwyg_dialog('{path}','{thumb_path}','{internal_type}','{title}'); return false;">В редактор</a>|
 	<a href="#" onclick="javascript:remove_file('{id}','file2wisiwig_{id}'); return false;">удалить</a>
 </div>
 </xsl:template>
