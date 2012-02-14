@@ -22,6 +22,8 @@ function category_add_event(obj){
 			txtOf: 'из'
 		});
 	obj.find('li>.item_cont>a').click(function(){
+		if(navigator.userAgent.indexOf('MSIE')!=-1)
+			return true;
 		var obj_a = $(this);
 		if(obj_a.parent().parent()[0].tagName!='LI')
 			return false;

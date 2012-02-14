@@ -16,7 +16,8 @@
 			</xsl:call-template>
 		</xsl:when>
 		<xsl:otherwise>
-			<div class="nested_items {_module_name} {_method_name} {_config/category_type} {_block_class}">
+			<xsl:variable name="_admin"><xsl:if test="_config/admin_mode=1">admin</xsl:if></xsl:variable>
+			<div class="nested_items {_module_name} {_method_name} {_config/category_type} {_block_class} {$_admin}">
 				<xsl:call-template name="nested_items_category_base">
 					<xsl:with-param name="param" select="$param"/>
 				</xsl:call-template>
