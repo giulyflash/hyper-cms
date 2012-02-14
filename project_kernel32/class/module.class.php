@@ -19,6 +19,11 @@ class module_config extends config{
 	protected $parent_module = array();//if true language file will be merged from each parent
 	protected $callable_method = array();//list of callable from HTTP-request with filter vars
 	
+	protected $_table_name = NULL;
+	protected $_category_table_name = NULL;
+	protected $_fied = '*';
+	protected $_admin_fied = '*';
+	
 	const role_read = 'read';
 	const role_write = 'write';
 	const role_delete = 'delete';
