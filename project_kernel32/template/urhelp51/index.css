@@ -1,0 +1,56 @@
+body{
+	padding: 0;
+	margin: 0;
+	background: url("/template/urhelp51/img/back_middle.png");
+	min-width: 1024px;
+}
+.bg_top{
+	background: url("/template/urhelp51/img/back_top.png") repeat-x top;
+}
+.wrapper_bg{
+	background: url("/template/urhelp51/img/bg_middle.png") repeat-y left;
+}
+.wrapper_bg, .header{
+	width: 1004px;
+	margin: 0 auto;
+}
+.wrapper_bg_bottom{
+	background: url("/template/urhelp51/img/bg_bottom1.png") no-repeat bottom left;
+}
+.wrapper{
+	background: url("/template/urhelp51/img/bg_top1.png") no-repeat top left;
+}
+.left_column{
+	float: left;
+	width: 502px;
+}
+.right_column{
+	margin-left: 502px;
+}
+.left_column, .right_column{
+	min-height: 700px;
+}
+
+.header{
+	height: 90px;
+}
+.header .menu_cont{
+	width: 145px;
+	float: right;
+}
+
+.header .menu_cont div{
+	width: 145px;
+}
+
+.menu_bg_top{
+	background: url("/template/urhelp51/img/label_top.png") no-repeat top left;
+	height: 120px;
+}
+.menu_bg_bottom{
+	background: url("/template/urhelp51/img/label_bottom.png") no-repeat top left;
+	height: 68px;
+}
+.menu{
+	background: url("/template/urhelp51/img/label_center.png") repeat-y left;
+}

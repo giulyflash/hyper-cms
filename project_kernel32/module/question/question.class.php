@@ -1,5 +1,5 @@
 <?php
-class question extends module{
+class question extends base_module{
 	protected $config_class_name = 'question_config';
 	protected $_field = 'id,text';
 	protected $_field_admin = '*';
@@ -10,73 +10,6 @@ class question extends module{
 	protected $_need_path = true;
 	protected $_page_count = 10;
 	protected $_message = true;
-	
-	/*data operations service*/
-	
-	public function _message($name=NULL, $params=array()){
-		if($this->_message)
-			parent::_message($name, $params);
-	}
-	
-	public function check_title(&$value,$category=false){
-		if(empty($value['title'])){
-			$this->_message('title must not be empty');
-			if(!isset($_SESSION['_user_input']))
-				$_SESSION['_user_input'] = array();
-			$_SESSION['_user_input'][$this->module_name] = $value;
-			$redirect_params = array();
-			if(!empty($value['id']))
-				$redirect_params['id'] = $value['id'];
-			$this->redirect($redirect_params, 'edit'.$category?'_category':'');
-		}
-	}
-	
-	private function get_unique_title(&$value=array(), $id=NULL, $category = false){
-		if(!empty($value['id'])){
-			if($id!=$value['id'])
-				$value['id'] = $this->check_unique_title($value['id'], $category);
-		}
-		else{
-			if(!$id){
-				if(!empty($value['title']))
-					$value['id'] = $this->check_unique_title(translit::transliterate($value['title']), $category);
-				else
-					$value['id'] = $this->check_unique_title(NULL, $category);
-			}
-		}
-		//TODO database trigger
-	}
-	
-	private function check_unique_title($value = NULL, $category = false){
-		if(!$value)
-		$value = 1;
-		if($count = $this->_query->injection('SELECT count(*) as c')->
-		from($category?$this->_category_table_name:$this->_table_name)->
-		where($category?$this->category_id_field:$this->_id_field,$value.'%','like')->
-		query1('c',false)
-		)
-		$value.=$count;
-		return $value;
-	}
-	
-	protected function redirect($redirect_params,$redirect=false){
-		if($redirect === false)
-		$redirect = $this->_config('admin_method');
-		elseif(!$redirect)
-		$return;
-		$this->parent->redirect('/'.($this->admin_mode?'admin.php':'').'?call='.$this->module_name.'.'.$redirect,$redirect_params);
-	}
-	
-	protected function add_item_path(){
-		if($this->_need_path){
-			if($this->_show_module_path)
-				$this->parent->add_module_path();
-			else
-				$this->parent->check_default_path();
-			if(!empty($this->_result['title']))
-				$this->parent->add_path($this->_result['title']);
-		}
-	}
 	
 	/*data operations*/
 	

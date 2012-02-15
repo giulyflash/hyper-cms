@@ -96,15 +96,28 @@ abstract class base_module extends module{
 	protected $config_class_name = 'base_module_config';
 	public $id_field = 'id';
 	public $category_id_field = 'id';
-	protected $item_draft = true;
+	//protected $_draft = true;
 	protected $_need_message = true;
-	protected $show_module_path = true;
+	protected $_show_module_path = true;
+	
+	protected $_field = '*';
+	protected $_field_admin = '*';
+	//protected $_id_type = 'int';//TODO id type
+	protected $_draft = true;
+	protected $_need_path = true;
+	protected $_page_count = 10;
+	protected $_message = true;
 	
 	public function __construct(&$parent=NULL){
 		parent::__construct($parent);
 		if($this->admin_mode)
 			$this->config->set('simple_category_style',0);
 		$this->_inherit_language('base_module');
+	}
+	
+	public function _message($name=NULL, $params=array()){
+		if($this->_message)
+			parent::_message($name, $params);
 	}
 	
 	public function _get_param_values(){
@@ -181,7 +194,7 @@ abstract class base_module extends module{
 		$where = false;
 		if($value!==false && $bound){
 			$this->get_category_sql_active($bound);
-			if(!$this->admin_mode){
+			if(!$this->admin_mode && $this->_draft){
 				$this->_query->where('draft',0);
 				$where = true;
 			}
@@ -199,7 +212,7 @@ abstract class base_module extends module{
 	private function get_category_sql_default($category_condition=NULL, $query = NULL){
 		$where = false;
 		$this->_query->from($this->_category_table_name);
-		if(!$this->admin_mode){
+		if(!$this->admin_mode && $this->_draft){
 			$this->_query->where('draft',0);
 			$where = true;
 		}
@@ -226,7 +239,7 @@ abstract class base_module extends module{
 		$where = false;
 		if($value!==false && $bound){
 			$this->get_category_sql_active($bound);
-			if(!$this->admin_mode){
+			if(!$this->admin_mode && $this->_draft){
 				$this->_query->where('draft',0);
 				$where = true;
 			}
@@ -291,7 +304,7 @@ abstract class base_module extends module{
 	public function get_category_items($show,$item_condition,$value,$bound){
 		if($this->_config('has_item')){
 			$item_field = $this->_config('item_field');
-			if($this->admin_mode && $this->item_draft)
+			if($this->admin_mode && $this->_draft)
 				$item_field.= ',draft';
 			//',"'.$this->module_name.'" as _module_name, "'.$this->admin_mode.'" as _admin,
 			$this->_query->select($item_field)->injection(',"'.$this->module_name.'" as _module_name, "'.$this->admin_mode.'" as _admin')->from($this->_table_name);//temp hack for xsl-tree builder
@@ -340,7 +353,9 @@ abstract class base_module extends module{
 	}
 	
 	public function category_list($category_condition=NULL){
-		$this->_query->select('left,title,depth,'.$this->category_id_field)->from($this->_category_table_name)->where('draft',1,'!=');
+		$this->_query->select('left,title,depth,'.$this->category_id_field)->from($this->_category_table_name);
+		if($this->_draft)
+			$this->_query->where('draft',1,'!=');
 		$this->parse_condition($category_condition,true);
 		$this->_result['_category_list'] = $this->_query->order('left')->query();
 	}
@@ -423,7 +438,7 @@ abstract class base_module extends module{
 			$this->_query->where($field,$value);
 			$where = true;
 		}
-		if(!$this->admin_mode){
+		if(!$this->admin_mode && $this->_draft){
 			if($where)
 				$this->_query->_and('draft','1','!=');
 			else
@@ -440,7 +455,7 @@ abstract class base_module extends module{
 	
 	protected function add_item_path(){
 		if($this->_config('need_path')){
-			if($this->show_module_path)
+			if($this->_show_module_path)
 				$this->parent->add_module_path();
 			else
 				$this->parent->check_default_path();
@@ -456,7 +471,7 @@ abstract class base_module extends module{
 	
 	protected function add_category_path($left=NULL,$title=NULL,$path_from_result=true){
 		if($this->_config('need_path')){
-			if($this->show_module_path)
+			if($this->_show_module_path)
 				$this->parent->add_module_path();
 			else
 				$this->parent->check_default_path();
