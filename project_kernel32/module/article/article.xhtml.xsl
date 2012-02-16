@@ -94,12 +94,12 @@
 						</td>
 						<td>
 							<xsl:variable name="category_id"><xsl:choose>
-								<xsl:when test="id"><xsl:value-of select="category_id"/></xsl:when>
-								<xsl:otherwise><xsl:value-of select="_argument/category_id"/></xsl:otherwise>
+								<xsl:when test="category_id!=''"><xsl:value-of select="category_id"/></xsl:when>
+								<xsl:otherwise><xsl:value-of select="_argument/insert_place"/></xsl:otherwise>
 							</xsl:choose></xsl:variable>
-							<select name="category_id" autocomplete='off'>
+							<select name="insert_place" autocomplete='off'>
 								<xsl:call-template name="_get_category_list">
-									<xsl:with-param name="id" select="$category_id"/>
+									<xsl:with-param name="category_id" select="$category_id"/>
 								</xsl:call-template>
 							</select>
 						</td>
