@@ -80,7 +80,15 @@
 		</script>
 	</xsl:if>
 	<form class="link_form" action="/admin.php?call=module_link.save" method="post" enctype="multipart/form-data">
-		<input type="hidden" name="id" value="{link_data/id}"/>
+		<xsl:variable name="id"><xsl:choose>
+			<xsl:when test="link_data/id">
+				<xsl:value-of select="link_data/id"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="_argument/id"/>
+			</xsl:otherwise>
+		</xsl:choose></xsl:variable>
+		<input type="hidden" name="id" value="{$id}"/>
 		<input type="hidden" name="menu" value="{link_data/menu}"/>
 		<table class="link_controls">
 			<tr>

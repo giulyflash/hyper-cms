@@ -21,7 +21,7 @@ class article extends base_module{
 		$this->get_category('translit_title',$id,true,'auto',NULL,array('draft',0));
 	}*/
 	
-	public function save($id=NULL, $title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $category_id=NULL, $create_date=array()){
+	public function save($id=NULL, $title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $insert_place=NULL, $create_date=array()){
 		$date = new DateTime();
 		$value = array(
 			'id'=>$id,
@@ -31,7 +31,7 @@ class article extends base_module{
 			'keyword'=>$keyword,
 			'description'=>$description,
 			'draft'=>($draft)?$draft:0,
-			'category_id'=>$category_id?$category_id:NULL,
+			'category_id'=>$insert_place?$insert_place:NULL,
 			'create_date'=>($user_date = $this->get_date($create_date))?$user_date:$date->format('Y-m-d H:i:s'),
 		);
 		$this->_save($id, $value);

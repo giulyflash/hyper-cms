@@ -296,7 +296,7 @@
 		</select>
 		<xsl:for-each select="..">
 			<xsl:apply-templates select="_module_name">
-				<xsl:with-param name="param" select="$param"/>
+				<xsl:with-param name="param" select="concat($param,'&amp;insert_place=',id)"/>
 			</xsl:apply-templates>
 		</xsl:for-each>
 		<input type="hidden" value="{../id}" name="id"/>

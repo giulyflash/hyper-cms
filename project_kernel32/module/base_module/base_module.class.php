@@ -514,7 +514,7 @@ abstract class base_module extends module{
 		}
 	}
 	
-	public function edit($id=NULL, $category_id=NULL, $select='*'){
+	public function edit($id=NULL, $insert_place=NULL, $select='*'){
 		if(!empty($_SESSION['_user_input'][$this->module_name])){
 			//_user_input - save user input values when error
 			$this->_result = $_SESSION['_user_input'][$this->module_name];

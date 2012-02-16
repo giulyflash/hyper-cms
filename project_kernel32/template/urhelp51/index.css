@@ -22,10 +22,14 @@ body{
 }
 .left_column{
 	float: left;
-	width: 502px;
+	width: 440px;
 }
 .right_column{
 	margin-left: 502px;
+	padding: 20px 30px 30px 32px;
+}
+.left_column{
+	padding: 20px 32px 30px 30px;
 }
 .left_column, .right_column{
 	min-height: 700px;
@@ -53,4 +57,12 @@ body{
 }
 .menu{
 	background: url("/template/urhelp51/img/label_center.png") repeat-y left;
+}
+
+.menu.nested_items.dropdown ul{
+	padding: 0 45px 0 10px;
+}
+
+.left_column h1{
+	margin: 10px; 
 }
