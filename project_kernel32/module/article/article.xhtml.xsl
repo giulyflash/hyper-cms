@@ -161,7 +161,7 @@
 		</xsl:when>
 		<xsl:otherwise>
 			<div>
-				<a href="/?call=article.get&amp;title={translit_title}" alt="{title}" title="{title}">
+				<a href="/?call=article.get&amp;title={id}" alt="{title}" title="{title}">
 					<h4><xsl:value-of select="title"/></h4>
 				</a>
 				<xsl:if test="thumb_path">
@@ -170,7 +170,7 @@
 				<div class="text">
 					<xsl:value-of select="preview"/>
 					<xsl:if test="preview!='' and substring(string-length(preview)-1, 1, preview)!='.'">...</xsl:if>
-					<a href="/?call=article.get&amp;title={translit_title}" alt="{title}" title="{title}">
+					<a href="/?call=article.get&amp;id={id}" alt="{title}" title="{title}">
 						читать полностью &#8594;
 					</a>
 				</div>

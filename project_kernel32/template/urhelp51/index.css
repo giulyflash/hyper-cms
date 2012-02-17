@@ -3,7 +3,19 @@ body{
 	margin: 0;
 	background: url("/template/urhelp51/img/back_middle.png");
 	min-width: 1024px;
+	color: #827F7A;
 }
+
+a, a:visited{
+	color: #526876;
+}
+a:hover{
+	color: #333333;
+}
+h1,h2,h3,h4{
+	color: #50565D;
+}
+
 .bg_top{
 	background: url("/template/urhelp51/img/back_top.png") repeat-x top;
 }
@@ -20,25 +32,26 @@ body{
 .wrapper{
 	background: url("/template/urhelp51/img/bg_top1.png") no-repeat top left;
 }
-.left_column{
-	float: left;
-	width: 440px;
-}
 .right_column{
-	margin-left: 502px;
-	padding: 20px 30px 30px 32px;
+	padding: 20px 30px 30px 35px;
+	float: right;
 }
 .left_column{
-	padding: 20px 32px 30px 30px;
+	padding: 20px 32px 30px 35px;
 }
 .left_column, .right_column{
-	min-height: 700px;
+	min-height: 600px;
+	width: 437px;
 }
 
 .header{
 	height: 90px;
 }
 .header .menu_cont{
+	position: absolute;
+}
+
+.header .menu_cont0{
 	width: 145px;
 	float: right;
 }
@@ -63,6 +76,64 @@ body{
 	padding: 0 45px 0 10px;
 }
 
-.left_column h1{
-	margin: 10px; 
+h1{
+	margin: 10px;
+}
+
+/*content*/
+
+.article p{
+	text-indent: 2em;
+}
+
+.right_column .nested_items.dropdown ul.ready_style, .right_column .article .items{
+	padding: 0;
+}
+
+.right_column .nested_items.dropdown .items .item {
+    display: block;
+    min-height: 0;
+    min-width: 0;
+    padding: 3px 0 3px 10px ;
+    text-align: left;
+    background: url("/template/urhelp51/img/index21.gif") no-repeat 0px 10px;
+}
+
+.right_column .nested_items.dropdown li a{
+	text-decoration: underline;
+}
+
+.left_column>a{
+	text-decoration: none;
+}
+
+.right_column р1{
+	font-size: 140%;
+	font-family: Arial;
+}
+
+.left_column h1.top_heading{
+	background: url("/template/urhelp51/img/scales.png") no-repeat top left;
+	padding-left: 65px;
+}
+
+.left_column>h1{
+	font-size: 140%;
+}
+
+h1.top_heading{
+	height: 50px;
+	padding: 7px 0 0 17px;
+	font-family: Arial;
+	margin-bottom: 20px;
+	font-weight:lighter;
+	text-shadow: #99AAAA 3px 2px 2px;
+}
+.top_heading span{
+	font-weight:bold;
+	text-transform: uppercase;
+}
+.footer{
+	padding: 0 65px 35px;
+	font-size: 80%;
 }

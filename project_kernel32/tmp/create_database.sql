@@ -4,7 +4,7 @@ CREATE DATABASE `uk-mgk` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 GRANT DELETE, INSERT, LOCK TABLES, SELECT, UPDATE ON `uk-mgk` . * TO 'uk-mgk'@'localhost';
 GRANT ALL ON `uk-mgk`.* TO 'uk-mgk_admin'@'localhost';
 
-CREATE USER 'jkomfort'@'localhost' IDENTIFIED BY 'HimVX0CoWfs$WU7d4DGh';
+CREATE USER 'jkomfort'@'localhost' IDENTIFIED BY '***';
 CREATE DATABASE `jkomfort` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 GRANT ALTER, CREATE, DELETE, DROP, INSERT, LOCK TABLES, SELECT, UPDATE ON `jkomfort` . * TO 'jkomfort'@'localhost';
 
