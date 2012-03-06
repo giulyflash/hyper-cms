@@ -140,6 +140,7 @@ class app extends module{
 			if($this->_config('debug'))
 				$this->_debug['memory']['before'] = number_format(memory_get_usage(self::debug_memory_real_usage),0 ,',',' ');
 			$this->get_module_link();
+			//var_dump($this->call_list);
 			$this->get_db_config();
 			$this->config->set_vars($this->get_module_config());
 			$this->check_admin_mode();
