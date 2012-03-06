@@ -38,7 +38,8 @@ ALTER TABLE `article_category` DROP `language`;
 
 ALTER TABLE `menu_item` DROP `language`;
 
-ALTER TABLE `article` ADD `category_left` INT NOT NULL;
+ALTER TABLE `article` ADD `category_left` INT NULL;
+ALTER TABLE `article` ADD `category_right` INT NULL;
 
 UPDATE `article` SET `category_left` = (select `left` from article_category where id = category_id), `category_right` = (select `right` from article_category where id = category_id);
 ALTER TABLE `article` DROP `category_id`;
@@ -80,9 +81,8 @@ INSERT INTO temp_category (SELECT `left`,`right`,`depth` FROM `menu_item`);
 UPDATE `menu_item` SET `category_count` = (SELECT count(*) FROM `temp_category` WHERE `temp_category`.`left`>`menu_item`.`left` AND `temp_category`.`right`>`menu_item`.`right` AND `temp_category`.`depth`=`menu_item`.`depth`+1);
 
 ALTER TABLE `menu_item` DROP `id`;
-ALTER TABLE `menu_item` CHANGE `translit_title` `id` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL ;
+ALTER TABLE `menu_item` CHANGE `translit_title` `id` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL;
 ALTER TABLE `menu_item` ADD PRIMARY KEY ( `id` );
-ALTER TABLE `menu_item` DROP INDEX `translit_title`;
 
 ALTER TABLE `menu` ADD `order` INT NOT NULL DEFAULT '0';
 UPDATE `menu` SET `order` = `id`;

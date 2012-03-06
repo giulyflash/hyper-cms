@@ -35,7 +35,7 @@ class admin extends module{
 	
 	public function &get_module($exclude = array(), $adnin_method_only=false){
 		//TODO check access for $module->admin_method
-		$exclude = array_merge($exclude, array('admin','app','base_module'));
+		$exclude = array_merge($exclude, array('_admin','admin','app','base_module'));
 		$class_list = array();
 		$dir = _module_path;
 		if ($handle = opendir($dir)){
