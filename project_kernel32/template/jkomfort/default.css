@@ -161,56 +161,57 @@ img.right {
 
 /* Menu */
 
-#menu {
+.menu {
 	/*float: left;*/
 	padding: 0 0 10px 3px;
 	clear: both;
 	min-height: 2em;
 }
 
-#menu ul {
+.menu ul {
 	margin: 0;
 	padding: 0 20px 0 0;
 	list-style: none;
 	line-height: normal;
 }
 
-#menu ul ul{
+.menu ul ul{
 	padding: 6px;
 } 
 
-#menu li {
+.menu li {
 	display: block;
 	min-width: 110px;
 	float: left;
 	padding: 3px;
 }
 
-#menu a {
+.menu a {
 	padding: 0 18px 0 0;
 	text-decoration: underline;
 	font-size: 16px;
 	color: #405A67;
 }
-#menu li:hover a{
+.menu li:hover a{
 	padding-right: 10px;
 	font-weight: bold;
 	text-decoration: none;
 }
-#menu li:hover ul a{
+.menu li:hover ul a{
 	font-weight: normal;
 	text-decoration: none;
 }
-#menu li:hover ul{
+.menu li:hover>ul{
 	display: block;
 	position: absolute;
 	border: 1px solid #405A67;
 	border-radius: 10px;
-	-moz-border-radius: 10px;
 	background-color: white;
+	padding: 3px;
 }
-#menu li ul a{
+.menu li ul a{
 	font-weight: normal;
+	padding: 3px 5px;
 }
 
 .post.post1{
@@ -218,18 +219,18 @@ img.right {
 	min-height: 400px;
 }
 
-#menu ul ul{
+.menu ul ul{
 	display: none;
 }
-#menu ul ul li{
+.menu ul ul li{
 	border: 0px;
 	float: none;
 }
-#menu ul ul li:hover{
+.menu ul ul li:hover{
 	border: 0px!important;
 	margin: 0px!important;
 }
-#menu li:hover ul li:hover a:hover{
+.menu li:hover ul li:hover a:hover{
 	font-weight: normal!important;
 	text-decoration: underline;
 }
