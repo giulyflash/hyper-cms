@@ -133,6 +133,8 @@ class file extends module{
 			else
 				$file['path'] = $this->_config('file_path').$file['translit_title'].'_'.md5(rand(1,1000).date('Y-m-d H:i:s')).'.'.$file['extension'];
 		}
+		//$file['path'] = getcwd().'/'.$file['path'];
+		//TODO need 7 permission to write, wtf?
 		if(!move_uploaded_file($file['tmp_name'], $file['path']))
 			throw new my_exception('move file fail');
 		$date = new DateTime();
