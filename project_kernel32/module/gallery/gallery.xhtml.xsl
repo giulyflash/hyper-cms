@@ -62,4 +62,15 @@
 	</div>
 </xsl:template>
 
+<xsl:template match="items/item">
+	<div class="item">
+		<a href="{path}" alt="{title}" title="{title}">
+			<div class="border">
+				<img src="{thumb_path}"/>
+			</div>
+			<div><xsl:value-of select="title"/></div>
+		</a>
+	</div>
+</xsl:template>
+
 </xsl:stylesheet> 
