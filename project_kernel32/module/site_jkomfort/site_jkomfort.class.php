@@ -153,7 +153,7 @@ class site_jkomfort extends module{
 		$date = $date->format('Y-m-d H:i:s');
 		$value = array();
 		//$this->_query->echo_sql=1;
-		if($text=$this->_query->select('text')->from('article')->where('translit_title',$article_name)->query1('text')){
+		if($text=$this->_query->select('text')->from('article')->where('id',$article_name)->query1('text')){
 			$value['edit_date'] = $date;
 			if($replace){
 				if(preg_match($replace,$text))
@@ -163,7 +163,7 @@ class site_jkomfort extends module{
 			}
 			else
 				$value['text'] = $article_text;
-			$this->_query->update('article')->set($value)->where('translit_title',$article_name)->limit(1)->execute();
+			$this->_query->update('article')->set($value)->where('id',$article_name)->limit(1)->execute();
 		}
 		elseif($do_not_create_new){
 			$this->_message('Не найдена статья "'.$article_title.'"');
@@ -172,7 +172,7 @@ class site_jkomfort extends module{
 		else{
 			$value['text'] = $article_text;
 			$value['create_date'] = $date;
-			$value['translit_title'] = $article_name;
+			$value['id'] = $article_name;
 			$value['draft'] = 0;
 			$value['category_id'] = 1000;
 			$value['title'] = $article_title;

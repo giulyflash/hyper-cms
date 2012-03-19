@@ -4,7 +4,7 @@ class gallery extends base_module{
 
 	public function get_category($title = false){ 
 		//sleep(100500);
-		$this->get_category('translit_title', $title, true, 'auto', NULL, array(array('module',$this->module_name), array('internal_type','image')));
+		parent::_get_category(NULL, $title, true, 'auto', array(), array(array('module',$this->module_name), array('internal_type','image')));
 	}
 	
 	public function remove($id=NULL){
@@ -173,7 +173,7 @@ class gallery_config extends base_module_config{
 	public $default_show_title = true;
 	
 	protected $table_name = 'file';
-	protected $item_field = 'id,translit_title,path,thumb_path,thumb2_path,title,category_id';
+	protected $item_field = 'id,title,path,thumb_path,thumb2_path,title,category_id,link';
 	protected $default_method = 'get_category';
 }
 ?>
