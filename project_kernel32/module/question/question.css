@@ -1,0 +1,45 @@
+.question textarea{
+	width: 100%;
+}
+.question button{
+	float: right;
+}
+
+div input{
+	width: 100%;
+}
+
+.question table{
+	clear: both;
+	width: 100%;
+}
+.question table tr:first-child td:first-child{
+	width: 37px;
+}
+.question .tab{
+	padding-left: 2em;
+}
+.question .item{
+	border-bottom: 1px solid #DDDDDD;
+}
+.question .item:last-child{
+	border-bottom:none;
+}
+.question .item div{
+	font-style: italic;
+	font-size: 75%;
+}
+.question .item div span{
+	font-weight: bold;
+	padding-left: 20px;
+	font-size: 120%;
+}
+.question .item a{
+	text-align: right;
+	display: block;
+	text-decoration: none;
+}
+.question .item .remove{
+	color: red;
+	float: right;
+}
