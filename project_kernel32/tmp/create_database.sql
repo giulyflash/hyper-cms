@@ -25,3 +25,7 @@ GRANT ALTER, CREATE, DELETE, DROP, INSERT, LOCK TABLES, SELECT, UPDATE ON `jkomf
 
 CREATE DATABASE `jkomfort_komfortplus` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 GRANT ALTER, CREATE, DELETE, DROP, INSERT, LOCK TABLES, SELECT, UPDATE ON `jkomfort_komfortplus` . * TO 'jkomfort'@'localhost';
+
+CREATE DATABASE `jkomfort_upravdom51` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE USER 'upravdom51'@'localhost' IDENTIFIED BY 'e12b3bd894';
+GRANT ALTER, CREATE, DELETE, DROP, INSERT, LOCK TABLES, SELECT, UPDATE ON `jkomfort_upravdom51` . * TO 'upravdom51'@'localhost';

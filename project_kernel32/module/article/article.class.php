@@ -12,8 +12,6 @@ class article extends base_module{
 		$select = $this->_config('item_single_field');
 		if($show_title === false)
 			$show_title = $this->_config('default_show_title');
-		if($show_title)
-			$select.=',title';
 		$this->_get($this->id_field, $id, $select);
 	}
 	
@@ -133,7 +131,7 @@ class article extends base_module{
 						break;
 					}
 					case 'show_title':{
-						return array('true'=>'+','false'=>'-');
+						return array('1'=>'+','0'=>'-');
 						break;
 					}
 					default:
