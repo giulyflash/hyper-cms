@@ -127,7 +127,7 @@
 			<label for="article_draft">Черновик:</label>
 			<input type="submit" class="submit delete" value="Удалить" id="{id}"/>
 			<xsl:call-template name="draft_select"/>
-			<input type="hidden" value="{id}" name="id"/>
+			<input type="hidden" value="{id}" name="old_id"/>
 		</form>
 	</div>
 </xsl:template>

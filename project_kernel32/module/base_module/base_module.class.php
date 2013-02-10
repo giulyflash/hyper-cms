@@ -533,15 +533,15 @@ abstract class base_module extends module{
 		}
 	}
 	
-	public function save($id=NULL, $value = array()){
+	public function save($old_id=NULL, $value = array()){
 		$this->_save($id,$value);
 	}
 	
-	public function _save($id=NULL, $value = array(), $redirect = 'edit', $redirect_params=array()){
+	public function _save($old_id=NULL, $value = array(), $redirect = 'edit', $redirect_params=array()){
 		$this->check_title($value);
 		$params = array('title'=>$value['title']);
-		if($id){
-			$this->_query->update($this->_table_name)->set($value)->where($this->id_field,$id)->query1();
+		if($old_id){
+			$this->_query->update($this->_table_name)->set($value)->where($this->id_field,$old_id)->query1();
 			if($this->_need_message)
 				$this->_message('object edited successfully',$params);
 		}
