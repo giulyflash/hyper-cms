@@ -19,7 +19,7 @@ class article extends base_module{
 		$this->get_category('translit_title',$id,true,'auto',NULL,array('draft',0));
 	}*/
 	
-	public function save($id=NULL, $title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $insert_place=NULL, $create_date=array()){
+	public function save($old_id=NULL, $id=NULL, $title=NULL, $text=NULL, $keyword=NULL, $description=NULL, $draft=NULL, $insert_place=NULL, $create_date=array()){
 		$date = new DateTime();
 		$value = array(
 			'id'=>$id,
@@ -32,7 +32,7 @@ class article extends base_module{
 			'category_id'=>$insert_place?$insert_place:NULL,
 			'create_date'=>($user_date = $this->get_date($create_date))?$user_date:$date->format('Y-m-d H:i:s'),
 		);
-		$this->_save($id, $value);
+		$this->_save($old_id, $value);
 	}
 
 	private function get_date($date){

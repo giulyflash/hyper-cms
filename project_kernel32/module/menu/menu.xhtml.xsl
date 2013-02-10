@@ -6,7 +6,7 @@
 	<xsl:call-template name="nested_items_category"/>
 </xsl:template>
 
-<xsl:template match="root/module/item[_module_name='menu' and _method_name='get_category']">
+<xsl:template match="root/module/item[_module_name='menu' and _method_name='get_category']" priority="0.5">
 	<xsl:choose>
 		<xsl:when test="_argument/menu_id!=''">
 			<xsl:call-template name="nested_items_category">
@@ -72,7 +72,7 @@
 	</form>
 </xsl:template>
 
-<xsl:template match="root/module/item[_module_name='menu' and _method_name='_admin' or _method_name='edit']"><xsl:apply-imports/>
+<xsl:template match="root/module/item[_module_name='menu' and (_method_name='_admin' or _method_name='edit')]"><xsl:apply-imports/>
 	<xsl:choose>
 		<xsl:when test="_argument/menu_id!='' or _method_name='edit'">
 			<form method="post" action="admin.php?call=menu.save">

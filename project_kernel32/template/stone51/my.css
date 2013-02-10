@@ -1,0 +1,38 @@
+.main_header{
+    text-shadow: 3px 2px 2px #DDD;
+    font-size: 220%;
+    /*font-family: Arial;/*Britanic Bold*/
+    font-family: 'Open Sans', sans-serif;
+    line-height: 80%;
+    text-transform: uppercase;
+    font-stretch: condensed;
+    font-weight: bold;
+}
+.main_header .stone{
+    font-weight: normal;
+}
+.main_header .murmansk{
+    font-size: 70%;
+    color: #165B85;
+    font-style: italic;
+    text-transform: none;
+}
+#logo a{
+    text-decoration: none!important;
+}
+#menu .menu>li a{
+    text-transform: uppercase;
+    padding-top: 20px;
+}
+#menu .menu>li.cat_2 a {
+    padding-top: 15px;
+}
+.image2 img{
+    max-width: 200px;
+    border-radius: 4px;
+}
+.main-shining{
+    background-image: url('img/top-tail.gif');
+    background-repeat: repeat-x;
+    background-color: #53595D;
+}

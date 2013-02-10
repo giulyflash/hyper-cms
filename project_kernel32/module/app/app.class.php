@@ -145,6 +145,8 @@ class app extends module{
 			$this->config->set_vars($this->get_module_config());
 			$this->check_admin_mode();
 			$this->set_module_config_include($this);
+			if($c_location = $this->_config('under_construction'))
+				$this->redirect($c_location);
 			$call_count = count($this->call_list);
 			for($num=0; $num<$call_count; $num++)
 				$this->try_call($this->call_list[$num], $num);

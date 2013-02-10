@@ -88,7 +88,7 @@ class menu extends base_module{
 			}
 		}
 		$link_id = $id?($this->_query->select('link_id')->from($this->_category_table_name)->where('id',$id)->query1('link_id')):NULL;
-		$link_text = '';
+		//$link_text = '';
 		if($input_type=='wizard' && !empty($link[0]['module_name'])){
 			if($link){
 				$link = $link[0];
