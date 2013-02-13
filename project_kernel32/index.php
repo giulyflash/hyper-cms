@@ -11,7 +11,8 @@ define('_config_ext','.php');
 define('_language_path','language/');
 define('_language_ext','.php');
 
-error_reporting(E_ALL);
+date_default_timezone_set("Europe/Moscow"); //TODO remove this!!!
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
 ini_set('display_errors', 1);
 
 $output_index_error = true;

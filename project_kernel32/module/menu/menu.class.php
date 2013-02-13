@@ -42,7 +42,7 @@ class menu extends base_module{
 		}
 	}*/
 	
-	public function edit($id=NULL){}
+	public function edit($id=NULL, $insert_place=NULL, $select='*'){}
 	
 	public function remove($id=NULL){
 		$title = $this->_query->select('title')->from($this->_table_name)->where('id',$id)->query1('title');
@@ -132,7 +132,7 @@ class menu extends base_module{
 		parent::remove_category($id, array(),false,array('menu_id'=>$menu_id));
 	}
 	
-	public function save($id, $title){
+	public function save($id=NULL, $title){
 		if(!$title)
 			$this->_message('menu name must not be empty');
 		else{

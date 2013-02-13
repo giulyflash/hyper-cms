@@ -2,13 +2,13 @@
 class config{
 	protected $__parent__;
 	
-	public function __construct(&$array = null, &$parent = NULL){
+	public function __construct($array = null, $parent = NULL){
 		$this->__parent__ = $parent;
 		if($array)
 			$this->set_vars($array);
 	}
 	
-	public function set_parent(&$parent = NULL){
+	public function set_parent($parent = NULL){
 		$this->__parent__ = $parent;
 	}
 	
@@ -44,7 +44,7 @@ class config{
 		return get_object_vars($this);
 	}
 	
-	public function set_vars(&$array){
+	public function set_vars($array){
 		if($array){
 			foreach($array as $name=>$value)
 				$this->$name = $value;

@@ -2,9 +2,9 @@
 class gallery extends base_module{
 	protected $config_class_name = 'gallery_config';
 
-	public function get_category($title = false){ 
+	public function get_category($id = false){
 		//sleep(100500);
-		parent::_get_category(NULL, $title, true, 'auto', array(), array(array('module',$this->module_name), array('internal_type','image')));
+		parent::_get_category(NULL, $id, true, 'auto', array(), array(array('module',$this->module_name), array('internal_type','image')));
 	}
 	
 	public function remove($id=NULL){
