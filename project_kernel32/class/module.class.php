@@ -111,7 +111,7 @@ abstract class module{
 								}
 					}
 				}
-			app::check_array_comma($callable_method);
+            $this->parent->check_array_comma($callable_method);
 			$this->config->set('callable_method',$callable_method);
 		}
 	}
@@ -147,12 +147,12 @@ abstract class module{
 		}
 	}
 	
-	public function array_merge_recursive(&$ar1, &$ar2){
+	public function array_merge_recursive($ar1, $ar2){
 		//ugly method, but native array_merge_recursive create sub-array when names intersect
 		$result = $ar1;
 		foreach($ar2 as $name=>$value)
 			if(isset($ar1[$name]) && is_array($value))
-				$result[$name] = &self::array_merge_recursive($ar1[$name],$ar2[$name]);
+				$result[$name] = self::array_merge_recursive($ar1[$name],$ar2[$name]);
 			else
 				$result[$name]=$value;
 		return $result;

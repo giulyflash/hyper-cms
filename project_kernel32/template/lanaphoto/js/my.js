@@ -17,7 +17,13 @@ function h_loading(curr,cancel){
         curr.find('.wrapper').css({'background':'none'});
 }
 
-function h_put_content(curr,content){
+function h_put_article(curr,content){
+    h_loading(curr,true);
+    curr.find('.wrapper').html(content.text);
+    curr.find('.main h2').html(content.title);
+}
+
+function h_put_gallery(curr,content){
     h_loading(curr,true);
     curr.find('.wrapper').html(content.text);
     curr.find('.main h2').html(content.title);
@@ -28,7 +34,7 @@ function h_request(curr){
     if(h_cache[curr[0].id])
         h_put_content(curr,h_cache[curr[0].id])
     else{
-        var href = "http://lanaphoto/index.php?call=article.get&_content=json&id="+curr[0].id;
+        var href = window.location.origin+"/index.php?call=article.get&_content=json&id="+curr[0].id;
         var cur = curr;
         $.ajax({
             url: href,
@@ -39,7 +45,7 @@ function h_request(curr){
                 else{
                     console.log(html);
                     h_cache[curr[0].id] = html;
-                    h_put_content(cur,html);
+                    h_put_article(cur,html);
                 }
             }
         })

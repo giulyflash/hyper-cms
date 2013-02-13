@@ -7,7 +7,7 @@ class date_microtime extends DateTime{
 	private $count = 4;
 	
 	public function __construct(){
-		parent::__construct();
+		echo(parent::__construct());
 		$this->microtime = microtime(true);
 	}
 	

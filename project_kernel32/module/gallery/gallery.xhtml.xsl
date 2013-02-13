@@ -16,7 +16,7 @@
 		<form method="post" action="admin.php?call={_module_name}.save" enctype="multipart/form-data">
 			<xsl:variable name="category_id"><xsl:choose>
 				<xsl:when test="id"><xsl:value-of select="category_id"/></xsl:when>
-				<xsl:otherwise><xsl:value-of select="_argument/category_id"/></xsl:otherwise>
+				<xsl:otherwise><xsl:value-of select="_argument/insert_place"/></xsl:otherwise>
 			</xsl:choose></xsl:variable>
 			<input type="hidden" name="id" value="{id}"/>
 			<table>
@@ -69,6 +69,10 @@
 				<img src="{thumb_path}"/>
 			</div>
 			<div><xsl:value-of select="title"/></div>
+            <xsl:call-template name="controls_item">
+                <xsl:with-param name="module_name" select="_method_name"/>
+                <xsl:with-param name="edit_module_name" select="_module_name"/>
+            </xsl:call-template>
 		</a>
 	</div>
 </xsl:template>
