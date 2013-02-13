@@ -10,6 +10,15 @@
 	padding: 0 7px 0 0;
 }
 
+.nested_items._admin .item{
+    border: 1px solid rgba(200,200,200,0);
+}
+
+.nested_items._admin .item:hover{
+    border: 1px solid rgba(200,200,200,0.5);
+    border-width: 1px 0 1px 1px;
+}
+
 /*dropdown list*/
 
 .nested_items.dropdown li>.item_cont>a>span.folder_icon{

@@ -86,3 +86,7 @@
 .gallery .loading{
 	float:right;
 }
+
+.nested_items.gallery .item .controls{
+    padding: 15px 0 0 10px;
+}
