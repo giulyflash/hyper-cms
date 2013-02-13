@@ -31,10 +31,21 @@ function h_put_gallery(curr,content){
 
 function h_request(curr){
     //alert(curr[0].id+' requested')
+    var module = '';
+    switch (curr[0].id)
+    {
+        case "page_wedding":
+        case "page_people":
+        case "page_fashion":
+            module="gallery.get_category"
+            break
+        default:{module="article.get"}
+    }
+    //alert(module);
     if(h_cache[curr[0].id])
         h_put_content(curr,h_cache[curr[0].id])
     else{
-        var href = window.location.origin+"/index.php?call=article.get&_content=json&id="+curr[0].id;
+        var href = window.location.origin+"/index.php?call="+module+"&_content=json&id="+curr[0].id;
         var cur = curr;
         $.ajax({
             url: href,
