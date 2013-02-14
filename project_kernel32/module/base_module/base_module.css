@@ -120,3 +120,11 @@ p.controls_add{
 .message_box, .error_box{
 	padding: 10px 0;
 }
+
+.edit_category tr._more_input{
+    display: none;
+}
+.edit_category td._more_input{
+    color: blue;
+    cursor: pointer;
+}

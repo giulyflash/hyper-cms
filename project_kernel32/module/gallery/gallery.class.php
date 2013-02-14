@@ -40,7 +40,7 @@ class gallery extends base_module{
 			}
 		}
 		elseif($id){
-			$file_info = array('category_id' => $category_id?$category_id:NULL);
+		    $file_info = array('category_id' => $category_id?$category_id:NULL);
 			if($title)
 				$file_info['title'] = $title;
 			$this->_query->update('file')->set($file_info)->where('id',$id)->execute();

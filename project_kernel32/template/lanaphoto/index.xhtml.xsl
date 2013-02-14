@@ -19,11 +19,14 @@
     <script type="text/javascript" src="/template/lanaphoto/js/superfish.js"></script>
     <script type="text/javascript" src="/template/lanaphoto/js/jquery.color.js"></script>
     <script type="text/javascript" src="/template/lanaphoto/js/jquery.fancybox-1.3.4.js"></script>
-    <script type="text/javascript" src="/template/lanaphoto/js/googleMap.js"></script>
+    <!--<script type="text/javascript" src="/template/lanaphoto/js/googleMap.js"></script>-->
     <script type="text/javascript" src="/template/lanaphoto/js/jquery-ui.js"></script>
     <script type="text/javascript" src="/template/lanaphoto/js/cScroll.js"></script>
     <script type="text/javascript" src="/template/lanaphoto/js/jquery.mousewheel.js"></script>
     <script type="text/javascript" src="/template/lanaphoto/js/my.js"></script>
+    <!--lightbox-->
+    <link href="/extensions/jquery_lightbox/jquery_lightbox.css" rel="stylesheet" type="text/css"/>
+    <script src="/extensions/jquery_lightbox/jquery_lightbox.min.js" type="text/javascript"></script>
     <!--[if lt IE 9]>
     <script type="text/javascript" src="/template/lanaphoto/js/html5.js"></script>
     <![endif]-->
@@ -32,6 +35,7 @@
         <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode"><img src="http://storage.ie6countdown.com/assets/100/images/banners/warning_bar_0000_us.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today." /></a>
     </div>
     <![endif]-->
+    <meta name="Robots" content="noindex"/>
 </head>
 
 <body style="overflow: visible;">
@@ -119,7 +123,7 @@
                     </ul>
                 </div>
                 <div class="main">
-                    <a href="#close" class="back" style="left: -1800px;"><span style="opacity: 0;"></span>back to home</a>
+                    <a href="#close" class="back" style="left: -1800px;"><span style="opacity: 0;"></span>Назад</a>
                 </div>
             </li>
             <li id="page_people" style="position: absolute; display: none;">
@@ -141,7 +145,7 @@
                     </ul>
                 </div>
                 <div class="main">
-                    <a href="#close" class="back" style="left: -1800px;"><span style="opacity: 0;"></span>back to home</a>
+                    <a href="#close" class="back" style="left: -1800px;"><span style="opacity: 0;"></span>Назад</a>
                 </div>
             </li>
             <li id="page_fashion" style="position: absolute; display: none;">
@@ -163,7 +167,7 @@
                     </ul>
                 </div>
                 <div class="main">
-                    <a href="#close" class="back" style="left: -1800px;"><span style="opacity: 0;"></span>back to home</a>
+                    <a href="#close" class="back" style="left: -1800px;"><span style="opacity: 0;"></span>Назад</a>
                 </div>
             </li>
             <li id="page_mail" style="position: absolute; display: none;">
@@ -228,9 +232,7 @@
         <footer>
             Светлана Добрынина © 2012<!--  &#160;|&#160;  <a href="#!/page_privacy" class="link1"><span style="background-color: rgb(32, 32, 32); background-position: initial initial; background-repeat: initial initial;"></span>Privacy Policy</a>--><br/>
             <ul id="icons">
-                <li><a href="#"><img src="/template/lanaphoto/images/icon1.gif" alt=""/><img src="/template/lanaphoto/images/icon1_active.jpg" alt="" class="img_act" style="opacity: 0;"/></a></li>
-                <li><a href="#"><img src="/template/lanaphoto/images/icon2.gif" alt=""/><img src="/template/lanaphoto/images/icon2_active.jpg" alt="" class="img_act" style="opacity: 0;"/></a></li>
-                <li><a href="#"><img src="/template/lanaphoto/images/icon3.gif" alt=""/><img src="/template/lanaphoto/images/icon3_active.jpg" alt="" class="img_act" style="opacity: 0;"/></a></li>
+                <li><a target="_blank" href="http://vk.com/svetocek"><img src="/template/lanaphoto/images/vkontakte-32x32_inactive.png" alt=""/><img src="/template/lanaphoto/images/vkontakte-32x32.png" alt="" class="img_act" style="opacity: 0;"/></a></li>
             </ul>
             <!-- {%FOOTER_LINK} -->
         </footer>

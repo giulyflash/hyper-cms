@@ -88,4 +88,9 @@ function category_add_event(obj){
 		this.form.submit();
 		//TODO ajax
 	});
+
+    obj.find('td._more_input').click(function(){
+        obj.find('tr._more_input').toggle('slow');
+    });
 }
+
