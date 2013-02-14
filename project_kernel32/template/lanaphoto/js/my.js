@@ -25,27 +25,48 @@ function h_put_article(curr,content){
 
 function h_put_gallery(curr,content){
     h_loading(curr,true);
-    curr.find('.wrapper').html(content.text);
-    curr.find('.main h2').html(content.title);
+    var ul = $(".gallery > ul");
+    ul.html('');
+    //TODO one string + load from HTML
+    for(i in content.items)
+        ul.append('<li><a href="'+content.items[i].path+'" data-gal="example_group3"><img src="'+content.items[i].thumb_path+'" alt="'+content.items[i].title+'" title="'+content.items[i].title+'" style="opacity: 1;"></a></li>');
+    if(ul.lightBox){
+        ul.find('li a').lightBox({
+            imageLoading: 'extensions/jquery_lightbox/images/ru/loading.gif',
+            imageBtnClose: 'extensions/jquery_lightbox/images/ru/closelabel.gif',
+            imageBtnPrev: 'extensions/jquery_lightbox/images/ru/prev.gif',
+            imageBtnNext: 'extensions/jquery_lightbox/images/ru/next.gif',
+            imageBlank: 'extensions/jquery_lightbox/images/lightbox-blank.gif',
+            txtImage: 'Изображение',
+            txtOf: 'из'
+        });
+    }
+    else
+        alert("lightBox plugin not found!")
 }
 
 function h_request(curr){
     //alert(curr[0].id+' requested')
     var module = '';
+    var ref = '';
     switch (curr[0].id)
     {
         case "page_wedding":
         case "page_people":
-        case "page_fashion":
-            module="gallery.get_category"
+        case "page_fashion":{
+            module="gallery"
+            ref="gallery.get_category&_content=json"
             break
-        default:{module="article.get"}
+        }
+        default:{
+            module="article"
+            ref="article.get&_content=json"
+        }
     }
-    //alert(module);
     if(h_cache[curr[0].id])
         h_put_content(curr,h_cache[curr[0].id])
     else{
-        var href = window.location.origin+"/index.php?call="+module+"&_content=json&id="+curr[0].id;
+        var href = window.location.origin+"/index.php?call="+ref+"&id="+curr[0].id;
         var cur = curr;
         $.ajax({
             url: href,
@@ -54,9 +75,12 @@ function h_request(curr){
                 if(html=='')
                     alert("get data error!\n"+href)
                 else{
-                    console.log(html);
                     h_cache[curr[0].id] = html;
-                    h_put_article(cur,html);
+                    //alert(module);
+                    if(module=='gallery')
+                        h_put_gallery(cur,html)
+                    else
+                        h_put_article(cur,html);
                 }
             }
         })

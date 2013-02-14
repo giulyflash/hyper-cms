@@ -228,7 +228,8 @@
 </xsl:template>
 
 <xsl:template match="root/module/item[_method_name='edit_category']" priority="0">
-	<form class="{_module_name}" method="post" action="admin.php?call={_module_name}.save_category">
+    <xsl:variable name="_admin"><xsl:if test="_config/admin_mode=1">admin</xsl:if></xsl:variable>
+	<form class="{_module_name} {_method_name} {_config/category_type} nested_items {$_admin}" method="post" action="admin.php?call={_module_name}.save_category">
 		<xsl:if test="id">
 			<input type="hidden" value="{id}" name="id"/>
 		</xsl:if>
@@ -252,6 +253,17 @@
 					<xsl:call-template name="draft_select"/>
 				</td>
 			</tr>
+            <tr>
+                <td class="_more_input">Дополнительно</td>
+            </tr>
+            <tr class="_more_input">
+                <td>
+                    Идентификатор:
+                </td>
+                <td>
+                    <input type="text" value="{id}" name="new_id"/>
+                </td>
+            </tr>
 			<tr>
 				<td colspan="2">
 					<input type="submit" value="Сохранить"/>

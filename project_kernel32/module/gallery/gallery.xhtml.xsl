@@ -19,6 +19,7 @@
 				<xsl:otherwise><xsl:value-of select="_argument/insert_place"/></xsl:otherwise>
 			</xsl:choose></xsl:variable>
 			<input type="hidden" name="id" value="{id}"/>
+            <input type="hidden" name="category_id" value="{id}"/>
 			<table>
 				<tr>
 					<td>

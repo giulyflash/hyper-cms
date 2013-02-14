@@ -63,7 +63,7 @@ class base_module_config extends module_config{
 		'*,admin_mode.*' =>
 			'<link href="/module/base_module/base_module.css" rel="stylesheet" type="text/css"/>
 			<script src="/module/base_module/base_module.js" type="text/javascript"></script>',
-		'get_category,_admin' =>
+		'get_category,_admin,edit_category' =>
 			'<script src="/module/base_module/category.js" type="text/javascript"></script>',
 	);
 	
@@ -139,6 +139,7 @@ abstract class base_module extends module{
 	public function _get_category($field=NULL, $value=false, $need_item=true, $show='auto', $category_condition=array(),$item_condition=array(),$page=NULL,$count=NULL){
 		if(!$field)
 			$field = $this->category_id_field;
+        //$this->_query->echo_sql = true;
 		//TODO pages?
 		//$show: all (all categories and subcategories), category (0lvl categories + tree to current category), current (current category content only), auto ('current' for json, 'category' for others)
 		if($value==='')
@@ -598,10 +599,10 @@ abstract class base_module extends module{
 	}
 	
 	public function save_category($id=NULL,$title=NULL,$insert_place=NULL,$draft=NULL,$new_id=NULL){
-		$this->_save_category($id,
-			array('title'=>$title,'draft'=>$draft,'id'=>$new_id),
-			$insert_place
-		);
+        $value = array('title'=>$title,'draft'=>$draft);
+        if($new_id)
+              $value['id'] = $new_id;
+		$this->_save_category($id,$value,$insert_place);
 	}
 	
 	public function check_title(&$value,$category=false){
@@ -627,6 +628,11 @@ abstract class base_module extends module{
 			if(!$item = $this->_query->select('title,left')->from($this->_category_table_name)->where($this->category_id_field,$id)->query1())
 				new my_exception('category not found',array($this->category_id_field=>$id));
 			$this->_query->update($this->_category_table_name)->set($value)->where($this->category_id_field,$id)->query1();
+            if(!empty($value['id']) && $id!=$value['id']){
+                $this->_query->update($this->_table_name)->set(array('category_id'=>$value['id']))->where('category_id',$id)->query();
+                //TODO check 'has_item'
+                //var_dump($this->has_item);die('yahooo!!!');
+            }
 			if($this->_need_message)
 				$this->_message('category edited successfully',array('title'=>$item['title']));
 			if($parent_title = $this->_query->select($this->category_id_field)->from($this->_category_table_name)->where('left',$item['left'],'<')->_and('right',$item['left'],'>')->order('left desc')->query1($this->category_id_field))
